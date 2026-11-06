@@ -5,6 +5,8 @@
 **Upstream:** https://github.com/AlexandriaDeveloper/OraclePdfParser
 **Project target:** AlexandriaDeveloper/PayrollReviewSystem — separate independent audit system; no Git submodule/dependency/code copied in this documentation PR.
 
+**Follow-up in-depth audit:** [Oracle parser failure audit](ORACLE-PARSER-FAILURE-AUDIT.md) and [financial-line identity / Arabic mapping](../specs/ORACLE-FINANCIAL-LINE-IDENTITY.md). The code-study baseline should not be interpreted as a claim that all known bugs have been fixed.
+
 ## Why this repository is important
 OraclePdfParser is an existing working *starting point* for Arabic payroll PDF ingestion, not just an architectural idea. It already contains a .NET 10 parser, input abstraction, PDFium text extraction, Arabic text/number normalization, three Oracle report types, cross-document checks, local import archive, review statuses, Excel export and focused unit/integration tests.
 

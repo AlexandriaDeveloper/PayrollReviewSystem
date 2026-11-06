@@ -33,3 +33,8 @@
 Historical reference repos: Payroll-Auditor, Py-Ai-Moratabat, OraclePdfParser, PDF-EXTRACTOR, IProgram2. They do not set this project's architecture or legal policy.
 
 **Caution:** Prior research included user-supplied Markdown summaries of regulations and a larger source inventory. Summaries and source counts are not substitutes for original text, page-level evidence and up-to-date applicability. No confidential source files are copied into this public repository.
+
+## OraclePdfParser risk and mapping review
+- [Deep audit of actual OraclePdfParser code, earlier PR findings and known unresolved risks](reference/ORACLE-PARSER-FAILURE-AUDIT.md)
+- [Source financial line occurrence identity, repeated codes and Arabic label normalization](specs/ORACLE-FINANCIAL-LINE-IDENTITY.md)
+These files are mandatory for the Gemini PDF implementation handoff; no OraclePdfParser source has been copied to this repository.

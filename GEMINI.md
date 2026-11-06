@@ -28,6 +28,9 @@ You are the **implementation engineer** of PayrollReviewSystem. ChatGPT acts as 
 ## Mandatory PDF preparation
 If assigned any source-file import task: read docs/reference/ORACLEPDFPARSER-CODE-STUDY.md and docs/specs/ORACLE-PDF-ADAPTER-DESIGN.md, inspect the exact upstream OraclePdfParser repository SHA, and compare with PDF-EXTRACTOR layout-based strategies on synthetically varied documents. Do not blindly copy the upstream implementation, derive a salary rate or assume the fixed reference sample covers all statement layouts. The first authorization is for technical spike/design and acceptance validation, not a broad rewrite.
 
+## Mandatory code-review baseline for Oracle PDF implementation
+Before modifying any PDF parser, reader, item mapping or export, inspect and follow docs/reference/ORACLE-PARSER-FAILURE-AUDIT.md and docs/specs/ORACLE-FINANCIAL-LINE-IDENTITY.md as well as the earlier parser code study. Upstream main 23f75d7354cb0a5981d02b35b1a5942ab9c0eeed is an important implementation starting point but **is not known to read every source correctly**. Do not make a code or raw Arabic item name a unique financial identity; preserve each source occurrence. P0 known defects must have fail-first synthetic tests, code-level fixes and private source verification before financial use. Never claim private-pdf acceptance when only CI tested samples.
+
 ## Financial requirements
 - Distinguish actual imported amount, independently calculated expected amount and a reviewer-approved overlay.
 - A component type is not determined solely from a code prefix or appearance in an Oracle column.

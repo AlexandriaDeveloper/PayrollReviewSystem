@@ -3,6 +3,8 @@
 **Status: DESIGN PROPOSAL ONLY / NO IMPLEMENTATION AUTHORIZED**
 **Upstream reference:** [code study](../reference/ORACLEPDFPARSER-CODE-STUDY.md), current OraclePdfParser, and PDF-EXTRACTOR (physical PDF layout approach).
 
+**Required before implementation:** [upstream failure catalogue](../reference/ORACLE-PARSER-FAILURE-AUDIT.md) and [line occurrence and Arabic mapping spec](ORACLE-FINANCIAL-LINE-IDENTITY.md). No code-only account mapping or source-line collapse is allowed.
+
 ## Goal
 Parse **genuine government Oracle/GFMIS reports** with independently verifiable identity, financial values and evidence, not just documents tuned to one private sample. Source files are not the expected lawful payroll and no reviewer action changes them.
 
