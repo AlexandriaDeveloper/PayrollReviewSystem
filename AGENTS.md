@@ -1,64 +1,74 @@
-# Mandatory instructions for every AI agent and developer
+# التعليمات الإلزامية لجميع أدوات الذكاء الاصطناعي والمطورين
 
-Read this document before analyzing, designing or changing this repository. These rules are repository governance, not a substitute for the Owner's latest explicit decisions.
+اقرأ الملف قبل تحليل المستودع أو تصميمه أو تعديل أي جزء منه. هذه تعليمات حوكمة دائمة؛ ولا تتجاوز أحدث قرارات مالك النظام الصريحة.
 
-## Authority and source order
-1. Owner's latest explicit, recorded business decision.
-2. Reviewed ADRs and approved GitHub Issue acceptance criteria.
-3. Domain/architecture specifications under docs.
-4. Source documents **after** their authenticity, applicability and version are confirmed.
-5. Legacy repositories: discovery only; no implicit inheritance.
+## ترتيب مصادر السلطة
+1. أحدث قرار صريح صادر من مالك النظام وموثق.
+2. قرارات التصميم المعتمدة \`ADR\` ومعايير قبول مهام GitHub المعتمدة.
+3. المواصفات المعمارية والوظيفية داخل مجلد \`docs/\`.
+4. المستندات القانونية والمالية الأصلية **بعد** إثبات أصالتها وسريانها ونطاق تطبيقها.
+5. المشاريع القديمة مصادر للدراسة فقط، ولا تنتقل أحكامها تلقائيًا إلى النظام الجديد.
 
-If documents conflict, identify the conflict in the assigned Issue. Do not silently invent a rule, overwrite an existing decision, or implement a disputed policy. Proposed changes to approved boundaries require an ADR and Owner approval.
+عند التعارض، سجل المشكلة في الـIssue المخصص ولا تختر قاعدة من عندك. تغيير قرار معتمد يتطلب ADR جديدًا واعتمادًا من المالك.
 
-## Agent roles and GitHub communication
-- **ChatGPT:** owns system/domain architecture, proposes tasks, reviews PR diffs and risks, records review comments. May not claim a PR was reviewed unless the actual changes were inspected.
-- **Gemini:** implements **only** the scope of the explicitly assigned Issue; documents tests, source changes, assumptions, risks and security impact in its PR.
-- **Owner:** approves business/legal assumptions and scope, explicitly authorizes migrations/production changes and merges.
-- **GitHub Issues/PRs** are the asynchronous handoff surface, not a hidden autonomous link between AI models. ChatGPT must be explicitly invoked or separately scheduled to check PRs; an @mention alone does not guarantee execution.
+## الأدوار وقناة الاتصال
+- **ChatGPT:** المصمم المعماري ومسؤول تحليل النطاق ومراجعة فروق الكود والاختبارات، ولا يدعي مراجعة PR دون فحص التعديلات الفعلية.
+- **Gemini:** المطور المنفذ لنطاق GitHub Issue المعتمدة فقط؛ يرفع PR مع الاختبارات والأثر والمخاطر ولا يدمج الكود بنفسه.
+- **المالك:** صاحب قرارات العمل والقواعد القانونية، واعتماد التنفيذ والهجرات والإصدار والنشر.
+- **GitHub Issues/PRs:** قناة نقل العمل والملاحظات الموثقة. التعليق أو الإشارة لأداة AI لا يضمن عملها تلقائيًا ما لم تُستدعَ أو توجد مهمة مجدولة مفعلة.
 
-## Hard invariants
-1. This is a **review** system, not a salary disbursement or Oracle modification system.
-2. Treat source PDFs/extracted rows as immutable evidence with file hash, provenance and page/row references; corrections form separate records.
-3. Person != employment relationship != payee/financial relationship.
-4. Historical entitlement uses the correct legal status, grade, source amounts and rule versions **at the entitlement date**, not current profile values.
-5. Keep financial reference/base figures separate from cash earnings, deductions, employer costs and display totals.
-6. Gross payroll matching does not prove entitlement; payment-sheet inclusion does not by itself prove bank settlement.
-7. Missing != 0; null/unknown statuses must be explicit. Never mark ambiguous extraction Verified.
-8. No automatic change to employee master data from an external payroll file, even during finance-only imports.
-9. No hidden default grade, salary, frozen 2015 base, rate, amount, due date or law classification.
-10. No retroactive deduction, repayment, payment approval or legal violation determination made automatically.
-11. Each item calculation must be explainable: inputs, dates, rules, source references, rounding and dependent items.
-12. Reconciliation differences and reviewer overrides never mutate historical Oracle source facts or approved snapshots.
-13. Financial math uses decimal-compatible fixed precision and explicit rounding and proration policies per rule.
-14. Approval of a full employee review must be blocked where required evidence or unresolved material differences remain; a reviewer can finish examination without closing a correction or payment.
-15. Store both entitlement-period and disbursement-period concepts. Post-period adjustments must be allocated to underlying periods/components when proven; otherwise mark allocation unresolved.
-16. No real national IDs, payslips, bank account numbers, connection strings, API keys, unredacted logs or private legal records in public GitHub.
+## ثوابت لا يجوز كسرها
+1. هذا نظام **مراجعة مالية** لا نظام تنفيذ صرف أو تعديل Oracle.
+2. ملفات PDF والسطور المستخرجة أدلة مصدرية محفوظة بصمةً وصفحةً وصفًا وإصدارًا؛ التصحيح سجل جديد.
+3. \`Person\` ليس \`EmploymentRelationship\` وليس \`PayeeRelationship\`.
+4. استحقاق فترة سابقة يعتمد على الحالة والدرجة والوقائع والقواعد **السارية وقت الاستحقاق**.
+5. افصل الوعاء المرجعي التاريخي عن الاستحقاقات النقدية والاستقطاعات وحصة جهة العمل والإجماليات المعروضة.
+6. تطابق الإجمالي لا يثبت صحة كل بند؛ ظهور مبلغ بكشف الصرف لا يثبت وصوله للبنك.
+7. القيمة المفقودة ليست صفرًا. لا تمنح \`Verified\` لاستخراج غير مؤكد.
+8. Oracle لا يعدّل ملف الموظف أو مرجعه المالي المعتمد تلقائيًا.
+9. ممنوع اختراع درجة أو مرتب أو أساسي 2015 أو معدل أو تاريخ أو نص قانوني افتراضي.
+10. ممنوع الاستقطاع التصحيحي أو الاسترداد أو اعتماد الصرف أو تقرير مخالفة قانونية تلقائيًا.
+11. أي حساب مستقل قابل للتفسير: المدخلات والتواريخ والقاعدة والمستند والتقريب والتبعيات.
+12. لا تتغير القيم المصدرية أو الاعتمادات التاريخية عند تعديل نتيجة المراجع.
+13. استخدم \`decimal\` وسياسة تقريب واحتساب جزء الشهر محددة ومعتمدة لكل قاعدة.
+14. وجود نقص جوهري يمنع الاعتماد حسب السياسة؛ انتهاء الفحص لا يعني تنفيذ التصحيح أو التسوية.
+15. فترة الاستحقاق وفترة ظهور الصرف وفترة التسوية تواريخ مختلفة؛ لا توزّع متجمدًا دون دليل.
+16. ممنوع رفع الأرقام القومية والمرتبات والمستندات البنكية والأسرار وسجلات البيانات الحقيقية إلى GitHub.
 
-## Oracle PDF importer gate
-For any importer/parser work, first read docs/reference/ORACLEPDFPARSER-CODE-STUDY.md and docs/specs/ORACLE-PDF-ADAPTER-DESIGN.md. OraclePdfParser is a high-value proven *starting point for code discovery*, not an automatically accepted library or proof that extracted money is correct. Treat source types as payslip, cover and payment sheet with report-specific validation. Do not implement or copy parser code until Owner explicitly authorizes the scoped issue.
+## بوابة استيراد PDF
+قبل أي كود مرتبط بالقراءة راجع:
+- \`docs/reference/ORACLEPDFPARSER-CODE-STUDY.md\`
+- \`docs/reference/ORACLE-PARSER-FAILURE-AUDIT.md\`
+- \`docs/specs/ORACLE-PDF-ADAPTER-DESIGN.md\`
+- \`docs/specs/ORACLE-FINANCIAL-LINE-IDENTITY.md\`
 
-## Markdown-only merge delegation
-The Owner authorized the ChatGPT architect to merge **reviewed Markdown-only changes** without seeking separate merge approval; see docs/governance/COLLABORATION.md. This does **not** authorize Gemini to self-merge, or any application code/configuration/schema/deployment changes.
+استخدم أفضل نسخة متاحة من \`OraclePdfParser\` نقطة انطلاق **تحتاج اختبارًا وإصلاحًا**، مع دراسة استراتيجية استخراج الخلايا من \`PDF-EXTRACTOR\`. افصل صرفية الفرد والكافر وكشف الصرف، ولا تدمج الأكواد المتكررة أو تقلب النص العربي كله عشوائيًا.
 
-## Architecture blueprint reference
-Before coding any data access, financial engine, review service or imported PDF model, read docs/architecture/BLUEPRINT-V1.md and its Mermaid ERDs, UML classes, sequences and constraints. These diagrams are draft concepts, not implementation permission. Data and class decisions require an approved physical schema/ADR and a traceable authorized GitHub Issue.
+## تفويض دمج ملفات التوثيق
+فوض المالك ChatGPT في **مراجعة ودمج Pull Requests التي تغيّر ملفات \`.md\` فقط** دون طلب موافقة جديدة في كل مرة، بعد فحص التغييرات وحماية البيانات. التفويض لا يشمل Gemini بالدمج الذاتي ولا الكود أو SQL أو إعدادات CI أو النشر. التفاصيل في \`docs/governance/COLLABORATION.md\`.
 
-## Before doing any change
-- Read docs/README.md and only the relevant domain specs; inspect main HEAD, current branch and authorized Issue.
-- State what exists, what is planned, exact change scope, acceptance cases and any open legal/business questions.
-- No implementation while the assigned Issue is design-only or lacks authorization.
-- Prefer incremental reversible changes; do not break previously working functionality to implement a new feature.
-- Keep modules decoupled, migrations reversible/assessed, and schema changes explicitly described.
-- Do not modify unrelated repositories, GitHub settings, deployment resources or production data.
+## المخطط المعماري المرجعي
+قبل تصميم جداول أو كيانات أو API أو خدمات مالية، اقرأ \`docs/architecture/BLUEPRINT-V1.md\` مع ERD وUML والمخططات والأمثلة:
+- \`docs/examples/01-ERD-INPUT-OUTPUT.md\`
+- \`docs/examples/02-UML-REVIEW-EXAMPLES.md\`
 
-## Evidence required in every implementation PR
-- Issue/decision references; behavior summary and affected modules.
-- Passing commands and exact test results, or explicit reason tests could not run.
-- Synthetic regression fixtures with boundary dates, negative amounts, missing data, Arabic RTL and exceptional cases.
-- Security/privacy impact and migration impact.
-- Before/after examples with source evidence, no sensitive identifiers.
-- Outstanding questions or architectural deviations, clearly marked.
+المخططات **مقترحات تصورية** لا تعني السماح بكتابة Migration أو كود دون قرار معماري معتمد ومهمة مصرح بها.
 
-## Stop / escalate
-Stop affected work and open a question for: unverifiable legal formula; inconsistent source identities; unreconciled monetary totals; uncertain payee or reference basis; unapproved architecture change; potentially destructive migration; unexpected sensitive data; or attempts to bypass reviewer approval.
+## قبل أي تعديل
+- اقرأ فهرس الوثائق وIssue المخصصة وأحدث \`main HEAD\` والفرع الحالي.
+- حدد الموجود والمقترح ونطاق الملفات ومعايير القبول والأسئلة القانونية أو التشغيلية.
+- لا تبدأ الكود إذا كانت المهمة تصميمًا فقط أو بلا اعتماد تنفيذ.
+- نفذ تغييرات صغيرة قابلة للعكس مع الحفاظ على الوظائف الحالية.
+- افصل الوحدات، ووثّق أثر الهجرات وتبعياتها.
+- لا تغيّر مشاريع أخرى أو إعدادات GitHub أو بيانات الإنتاج دون تصريح.
+
+## إثباتات PR البرمجي
+- رابط Issue وADR والمتطلبات والملفات المتأثرة.
+- أوامر الاختبارات **المنفذة فعلًا** ونتائجها، وأسباب تعذر التشغيل إن وجدت.
+- اختبارات اصطناعية للتواريخ والمبالغ السالبة وRTL والتكرار ونقص البيانات.
+- تقييم الخصوصية والأمان والهجرات والتوافق.
+- مثال قبل وبعد مع دليل مصدر **غير حساس**.
+- العقبات والأسئلة والانحرافات المعمارية إن وجدت.
+
+## موانع التنفيذ والتصعيد
+أوقف الجزء المعني وسجل سؤالًا عند: قاعدة قانونية غير موثقة؛ تضارب هوية أو مبلغ؛ إجماليات غير متطابقة؛ غموض المستفيد أو الوعاء المرجعي؛ تغيير معماري غير معتمد؛ هجرة مدمرة؛ بيانات حساسة غير متوقعة؛ أو محاولة تجاوز صلاحية المراجع.

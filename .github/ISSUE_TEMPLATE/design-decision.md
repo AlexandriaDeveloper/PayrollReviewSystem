@@ -1,16 +1,18 @@
----
-name: "Design / rule decision"
-about: "Record an unresolved business/legal or architectural decision"
-title: "DECISION: "
-labels: []
-assignees: []
----
+# قرار تصميم معماري — {{عنوان القرار}}
 
-## Question / conflict
-## Existing design and evidence
-## Alternatives and impact
-## Legal source status (if relevant)
-## Architect recommendation
-## Owner decision (do not presume)
-## ADR / docs to update
-## What work must remain blocked until resolved
+**الحالة:** مقترح / قيد المراجعة / معتمد / ملغى
+
+## المشكلة والسبب
+صف المسألة التي نحتاج لحسمها، وتأثيرها في النظام.
+
+## المتطلبات المؤكدة والمصادر
+اذكر قرار مالك النظام والمستندات أو القوانين المتحقق منها، وافصلها عن الافتراضات.
+
+## البدائل
+اشرح كل بديل ومزاياه وعيوبه وتأثيره على البيانات والأمان والمراجعة.
+
+## القرار المقترح
+القرار والسبب والحدود التي لا يجوز تجاوزها.
+
+## الآثار واختبارات القبول
+ما الذي سيتغير؟ وكيف نتحقق؟ وهل يلزم اعتماد المالك قبل التنفيذ؟

@@ -1,35 +1,34 @@
-## Issue and authorization
-Closes/Relates to:
-Approved Issue/status:
+# وصف طلب المراجعة
 
-## Change summary
-What changed and why; what intentionally did not change:
+## المهمة
+رقم GitHub Issue والقرار أو ADR المعتمد.
 
-## Financial and legal behavior
-Source facts versus expected calculations:
-Dates, classes, reference bases and rounding:
-Source status/legal verification:
+## لماذا التعديل؟
+المشكلة الفعلية والسلوك السابق والأثر في مراجعة الصرفيات.
 
-## Acceptance coverage and tests
-- [ ] All specified acceptance scenarios have test references.
-- [ ] Tests actually run with exact commands/results.
-- [ ] Negative, missing source, duplicate and effective-date cases covered where relevant.
-- [ ] No source evidence/approved historical snapshots mutated.
+## ما الذي تغيّر؟
+الملفات والكلاسات والجداول والواجهات ومخططات ERD/UML المتأثرة.
 
-## Security and privacy
-- [ ] No employee PII, payroll PDFs, personal bank details, credentials or unredacted financial logs committed.
-- [ ] Permissions, audit trail, input validation and exports reviewed.
-- [ ] No new unapproved ability to pay, recover, edit Oracle or bypass reviewer approval.
+## بيانات الإدخال والمخرجات
+أمثلة اصطناعية قبل التعديل وبعده، بما فيها حالات الفشل.
 
-## Migration / compatibility
-Describe migrations, risks, rollback and old-data behavior. If none: NONE.
+## الاختبارات الفعلية
+- الأمر المستخدم:
+- النتيجة:
+- عدد الاختبارات الناجحة/الفاشلة:
+- حدود الاختبار والمصادر غير المتاحة:
 
-## Reviewer response
-Open BLOCKER / MAJOR / MINOR / QUESTION findings:
-Evidence of fixes on updated HEAD:
+## سلامة البيانات
+هل التغيير يحافظ على PDF الأصلي والسجل التاريخي؟ وهل يمنع تكرار أو دمج البنود خطأً؟
 
-## Delivery
-Branch:
-Commit SHA:
-Architect review requested:
-Owner merge/deploy authorization:
+## الأمان والخصوصية
+الصلاحيات، التسريب المحتمل، الأسرار، وإخفاء البيانات الحساسة.
+
+## تغييرات قاعدة البيانات
+هل توجد Migration؟ وهل تحتاج اعتمادًا منفصلًا؟ وهل الرجوع للإصدار السابق آمن؟
+
+## أمور لم تُحسم
+كل خلل أو مصدر قانوني أو اعتماد يحتاج تدخلًا.
+
+## حالة المراجعة
+لا تدمج التغييرات البرمجية بنفسك. ملفات Markdown فقط تخضع لتفويض ChatGPT بالمراجعة والدمج.

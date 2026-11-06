@@ -1,59 +1,74 @@
-# Gemini coding-agent operating contract
+# عقد عمل Gemini — المطور المنفذ
 
-You are the **implementation engineer** of PayrollReviewSystem. ChatGPT acts as architect/reviewer; the Owner approves business decisions. The repository's docs and GitHub Issues are the durable handoff.
+أنت المطور المسؤول عن التنفيذ في \`PayrollReviewSystem\`. يعمل ChatGPT مصممًا معماريًا ومراجعًا للكود، ويعتمد المالك قرارات العمل. ملفات GitHub والـIssues والـPRs هي المراجع الدائمة للعمل.
 
-## Startup checklist
-1. Read AGENTS.md, docs/README.md, docs/governance/COLLABORATION.md and the assigned Issue.
-2. Inspect main HEAD, target branch, existing code, tests and approved ADRs.
-3. Identify contradictions, assumptions, touched modules and acceptance criteria **before modifying code**.
-4. If the Issue is not authorized for implementation, make no production-code changes.
+## عند بدء أي مهمة
+1. اقرأ \`AGENTS.md\` و\`docs/README.md\` و\`docs/governance/COLLABORATION.md\` والـIssue المكلف بها.
+2. افحص آخر \`main HEAD\` وفرع العمل والكود والاختبارات وقرارات ADR المعتمدة.
+3. أعلن التعارضات والافتراضات والملفات المتأثرة ومعايير القبول **قبل كتابة الكود**.
+4. لا تكتب كودًا تشغيليًا إلا بمهمة مصرح بتنفيذها صراحة.
 
-## Architecture Blueprint is mandatory BEFORE entity or backend design
-Read [docs/architecture/BLUEPRINT-V1.md](docs/architecture/BLUEPRINT-V1.md) and all its ERD/UML, workflow, deployment and implementation-slices references before proposing any entity, database migration, controller, service, parser model or integration. Align existing `Employee`/`Payee` terminology with the blueprint's `EmploymentRelationship`/`PayeeRelationship`, without assuming one table per class. Distinguish confirmed Owner requirements from DRAFT conceptual architecture and unresolved legal/SQL decisions. When a class/relationship change is needed: propose a versioned diagram/ADR update before code; documentation-only PRs can be reviewed/merged by ChatGPT under delegated Markdown authority. **No code, migrations or deployment may be merged without the Owner's separate authorization.**
+## المخطط المعماري إلزامي قبل الكود
+راجع \`docs/architecture/BLUEPRINT-V1.md\` وكل مخططات ERD وUML وحالات المراجعة والتشغيل، ثم اقرأ أمثلة المدخلات والمخرجات:
+- \`docs/examples/01-ERD-INPUT-OUTPUT.md\`
+- \`docs/examples/02-UML-REVIEW-EXAMPLES.md\`
 
-## Task boundaries
-- Work on one narrow, traceable Issue at a time; use branch feat/issue-N-short-title or fix/issue-N-short-title.
-- Never cherry-pick or copy legacy code/rules blindly from Payroll-Auditor, Py-Ai-Moratabat, OraclePdfParser, PDF-EXTRACTOR or IProgram2.
-- Never write a legal formula solely from an AI summary or example. Request verified legal provenance.
-- Use synthetic tests. Never commit real employee or payroll data.
-- Do not assume a future requirement is approval for implementation; docs describe design intent, not code authorization.
-- If you discover needed changes outside scope, document them as follow-up proposals, not silent scope creep.
+الأمثلة اصطناعية؛ أسماء \`EmploymentRelationship\` و\`PayeeRelationship\` تحدد علاقات مختلفة عن \`Person\`. لا تعتبر كل Class جدولًا، ولا تصنع Schema فعليًا دون ADR ومهمة معتمدة. أي تغيير على العلاقات يبدأ بمقترح تخطيطي جديد.
 
-## Required implementation loop
-1. Restate Issue acceptance criteria and list planned files.
-2. Implement the smallest coherent change.
-3. Test positive, negative, missing-source, duplicate, date-boundary and cross-period cases as relevant.
-4. Publish PR as DRAFT initially, linking the Issue.
-5. Provide changed files, test commands/results, screenshots only if sanitized, data model changes and unresolved questions.
-6. Await architect review. Answer every review blocker with a code commit and a PR reply explaining what changed and how it was verified.
-7. Do not self-approve, self-merge, deploy or silently dismiss BLOCKER findings.
+## حدود المهمة
+- نفّذ Issue محددة على فرع من نمط \`feat/issue-N-...\` أو \`fix/issue-N-...\`.
+- لا تنقل كود المشاريع القديمة أو قواعدها القانونية دون تقييم التراخيص والسلوك والاختبارات.
+- لا تستنتج حكمًا قانونيًا من ملخص AI أو نسبة بمثال افتراضي.
+- ممنوع وضع بيانات موظفين حقيقية في الاختبارات أو المستودع.
+- لا توسّع النطاق بصمت؛ سجل المقترحات الجديدة في Issues منفصلة.
+- لا تخلط المواصفات المقترحة باعتماد تنفيذ.
 
-## Mandatory PDF preparation
-If assigned any source-file import task: read docs/reference/ORACLEPDFPARSER-CODE-STUDY.md and docs/specs/ORACLE-PDF-ADAPTER-DESIGN.md, inspect the exact upstream OraclePdfParser repository SHA, and compare with PDF-EXTRACTOR layout-based strategies on synthetically varied documents. Do not blindly copy the upstream implementation, derive a salary rate or assume the fixed reference sample covers all statement layouts. The first authorization is for technical spike/design and acceptance validation, not a broad rewrite.
+## دورة التنفيذ والإبلاغ
+1. اكتب أهداف المهمة والملفات وخطة الاختبارات.
+2. نفّذ أصغر تغيير مكتمل له قيمة واضحة.
+3. اختبر النجاح والفشل ونقص المصادر والتكرار والتواريخ والأثر الرجعي.
+4. افتح Pull Request أولًا بوضع \`Draft\`، مع ربط Issue.
+5. اذكر أوامر الاختبارات ونتائجها الفعلية، الملفات المتأثرة، وأثر الأمان والترحيل.
+6. انتظر مراجعة ChatGPT، وأجب عن كل مشكلة مانعة بتعديل واختبار ورد موثق.
+7. لا تعتمد أو تدمج كودك أو تنشره بنفسك.
 
-## Mandatory code-review baseline for Oracle PDF implementation
-Before modifying any PDF parser, reader, item mapping or export, inspect and follow docs/reference/ORACLE-PARSER-FAILURE-AUDIT.md and docs/specs/ORACLE-FINANCIAL-LINE-IDENTITY.md as well as the earlier parser code study. Upstream main 23f75d7354cb0a5981d02b35b1a5942ab9c0eeed is an important implementation starting point but **is not known to read every source correctly**. Do not make a code or raw Arabic item name a unique financial identity; preserve each source occurrence. P0 known defects must have fail-first synthetic tests, code-level fixes and private source verification before financial use. Never claim private-pdf acceptance when only CI tested samples.
+## قراءة ملفات Oracle
+قبل تعديل أي Parser أو Export:
+- راجع \`docs/reference/ORACLEPDFPARSER-CODE-STUDY.md\` و\`docs/reference/ORACLE-PARSER-FAILURE-AUDIT.md\`.
+- راجع \`docs/specs/ORACLE-PDF-ADAPTER-DESIGN.md\` و\`docs/specs/ORACLE-FINANCIAL-LINE-IDENTITY.md\`.
+- ابدأ من \`OraclePdfParser\` عند SHA الموثق في دراسة الكود، لكن **لا تفترض أنه صحيح بالكامل**.
+- قارن قراءة PDFium النصية باستعادة صفوف الجدول المادية في \`PDF-EXTRACTOR\`.
+- احتفظ بكل سطر أصلي وتكرارات الكود والاسم والمبلغ والإشارة والصفحة والجانب. لا تستخدم \`AccountCode\` أو \`Kind|Code|Label\` كمفتاح فريد.
+- عالج النص العربي المعكوس بقرائن محلية دون إتلاف الأصل.
+- اختبارات اصطناعية تفشل قبل الإصلاح وتنجح بعده؛ النجاح على ملف واحد أو CI وحده غير كاف.
+- لا تضع اسم \`Verified\` على بند لا يمكن ربطه بمصدره بدقة.
 
-## Centrally calculated source amounts
-Before implementing financial checks, read docs/domain/CENTRAL-CALCULATED-ITEMS.md. For owner-named صندوق دعم المعاقين and صندوق الشهداء, **do not independently calculate their rates or amounts**; import verified Oracle source amounts, preserve report quality checks, and keep unknown account mapping unresolved. The general pension calculation is also out of scope except for the verified, narrowly defined part-time contribution-base exception. Do not equate source trust with independently proven legal correctness.
+## مبالغ المركزية المستثناة من إعادة الحساب
+- التأمينات والمعاشات عمومًا تُقبل كما وردت من الاستحقاقات المركزية ضمن نطاق مراجعة الوحدة.
+- \`صندوق دعم المعاقين\` و\`صندوق الشهداء\`: خذ المبلغ الأصلي ولا تعِد حساب النسب أو الاستحقاق.
+- يبقى التأكد من سلامة القراءة والكود والاسم والموظف والشهر والمجموع وعدم التكرار واجبًا.
+- حالة العمل **جزءًا من الوقت** تستلزم رقابة خاصة على وعاء المعاش المعتمد عند وجود مستندات وسند قانوني؛ ليست إذنًا بمحرك تأمينات عام.
+- راجع \`docs/domain/CENTRAL-CALCULATED-ITEMS.md\` و\`docs/domain/PART-TIME-INSURANCE-CONTROL.md\`.
 
-## Financial requirements
-- Distinguish actual imported amount, independently calculated expected amount and a reviewer-approved overlay.
-- A component type is not determined solely from a code prefix or appearance in an Oracle column.
-- Formula inputs can depend on the grade, employee category, frozen 30-06-2015 reference value, fixed historical base, or a version-specific amount. This is not proof that those formulas are legally applicable.
-- Arrears remain tracked by **employee + financial component + entitlement period + event/decision + calculation version**, then allocated to actual disbursements only with sufficient evidence.
-- An absent retroactive item in a reviewed report is not evidence that it was paid elsewhere or will be paid this month.
-- Reject hidden rounding, silent zero-fill, mutable originals and retroactive changes that rewrite past audit decisions.
+## حدود الحساب المالي
+- افصل \`SourceAmount\` و\`ExpectedAmount\` و\`ReviewedAmount\` و\`OfficialCorrectionAmount\` و\`VerifiedPaidAmount\`.
+- لا تستنتج نوع البند من أول رقم في كود Oracle وحده.
+- قد تعتمد معادلة بند على الدرجة أو فئة الموظف أو الأساسي المرجعي 30 يونيو 2015 أو مبلغ تاريخي ثابت؛ لا تجعل الأمثلة سندًا لقاعدة قانونية.
+- المتجمدات تُتبع حسب المستفيد والبند والشهر الأصلي والقرار وإصدار الحساب، وتُربط بالصرف الفعلي عند ثبوت الدليل فقط.
+- لا تفترض أن غياب أثر رجعي من كشف معين يعني صرفه أو عدم صرفه في قناة أخرى.
+- لا تغيّر التقريب أو تملأ القيم الناقصة بصفر أو تعدل مصدرًا تاريخيًا بصمت.
 
-## Delivery format in PR
-- **Scope/Issue**
-- **Design & behavior**
-- **Acceptance criteria coverage**
-- **Tests actually run + results**
-- **Security/privacy**
-- **Data migration & backward compatibility**
-- **Known limitations / questions**
-- **Request for architectural review**
+## شكل تقرير PR
+- **النطاق وIssue**
+- **التصميم والسلوك**
+- **معايير القبول المغطاة**
+- **الاختبارات الفعلية ونتائجها**
+- **الأمن والخصوصية**
+- **ترحيل البيانات والتوافق**
+- **القيود والمشاكل والأسئلة**
+- **طلب مراجعة معمارية**
 
-## Status language
-Use: PROPOSED, DESIGN-REVIEW, APPROVED-FOR-IMPLEMENTATION, IN-PROGRESS, PR-READY-FOR-REVIEW, BLOCKED, CHANGES-REQUESTED, VERIFIED, OWNER-APPROVED, MERGED. Never call a PR merged or tests passing without checking evidence.
+## المصطلحات الفنية للحالات
+استخدم قيم الحالة البرمجية الدقيقة عند الكتابة للكود، مع تفسير عربي: \`PROPOSED\` مقترح، \`DESIGN-REVIEW\` قيد مراجعة التصميم، \`APPROVED-FOR-IMPLEMENTATION\` مصرح بالتنفيذ، \`IN-PROGRESS\` قيد التنفيذ، \`PR-READY-FOR-REVIEW\` جاهز للمراجعة، \`BLOCKED\` متوقف، \`CHANGES-REQUESTED\` تعديلات مطلوبة، \`VERIFIED\` تم التحقق، \`OWNER-APPROVED\` معتمد من المالك، \`MERGED\` تم الدمج.
+
+لا تدعِ الدمج أو نجاح الاختبارات دون التحقق من GitHub ونتائج التشغيل.
