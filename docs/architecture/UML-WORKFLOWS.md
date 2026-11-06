@@ -3,7 +3,7 @@
 **مخططات مقترحة لا تعني وجود كود منفذ.** تُظهر الحركة بين المراجع والتطبيق وطبقة الدومين ومصدر Oracle، دون تنفيذ صرف أو استرداد.
 
 ## 1. تسلسل استيراد PDF والتحقق من البنود
-\`\`\`mermaid
+```mermaid
 sequenceDiagram
   autonumber
   actor Reviewer as المراجع
@@ -30,10 +30,10 @@ sequenceDiagram
     API-->>UI: Rejected وسبب الرفض
   end
   Note over Store: لا يغيّر الاستيراد بيانات الموظف المعتمدة
-\`\`\`
+```
 
 ## 2. الحساب المستقل وقرار المراجع
-\`\`\`mermaid
+```mermaid
 sequenceDiagram
   autonumber
   actor Reviewer as المراجع المختص
@@ -59,10 +59,10 @@ sequenceDiagram
     Reviewer->>Case: اعتماد نسخة المراجعة بعد الضوابط
   end
   Note over Engine: التأمينات والصناديق المحددة مصدرية دون إعادة حساب
-\`\`\`
+```
 
 ## 3. تعديل طارئ بعد اعتماد المراجعة
-\`\`\`mermaid
+```mermaid
 sequenceDiagram
   autonumber
   actor Reviewer as المراجع
@@ -83,10 +83,10 @@ sequenceDiagram
     Reviewer->>Case: إرفاق المصدر الجديد وتتبعه
   end
   Note over Central: لا يصدر النظام أمر صرف أو إيقاف تلقائي
-\`\`\`
+```
 
 ## 4. المتجمدات وظهور الصرف لاحقًا
-\`\`\`mermaid
+```mermaid
 sequenceDiagram
   autonumber
   actor Reviewer as المراجع
@@ -108,10 +108,10 @@ sequenceDiagram
     Retro-->>Reviewer: يبقى غير موزع ويحتاج إثباتًا
   end
   Note over Retro: ظهور المبلغ بكشف الصرف لا يعني أنه وصل للبنك
-\`\`\`
+```
 
 ## 5. مخطط حالات مراجعة المستفيد
-\`\`\`mermaid
+```mermaid
 stateDiagram-v2
   [*] --> NotStarted
   NotStarted --> SourcePending: "بدء الفحص"
@@ -129,10 +129,10 @@ stateDiagram-v2
   AmendmentReview --> WaitingEvidence: "بيانات غير مكتملة"
   Approved --> [*]
   Note right of Approved: "اعتماد المراجعة ليس إثبات دفع"
-\`\`\`
+```
 
 ## 6. مخطط حالات الملاحظة والمتابعة
-\`\`\`mermaid
+```mermaid
 stateDiagram-v2
   [*] --> Detected
   Detected --> UnderReview
@@ -146,12 +146,12 @@ stateDiagram-v2
   Resolved --> [*]
   ExceptionAccepted --> [*]
   Note right of CorrectionRequested: "يمكن اكتمال فحص الموظف مع بقاء طلب التصحيح"
-\`\`\`
+```
 
 ## اختبارات السلوك المطلوبة
 - تكرار كود بند داخل صفحة أو عبر صفحات لا يؤدي لدمج السطور.
 - عدم وضوح الاسم أو فقد السالب يعطي مراجعة لازمة بدل اعتماد تلقائي.
-- مراجعة يفتحها أكثر من شخص لا تمسح تغيرات أحدهما؛ هناك \`ConcurrencyConflict\`.
+- مراجعة يفتحها أكثر من شخص لا تمسح تغيرات أحدهما؛ هناك `ConcurrencyConflict`.
 - اعتماد سابق لا يختفي بعد قرار وفاة/إعارة متأخر.
 - المتجمد الظاهر في ديسمبر عن يوليو لا يسجل مدفوعًا بلا دليل تسوية.
 - لا تُنشئ قيمة متوقعة مستقلة لبند صندوق يقبل من المركزية.

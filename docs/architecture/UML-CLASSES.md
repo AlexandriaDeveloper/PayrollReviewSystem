@@ -101,12 +101,12 @@ classDiagram
 ```
 
 ### تفسير الرسم
-- \`Person\` شخص قد يكون له صفر أو أكثر من العلاقات الوظيفية \`EmploymentRelationship\` وعلاقات استحقاق \`PayeeRelationship\`.
-- \`PayrollCycle\` دورة شهرية أو صرفية أخرى، وتشمل ملفات \`AuditCase\`.
-- \`SourceDocument\` ينشئ استخراجُه عدة \`SourceFinancialOccurrence\` مستقلة؛ تكرار الكود لا يلغي وقوع أي سطر.
-- \`FinancialComponent\` هو تعريف البند المعتمد؛ وله \`ComponentAuditPolicy\` متغيرة بالسياق وإصدارات \`FinancialRuleVersion\`.
-- \`ExpectedCalculation\` يحتوي أسطر \`ExpectedLine\` مستقلة عن المصدر.
-- \`AuditCase\` يحتفظ بالملاحظات والاعتمادات بإصدارات، و\`RetroEntitlement\` يتتبع التسويات المخصصة إذا ثبت الدفع.
+- `Person` شخص قد يكون له صفر أو أكثر من العلاقات الوظيفية `EmploymentRelationship` وعلاقات استحقاق `PayeeRelationship`.
+- `PayrollCycle` دورة شهرية أو صرفية أخرى، وتشمل ملفات `AuditCase`.
+- `SourceDocument` ينشئ استخراجُه عدة `SourceFinancialOccurrence` مستقلة؛ تكرار الكود لا يلغي وقوع أي سطر.
+- `FinancialComponent` هو تعريف البند المعتمد؛ وله `ComponentAuditPolicy` متغيرة بالسياق وإصدارات `FinancialRuleVersion`.
+- `ExpectedCalculation` يحتوي أسطر `ExpectedLine` مستقلة عن المصدر.
+- `AuditCase` يحتفظ بالملاحظات والاعتمادات بإصدارات، و`RetroEntitlement` يتتبع التسويات المخصصة إذا ثبت الدفع.
 
 ## الرسم الثاني: واجهات الخدمات وفصل المسؤوليات
 ```mermaid
@@ -190,24 +190,24 @@ classDiagram
 
 | الخدمة | مسؤوليتها | ما لا يجوز أن تفعله |
 | --- | --- | --- |
-| \`ImportUseCase\` | حفظ PDF وبصمته وتحويله إلى أسطر مصدرية قابلة للفحص | تغيير المرتب المعتمد أو درجة الموظف |
-| \`IRecipientMatcher\` | اقتراح ربط مستفيد مصدر بهوية داخلية مع الأدلة | اعتماد الشخص لمجرد تشابه الأسماء |
-| \`IComponentMapper\` | اقتراح بند داخلي من الكود والاسم والجانب والسياق والتاريخ | دمج كود متكرر أو تغيير الاسم الخام دون سجل |
-| \`IFinancialRuleResolver\` | تحديد القاعدة الأصلية المتحقق منها والفترة والكادر | اختراع نسبة أو قيمة الأساسي المرجعي |
-| \`IExpectedPayrollCalculator\` | حساب مستقل **مقترح** لكل بند وفترة مع أثر حساب | إعادة حساب البنود التي قبلها المالك من المركزية |
-| \`IReconciliationService\` | اكتشاف الفروق والجمع والمجموعات البنكية والتصنيف | اعتماد موظف من تطابق الصافي فقط |
-| \`IReviewWorkflowService\` | اتخاذ قرارات المراجعين واعتماد نسخ مستقلة وإعادة فتحها | تعديل Oracle أو حذف الاعتماد السابق |
-| \`IRetroEntitlementService\` | حساب الفروق بأثر رجعي حسب أصل الشهر والبند | افتراض أن متجمدات الموظف صُرفت |
-| \`IPaymentEvidenceService\` | التحقق من دليل التسوية وتخصيص المدفوعات | الخلط بين كشف الصرف والدفع المؤكد |
-| \`IAuditTrail\` | تسجيل الفاعل والوقت والسبب وقيمة الحالة قبل وبعد | السماح بمحو تاريخ القرار |
+| `ImportUseCase` | حفظ PDF وبصمته وتحويله إلى أسطر مصدرية قابلة للفحص | تغيير المرتب المعتمد أو درجة الموظف |
+| `IRecipientMatcher` | اقتراح ربط مستفيد مصدر بهوية داخلية مع الأدلة | اعتماد الشخص لمجرد تشابه الأسماء |
+| `IComponentMapper` | اقتراح بند داخلي من الكود والاسم والجانب والسياق والتاريخ | دمج كود متكرر أو تغيير الاسم الخام دون سجل |
+| `IFinancialRuleResolver` | تحديد القاعدة الأصلية المتحقق منها والفترة والكادر | اختراع نسبة أو قيمة الأساسي المرجعي |
+| `IExpectedPayrollCalculator` | حساب مستقل **مقترح** لكل بند وفترة مع أثر حساب | إعادة حساب البنود التي قبلها المالك من المركزية |
+| `IReconciliationService` | اكتشاف الفروق والجمع والمجموعات البنكية والتصنيف | اعتماد موظف من تطابق الصافي فقط |
+| `IReviewWorkflowService` | اتخاذ قرارات المراجعين واعتماد نسخ مستقلة وإعادة فتحها | تعديل Oracle أو حذف الاعتماد السابق |
+| `IRetroEntitlementService` | حساب الفروق بأثر رجعي حسب أصل الشهر والبند | افتراض أن متجمدات الموظف صُرفت |
+| `IPaymentEvidenceService` | التحقق من دليل التسوية وتخصيص المدفوعات | الخلط بين كشف الصرف والدفع المؤكد |
+| `IAuditTrail` | تسجيل الفاعل والوقت والسبب وقيمة الحالة قبل وبعد | السماح بمحو تاريخ القرار |
 
 ## أنواع القيمة المقترحة
-\`Money(decimal Amount,Currency)\`، \`Period(Year,Month)\`، \`EffectiveInterval\`، \`EvidenceRef(DocumentId,Page,Row,Cell)\`، \`ExternalAccountCode\`، \`SourceLineId\`، \`ComponentId\`، \`RuleTraceRef\`.
+`Money(decimal Amount,Currency)`، `Period(Year,Month)`، `EffectiveInterval`، `EvidenceRef(DocumentId,Page,Row,Cell)`، `ExternalAccountCode`، `SourceLineId`، `ComponentId`، `RuleTraceRef`.
 
-سياسة البند \`IndependentCalculation\` أو \`CentralSourceAmount\` أو \`ReferenceOnly\` أو \`ExceptionalCheck\`، مع تاريخ ونطاق اعتماد. افصل حالات **جودة القراءة** عن **ربط البند** عن **المراجعة** عن **إثبات التسوية** ولا تختصرها في متغير \`IsApproved\` واحد.
+سياسة البند `IndependentCalculation` أو `CentralSourceAmount` أو `ReferenceOnly` أو `ExceptionalCheck`، مع تاريخ ونطاق اعتماد. افصل حالات **جودة القراءة** عن **ربط البند** عن **المراجعة** عن **إثبات التسوية** ولا تختصرها في متغير `IsApproved` واحد.
 
 ## اتجاه الاعتمادات
-\`Domain\` لا يعتمد على PDFium أو SQL أو Angular. توضع العقود في \`Application\`، وتنفيذ قارئ PDF/التخزين في \`Infrastructure\`. المبلغ \`decimal\` مع تقريب صريح؛ المدخلات التاريخية والحسابات محفوظة بإصدارات.
+`Domain` لا يعتمد على PDFium أو SQL أو Angular. توضع العقود في `Application`، وتنفيذ قارئ PDF/التخزين في `Infrastructure`. المبلغ `decimal` مع تقريب صريح؛ المدخلات التاريخية والحسابات محفوظة بإصدارات.
 
 ## مثال قابل للفهم
 [الطلب والاستجابة والمخطط المبسط في مثال UML](../examples/02-UML-REVIEW-EXAMPLES.md) يعرض الكلاسات أثناء استيراد صرفية فيها نفس الكود لبدلين مختلفين.
