@@ -25,6 +25,9 @@ You are the **implementation engineer** of PayrollReviewSystem. ChatGPT acts as 
 6. Await architect review. Answer every review blocker with a code commit and a PR reply explaining what changed and how it was verified.
 7. Do not self-approve, self-merge, deploy or silently dismiss BLOCKER findings.
 
+## Mandatory PDF preparation
+If assigned any source-file import task: read docs/reference/ORACLEPDFPARSER-CODE-STUDY.md and docs/specs/ORACLE-PDF-ADAPTER-DESIGN.md, inspect the exact upstream OraclePdfParser repository SHA, and compare with PDF-EXTRACTOR layout-based strategies on synthetically varied documents. Do not blindly copy the upstream implementation, derive a salary rate or assume the fixed reference sample covers all statement layouts. The first authorization is for technical spike/design and acceptance validation, not a broad rewrite.
+
 ## Financial requirements
 - Distinguish actual imported amount, independently calculated expected amount and a reviewer-approved overlay.
 - A component type is not determined solely from a code prefix or appearance in an Oracle column.

@@ -8,7 +8,7 @@
 ## Phase 1 — data & evidence correctness
 - Define canonical identity and temporal schema via ADR.
 - Define source import contracts and financial component classifications.
-- Read-only Oracle adapter(s) and staging, page evidence, report classification.
+- Read-only Oracle adapter(s) and staging, page evidence, report classification. Start from concrete OraclePdfParser code-map and integration design in docs/reference/ORACLEPDFPARSER-CODE-STUDY.md and docs/specs/ORACLE-PDF-ADAPTER-DESIGN.md; do not begin a greenfield regex parser without reviewing that baseline.
 - Synthetic tests; privately validate diverse actual report layouts (never commit private originals).
 - Arabic reviewer import preview and blocking issue list.
 

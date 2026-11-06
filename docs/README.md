@@ -16,10 +16,12 @@
 | 10 | domain/ORACLE-IMPORT-AND-RECONCILIATION.md | PDF quality, matching, source evidence |
 | 11 | domain/LEGAL-AND-RULE-GOVERNANCE.md | How to verify legal rules |
 | 12 | specs/REQUIREMENTS-AND-ACCEPTANCE.md | MVP and testable requirements |
-| 13 | process/ROADMAP.md | Proposed implementation sequence |
-| 14 | reference/RESEARCH-INVENTORY-STATUS.md | What is / is not evidenced |
-| 15 | security/SECURITY-AND-PRIVACY.md | Personal data and audit security |
-| 16 | ui/REVIEWER-UX.md | Arabic RTL reviewer workflow |
+| 13 | reference/ORACLEPDFPARSER-CODE-STUDY.md | Concrete OraclePdfParser code map, local run, limitations and reuse criteria |
+| 14 | specs/ORACLE-PDF-ADAPTER-DESIGN.md | New-system reader contract, staged implementation and acceptance |
+| 15 | process/ROADMAP.md | Proposed implementation sequence |
+| 16 | reference/RESEARCH-INVENTORY-STATUS.md | What is / is not evidenced |
+| 17 | security/SECURITY-AND-PRIVACY.md | Personal data and audit security |
+| 18 | ui/REVIEWER-UX.md | Arabic RTL reviewer workflow |
 
 ## Document states
 - **REQUIREMENT CONFIRMED** — explicitly agreed goal or invariant in Owner conversation.

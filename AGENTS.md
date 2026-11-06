@@ -35,6 +35,9 @@ If documents conflict, identify the conflict in the assigned Issue. Do not silen
 15. Store both entitlement-period and disbursement-period concepts. Post-period adjustments must be allocated to underlying periods/components when proven; otherwise mark allocation unresolved.
 16. No real national IDs, payslips, bank account numbers, connection strings, API keys, unredacted logs or private legal records in public GitHub.
 
+## Oracle PDF importer gate
+For any importer/parser work, first read docs/reference/ORACLEPDFPARSER-CODE-STUDY.md and docs/specs/ORACLE-PDF-ADAPTER-DESIGN.md. OraclePdfParser is a high-value proven *starting point for code discovery*, not an automatically accepted library or proof that extracted money is correct. Treat source types as payslip, cover and payment sheet with report-specific validation. Do not implement or copy parser code until Owner explicitly authorizes the scoped issue.
+
 ## Before doing any change
 - Read docs/README.md and only the relevant domain specs; inspect main HEAD, current branch and authorized Issue.
 - State what exists, what is planned, exact change scope, acceptance cases and any open legal/business questions.
