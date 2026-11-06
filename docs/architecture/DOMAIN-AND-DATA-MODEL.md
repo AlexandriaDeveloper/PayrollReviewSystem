@@ -1,6 +1,13 @@
 # Conceptual data model — source of truth and time
 
-**Design proposal; not an executable migration.** A canonical identity is distinct from employment, payee, and one or more payment relationships.
+**Design proposal; not an executable migration.** See visual [Core ERD](ERD-CORE.md), [Source ERD](ERD-IMPORT-AND-AUDIT.md), [Audit/Retro ERD](ERD-REVIEW-AND-RETRO.md) and [Blueprint glossary](BLUEPRINT-V1.md). A canonical identity is distinct from employment, payee, and one or more payment relationships.
+
+## Entity terminology used in diagrams
+- `EmploymentRelationship` is the narrow Employment/Employee relation originally described here. `Person` can have multiple employment relations.
+- `PayeeRelationship` is the financial/recipient relationship; it is valid for employee and nonemployee reward payees, with optional linked employment.
+- `ApprovedFinancialFact` represents the formerly proposed `EmployeeFinancialFact`; its attachment to a payee relationship rather than only an employee is a **proposed schema refinement**, not an approved migration.
+- `SourceFinancialOccurrence` is a physical source line, not equivalent to `FinancialComponent`. It cannot be keyed by code or name.
+These aliases will be finalized in the first physical schema ADR and must not be implemented as parallel duplicated tables.
 
 ## Core entities
 | Concept | Minimum durable fields / relationships | Important invariant |

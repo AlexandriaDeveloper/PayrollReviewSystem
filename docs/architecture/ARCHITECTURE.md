@@ -1,5 +1,7 @@
 # Architecture baseline (proposal, no code yet)
 
+**Diagrammed design:** [Architecture Blueprint v0.1](BLUEPRINT-V1.md) with ERD, UML class/sequence/state and deployment views. The blueprint is conceptual until the Owner approves specific physical schema and tech-stack ADRs.
+
 ## Mission and boundaries
 The system independently reconstructs lawful expected payroll for each person/employment/entitlement period from approved personnel, reference, event and legal evidence, then compares with central payroll source, records review decisions and monitors whether corrections/arrears are subsequently shown and paid.
 
@@ -13,7 +15,7 @@ The system independently reconstructs lawful expected payroll for each person/em
 5. **Expected Payroll Engine**: dependency-aware per-period calculations, snapshots, detailed traces.
 6. **Reconciliation & Review**: comparison, ambiguity management, reviewer adjustments, documents, findings, decisions.
 7. **Arrears & Follow-up**: retro entitlements, allocation of partial disbursements, over/under-payment tracking, no payment execution.
-8. **Tax, Insurance & Remittance Review**: reference bases and deductions, cumulative periods, separate calculation/payment evidence.
+8. **Centrally Calculated Items / Narrow Insurance Exception**: preserve pension and Owner-named funds as source-trusted amounts, not independently recalculated; review only evidenced part-time insured-wage base errors under verified applicable rules. Tax/remittance controls remain separate future scoping decisions.
 9. **Reports & Administration**: dashboard, audit workpapers, RBAC, immutable audit trail, exports.
 
 These are **logical boundaries**, not a mandatory microservice count or DB schema list.

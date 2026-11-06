@@ -18,6 +18,7 @@
 | P-004 | Adapter-based Oracle PDF import with strict verification | Existing extraction tools handle different PDF layouts. |
 | P-005 | Per-component/period arrears ledger and paid-allocation ledger | Delayed or partial settlement and no double counting. |
 | P-006 | Role-separated reviewer and rule approver | Financial segregation of duties. |
+| P-007 | Blueprint v0.1 split ERD, UML classes/sequences, internal deployment and schema constraints | Formalize approved relationships before any Gemini database migration; diagrams are proposals. |
 
 ## Business/legal questions — cannot be silently inferred
 - Which college/administrative entities and employee categories are in MVP?

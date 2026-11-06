@@ -23,6 +23,18 @@
 | 17 | security/SECURITY-AND-PRIVACY.md | Personal data and audit security |
 | 18 | ui/REVIEWER-UX.md | Arabic RTL reviewer workflow |
 
+## Architecture Blueprint v0.1 (conceptual diagrams; no code authorized)
+- [Architecture Blueprint index and status](architecture/BLUEPRINT-V1.md)
+- [ERD 1: organization, people, payees, historical facts and rules](architecture/ERD-CORE.md)
+- [ERD 2: original Oracle PDF evidence, financial occurrences and mappings](architecture/ERD-IMPORT-AND-AUDIT.md)
+- [ERD 3: calculation review, approvals, corrections and retroactive claims](architecture/ERD-REVIEW-AND-RETRO.md)
+- [UML classes and application/service interfaces](architecture/UML-CLASSES.md)
+- [UML sequences and review state machines](architecture/UML-WORKFLOWS.md)
+- [Internal network deployment and data integrity contracts](architecture/DEPLOYMENT-AND-CONTRACTS.md)
+- [Gemini implementation slices, design gates and open decisions](architecture/IMPLEMENTATION-SLICES.md)
+
+The diagrams render in GitHub's Markdown/Mermaid renderer. They are **proposed logical domain models**; do not generate SQL tables or class code until a physical schema ADR and scoped implementation Issue have been approved.
+
 ## Document states
 - **REQUIREMENT CONFIRMED** — explicitly agreed goal or invariant in Owner conversation.
 - **DESIGN PROPOSAL** — architect recommendation awaiting Owner approval to become binding detail.
