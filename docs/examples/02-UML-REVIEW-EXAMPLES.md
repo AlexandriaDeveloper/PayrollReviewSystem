@@ -6,7 +6,7 @@
 
 ### UML Class Diagram: من المسؤول عن أي عملية؟
 
-\`\`\`mermaid
+```mermaid
 classDiagram
   direction LR
   class SourceDocument {
@@ -49,11 +49,11 @@ classDiagram
   IComponentMapper ..> FinancialComponent : "يقترح ربطًا"
   ReconciliationService ..> SourceFinancialOccurrence : "يقارن"
   AuditCase ..> ReconciliationService : "يعرض الفروق"
-\`\`\`
+```
 
 ### UML Sequence Diagram: طلب الإدخال والرد
 
-\`\`\`mermaid
+```mermaid
 sequenceDiagram
   autonumber
   actor Reviewer as "المراجع"
@@ -75,11 +75,11 @@ sequenceDiagram
   Reviewer->>Audit: يعتمد ربط السطرين أو يطلب مراجعة
   Audit->>DB: حفظ القرار والوقت وهوية المراجع
   Audit-->>UI: نتيجة محدثة، مع بقاء PDF الأصلي كما هو
-\`\`\`
+```
 
 ## شكل الـInput البرمجي
 
-\`\`\`json
+```json
 {
   "command": "ImportPdf",
   "cycleId": "CYCLE-2026-10",
@@ -87,11 +87,11 @@ sequenceDiagram
   "expectedDocumentKind": "EmployeePayslip",
   "actingReviewerId": "USER-01"
 }
-\`\`\`
+```
 
 ## شكل الـOutput البرمجي المقترح
 
-\`\`\`json
+```json
 {
   "documentId": "DOC-001",
   "parseStatus": "ReviewRequired",
@@ -106,13 +106,13 @@ sequenceDiagram
     {"code":"ARABIC_NAME_UNCERTAIN","sourceLineId":"L-003","severity":"Review"}
   ]
 }
-\`\`\`
+```
 
-> أسماء الأوامر والحقول والـDTOs أعلاه **تصميم مبدئي** وليست Routes منفذة. القيم المالية في الإنتاج تُمثل بنوع \`decimal\` ثابت الدقة، وتُنقل في بعض العقود كسلاسل نصية لمنع فقد الدقة.
+> أسماء الأوامر والحقول والـDTOs أعلاه **تصميم مبدئي** وليست Routes منفذة. القيم المالية في الإنتاج تُمثل بنوع `decimal` ثابت الدقة، وتُنقل في بعض العقود كسلاسل نصية لمنع فقد الدقة.
 
 ## السيناريو الثاني: صرفية اعتُمدت ثم صدر قرار إعارة
 
-\`\`\`mermaid
+```mermaid
 stateDiagram-v2
   [*] --> UnderReview
   UnderReview --> Approved: "اعتماد المراجعة"
@@ -122,7 +122,7 @@ stateDiagram-v2
   AwaitingEvidence --> AmendmentReview: "استيفاء البيانات"
   AmendmentReview --> NewApproval: "اعتماد نسخة مراجعة جديدة"
   NewApproval --> [*]
-\`\`\`
+```
 
 **المدخل:** مستند إداري صادر بعد الاعتماد، يحدد تاريخ سريان الإعارة والجزء المستحق من الشهر.
 
@@ -138,7 +138,7 @@ stateDiagram-v2
 | وعاء الاشتراك المعتمد **لهذا المثال** | 1000 |
 | الوعاء الذي استخدمته المركزية بحسب دليل متاح | 650 |
 
-**المخرج:** \`PensionBaseMismatch\` — ملاحظة تطلب اعتراضًا وتصحيحًا من الجهة المختصة عند تحقق شروط القاعدة ومستنداتها. **لا يحسب البرنامج قيمة الاشتراك نفسه**، ولا يفترض أن 1000 هي الوعاء المعتمد لكل موظف. إذا لم يظهر وعاء المركزية في المستند، تكون النتيجة \`EvidenceRequired\` وليس إثبات خطأ.
+**المخرج:** `PensionBaseMismatch` — ملاحظة تطلب اعتراضًا وتصحيحًا من الجهة المختصة عند تحقق شروط القاعدة ومستنداتها. **لا يحسب البرنامج قيمة الاشتراك نفسه**، ولا يفترض أن 1000 هي الوعاء المعتمد لكل موظف. إذا لم يظهر وعاء المركزية في المستند، تكون النتيجة `EvidenceRequired` وليس إثبات خطأ.
 
 ## السيناريو الرابع: عدة بنود مجمّعة في بند واحد
 
@@ -151,17 +151,17 @@ stateDiagram-v2
 
 **مدخل Oracle الافتراضي:** بند واحد بمبلغ 1000.
 
-**المخرج:** \`DistributionMismatch\` مع تفاصيل ثلاثة أسطر متوقعة مقابل سطر مصدر واحد؛ لا يسوّيها تلقائيًا حتى لو الإجمالي صحيح. قد يختار المراجع \`AcceptedWithDocumentedException\` بعد التحقق من باب الصرف والضوابط والمستندات والصلاحية.
+**المخرج:** `DistributionMismatch` مع تفاصيل ثلاثة أسطر متوقعة مقابل سطر مصدر واحد؛ لا يسوّيها تلقائيًا حتى لو الإجمالي صحيح. قد يختار المراجع `AcceptedWithDocumentedException` بعد التحقق من باب الصرف والضوابط والمستندات والصلاحية.
 
 ## الفرق بين نتيجة المحلل ونتيجة المراجع
 
 | الطبقة | مثال الحالة | ماذا تعني؟ |
 | --- | --- | --- |
-| \`ParseStatus\` | \`ReviewRequired\` | يوجد اسم غير مؤكد رغم قراءة المبالغ |
-| \`MappingStatus\` | \`NeedsReview\` | لم يحدد المراجع البند المعتمد بعد |
-| \`ReconciliationStatus\` | \`DistributionMismatch\` | إجمالي صحيح لكن توزيع البنود مختلف |
-| \`ReviewStatus\` | \`ReviewerCompleted\` | انتهى فحص المراجع؛ قد تبقى مطالبة تصحيح |
-| \`PaymentStatus\` | \`ReportedInPayroll\` | ظهر في كشف الصرف، ولم يثبت بعد دخوله البنك |
+| `ParseStatus` | `ReviewRequired` | يوجد اسم غير مؤكد رغم قراءة المبالغ |
+| `MappingStatus` | `NeedsReview` | لم يحدد المراجع البند المعتمد بعد |
+| `ReconciliationStatus` | `DistributionMismatch` | إجمالي صحيح لكن توزيع البنود مختلف |
+| `ReviewStatus` | `ReviewerCompleted` | انتهى فحص المراجع؛ قد تبقى مطالبة تصحيح |
+| `PaymentStatus` | `ReportedInPayroll` | ظهر في كشف الصرف، ولم يثبت بعد دخوله البنك |
 
 ## طريقة استخدام المثال مع Gemini
 يراجع Gemini هذا السيناريو مع ERD المفصل وUML الرئيسي. يُطلب منه إنشاء **اختبارات اصطناعية أولًا**، ولا يبدأ تطبيق Schema أو واجهة/API حقيقية إلا بIssue تنفيذ منفصل معتمد. هذه الأمثلة توضح الشكل المراد الوصول إليه فقط.
