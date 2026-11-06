@@ -1,5 +1,7 @@
 # Central payroll ingestion, parsing, matching and source quality
 
+**Mandatory implementation-read:** [OraclePdfParser code study](../reference/ORACLEPDFPARSER-CODE-STUDY.md) and [adapter design / acceptance](../specs/ORACLE-PDF-ADAPTER-DESIGN.md). No implementation authorized from a docs-only PR.
+
 ## Report classes (confirm by actual samples)
 Oracle/GFMIS inputs may include **individual detailed employee payslips**, **cover/bank group summaries** (sometimes described as كافر), and **payment sheet/kشوف صرف**. Official 47/55/132 form references and their exact content must be confirmed from **the actual official source** before coding hard-coded classification.
 
