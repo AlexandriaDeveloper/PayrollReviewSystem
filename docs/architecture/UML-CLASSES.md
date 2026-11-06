@@ -1,9 +1,8 @@
-# UML class and dependency diagrams — candidate domain/application services
+# UML — الكلاسات والواجهات البرمجية
 
-> **Conceptual UML, not C# class scaffolding.** The eventual stack is still proposed. Business boundaries and contracts are stable design intent; class names, constructors, precise methods and persistence are subject to an implementation ADR.
+**هذا نموذج علاقات مبدئي وليس مشروع كود.** أسماء الكلاسات والـInterfaces بالإنجليزية للحفاظ على معانيها في C# أو أي تقنية نعتمدها لاحقًا، ولا يعني وجود Class ضرورة إنشاء جدول مماثل له.
 
-## Logical class architecture
-
+## الرسم الأول: علاقات الدومين
 ```mermaid
 classDiagram
   direction LR
@@ -101,7 +100,15 @@ classDiagram
   RetroEntitlement "1" --> "0..*" RetroPaymentAllocation
 ```
 
-## Ports and use-case interfaces
+### تفسير الرسم
+- \`Person\` شخص قد يكون له صفر أو أكثر من العلاقات الوظيفية \`EmploymentRelationship\` وعلاقات استحقاق \`PayeeRelationship\`.
+- \`PayrollCycle\` دورة شهرية أو صرفية أخرى، وتشمل ملفات \`AuditCase\`.
+- \`SourceDocument\` ينشئ استخراجُه عدة \`SourceFinancialOccurrence\` مستقلة؛ تكرار الكود لا يلغي وقوع أي سطر.
+- \`FinancialComponent\` هو تعريف البند المعتمد؛ وله \`ComponentAuditPolicy\` متغيرة بالسياق وإصدارات \`FinancialRuleVersion\`.
+- \`ExpectedCalculation\` يحتوي أسطر \`ExpectedLine\` مستقلة عن المصدر.
+- \`AuditCase\` يحتفظ بالملاحظات والاعتمادات بإصدارات، و\`RetroEntitlement\` يتتبع التسويات المخصصة إذا ثبت الدفع.
+
+## الرسم الثاني: واجهات الخدمات وفصل المسؤوليات
 ```mermaid
 classDiagram
   direction TB
@@ -179,31 +186,28 @@ classDiagram
   PhysicalTableAdapter ..|> IPdfExtractionAdapter
 ```
 
-## Service responsibility / anti-corruption boundary
-| Service | Owns | Must not do |
+## من يفعل ماذا؟
+
+| الخدمة | مسؤوليتها | ما لا يجوز أن تفعله |
 | --- | --- | --- |
-| `ImportUseCase` | PDF hash, extraction attempts, diagnostics, report classification and source observations | Update approved employee grade, salary fact or legal rule |
-| `RecipientMatcher` | Proposed identity candidates plus confidence/reasons | Convert similar name into approved canonical Person |
-| `ComponentMapper` | Proposed canonical component & alias candidates using code + side + label + context + period | Merge all rows with same code or reverse entire page blindly |
-| `FinancialRuleResolver` | Verified period/cadre/legal applicability, reference selection | Infer 2015 base/rate from old programs or invented defaults |
-| `ExpectedPayrollCalculator` | Proposed per-component period amounts with explainable trace; excludes source-trusted calculations | Treat Oracle source as independently calculated expected amount |
-| `ReconciliationService` | Item/total/group mismatches and candidate allocations | Silently overwrite source or mark paid by net match |
-| `ReviewWorkflowService` | Reviewer decisions, versioned approval, reopening, conflict checks | Post payments, change Oracle or erase prior approval |
-| `RetroEntitlementService` | Per-component/period recalculation and amounts due (proposal until approved) | Assume arrears will be disbursed immediately |
-| `PaymentEvidenceService` | Independently verified settlement evidence and attributed allocations | Treat printed payroll amount as bank paid |
-| `AuditTrail` | Evidence-linked append-only actions | Allow silent delete/edit of reviewed history |
+| \`ImportUseCase\` | حفظ PDF وبصمته وتحويله إلى أسطر مصدرية قابلة للفحص | تغيير المرتب المعتمد أو درجة الموظف |
+| \`IRecipientMatcher\` | اقتراح ربط مستفيد مصدر بهوية داخلية مع الأدلة | اعتماد الشخص لمجرد تشابه الأسماء |
+| \`IComponentMapper\` | اقتراح بند داخلي من الكود والاسم والجانب والسياق والتاريخ | دمج كود متكرر أو تغيير الاسم الخام دون سجل |
+| \`IFinancialRuleResolver\` | تحديد القاعدة الأصلية المتحقق منها والفترة والكادر | اختراع نسبة أو قيمة الأساسي المرجعي |
+| \`IExpectedPayrollCalculator\` | حساب مستقل **مقترح** لكل بند وفترة مع أثر حساب | إعادة حساب البنود التي قبلها المالك من المركزية |
+| \`IReconciliationService\` | اكتشاف الفروق والجمع والمجموعات البنكية والتصنيف | اعتماد موظف من تطابق الصافي فقط |
+| \`IReviewWorkflowService\` | اتخاذ قرارات المراجعين واعتماد نسخ مستقلة وإعادة فتحها | تعديل Oracle أو حذف الاعتماد السابق |
+| \`IRetroEntitlementService\` | حساب الفروق بأثر رجعي حسب أصل الشهر والبند | افتراض أن متجمدات الموظف صُرفت |
+| \`IPaymentEvidenceService\` | التحقق من دليل التسوية وتخصيص المدفوعات | الخلط بين كشف الصرف والدفع المؤكد |
+| \`IAuditTrail\` | تسجيل الفاعل والوقت والسبب وقيمة الحالة قبل وبعد | السماح بمحو تاريخ القرار |
 
-## Domain types and enumeration proposals
-`Money(decimal Amount, Currency)`, `Period(Year,Month)`, `EffectiveInterval(From,To?)`, `EvidenceRef(DocumentId,Page,Row,Cell?)`, `ExternalAccountCode(string)`, `SourceLineId(Guid)`, `ComponentId(Guid)`, `ReviewerDecisionId(Guid)`, `RuleTraceRef`, `AuditResult<T>`.
+## أنواع القيمة المقترحة
+\`Money(decimal Amount,Currency)\`، \`Period(Year,Month)\`، \`EffectiveInterval\`، \`EvidenceRef(DocumentId,Page,Row,Cell)\`، \`ExternalAccountCode\`، \`SourceLineId\`، \`ComponentId\`، \`RuleTraceRef\`.
 
-`ComponentAuditTreatment`: `IndependentCalculation`, `CentralSourceAmount`, `ReferenceOnly`, `ExceptionalCheck`; **policy is context/version-specific**.
+سياسة البند \`IndependentCalculation\` أو \`CentralSourceAmount\` أو \`ReferenceOnly\` أو \`ExceptionalCheck\`، مع تاريخ ونطاق اعتماد. افصل حالات **جودة القراءة** عن **ربط البند** عن **المراجعة** عن **إثبات التسوية** ولا تختصرها في متغير \`IsApproved\` واحد.
 
-`ExtractionQuality`, `ReviewerCaseStatus`, `ApprovalStatus`, `ReportedPaymentStatus`, `VerifiedSettlementStatus` are **different enums**. Do not use one global `Approved` or `Verified` flag.
+## اتجاه الاعتمادات
+\`Domain\` لا يعتمد على PDFium أو SQL أو Angular. توضع العقود في \`Application\`، وتنفيذ قارئ PDF/التخزين في \`Infrastructure\`. المبلغ \`decimal\` مع تقريب صريح؛ المدخلات التاريخية والحسابات محفوظة بإصدارات.
 
-## Engineering rules
-- Domain projects depend on no PDF library, database provider, web server, Excel exporter or UI framework.
-- Place contracts in application/domain interfaces and implementations in infrastructure. Adapter design should permit PDFium, cell-aware parser, new Oracle layout and synthetic fixtures.
-- `decimal` and explicit rule-specific rounding are mandatory; never binary floating point for money.
-- A repository interface does not imply a physical table per class. Value objects and projections need not be tables.
-- Financial facts and calculations are **versioned**; source PDF bytes and approved historical snapshots are immutable.
-- Class names are hypotheses; exact aggregate boundaries, event persistence, concurrency tokens and custom value object SQL mapping need technical ADR and review.
+## مثال قابل للفهم
+[الطلب والاستجابة والمخطط المبسط في مثال UML](../examples/02-UML-REVIEW-EXAMPLES.md) يعرض الكلاسات أثناء استيراد صرفية فيها نفس الكود لبدلين مختلفين.

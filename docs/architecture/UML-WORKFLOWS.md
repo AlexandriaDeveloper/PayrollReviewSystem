@@ -1,174 +1,161 @@
-# UML sequences and state machines — major audit journeys
+# UML — تتابع العمليات وحالات المراجعة
 
-> **Status: design proposal.** These flows represent **what the system should support**, not a claim that current code implements them or that every step has an approved legal basis. No external Oracle edits or bank payment initiation.
+**مخططات مقترحة لا تعني وجود كود منفذ.** تُظهر الحركة بين المراجع والتطبيق وطبقة الدومين ومصدر Oracle، دون تنفيذ صرف أو استرداد.
 
-## Sequence A: Import PDF, preserve physical rows and ask reviewer to validate
-```mermaid
+## 1. تسلسل استيراد PDF والتحقق من البنود
+\`\`\`mermaid
 sequenceDiagram
   autonumber
-  actor Operator as Intake Reviewer
-  participant UI as RTL Review UI
-  participant API as Import Use Case
-  participant Archive as Private Evidence Archive
-  participant Parser as PDFium / Table Adapter(s)
-  participant Gate as Import Quality Gate
-  participant DB as Source Observation Store
-  Operator->>UI: Upload Oracle PDF
-  UI->>API: Import(file, selected payroll cycle)
-  API->>Archive: Store immutable original and SHA-256
-  Archive-->>API: OriginalDocumentId
-  API->>Parser: Extract original by document ID
-  Parser-->>API: Source rows + raw Arabic + coordinates + issues
-  API->>Gate: Validate identity, signs, columns, totals, report kind
-  Gate-->>API: Per-field and per-report quality statuses
-  API->>DB: Save parse attempt and immutable occurrences
-  API-->>UI: Preview, warnings, original-page evidence
-  alt Source row mapping uncertain
-    Operator->>UI: Select verified recipient/item mapping
-    UI->>API: Submit reviewer decision with reason
-    API->>DB: Append mapping decision and audit event
-  else Source report structurally rejected
-    API-->>UI: Rejected with exact diagnostic
+  actor Reviewer as المراجع
+  participant UI as الواجهة العربية
+  participant API as خدمة الاستيراد
+  participant Archive as أرشيف المصادر
+  participant Parser as محرك قراءة PDF
+  participant Check as بوابة الجودة
+  participant Store as السطور المصدرية
+  Reviewer->>UI: يرفع PDF لدورة مرتبات
+  UI->>API: بدء الاستيراد
+  API->>Archive: حفظ الملف الأصلي والبصمة
+  Archive-->>API: DocumentId
+  API->>Parser: قراءة النص والخلايا والصفحات
+  Parser-->>API: أسطر ومبالغ وأدلة وتحذيرات
+  API->>Check: فحص الهوية والمجاميع والإشارات والجوانب
+  Check-->>API: حالات مستقلة لكل سطر وتقرير
+  API->>Store: تخزين كل ظهور مستقل دون دمج الأكواد
+  API-->>UI: عرض الملف والسطور والمشكلات
+  alt الاسم العربي أو الربط غير مؤكد
+    Reviewer->>UI: يختار الربط المدعوم بدليل
+    UI->>Store: إضافة قرار جديد وسجل مراجعة
+  else المستند غير معروف
+    API-->>UI: Rejected وسبب الرفض
   end
-  Note over Parser,DB: Same Oracle code/label may appear more than once; never collapse occurrences
-  Note over API,DB: Import must never update approved employee financial facts
-```
+  Note over Store: لا يغيّر الاستيراد بيانات الموظف المعتمدة
+\`\`\`
 
-## Sequence B: Independent financial proposal and reviewer decision
-```mermaid
+## 2. الحساب المستقل وقرار المراجع
+\`\`\`mermaid
 sequenceDiagram
   autonumber
-  actor Reviewer as Assigned Reviewer
-  participant UI as Review Workbench
-  participant Cases as Review Workflow Service
-  participant Facts as Approved Fact / Grade Store
-  participant Rules as Verified Rule Resolver
-  participant Calc as Proposed Payroll Calculator
-  participant Source as Accepted Oracle Source
-  participant Diff as Reconciliation Service
-  participant Audit as Audit Trail
-  Reviewer->>UI: Open assigned payee and payroll cycle
-  UI->>Cases: Verify scope + fetch case revision
-  Cases->>Facts: Load facts valid in entitlement period
-  Cases->>Rules: Resolve applicable verified versions
-  Cases->>Calc: Propose independent expected components
-  Note over Rules,Calc: Central-source-trusted pension/fund items are not independently recomputed
-  Calc-->>Cases: Proposed calculation + input trace
-  Cases->>Source: Read immutable source observations
-  Cases->>Diff: Compare source, expected and relevant funding chapter
-  Diff-->>UI: Details, mismatches, aggregation warnings
-  alt Difference or missing evidence
-    Reviewer->>UI: Correct proposal / request docs / flag central error
-    UI->>Cases: Submit decision with evidence and concurrency version
-    Cases->>Audit: Append action
-  else Independently verified and scope permits
-    Reviewer->>UI: Submit for approval
-    UI->>Cases: Sign immutable snapshot revision
-    Cases->>Audit: Append approval event
+  actor Reviewer as المراجع المختص
+  participant UI as شاشة المراجعة
+  participant Case as ملف المراجعة
+  participant Facts as الوقائع المعتمدة
+  participant Rules as القواعد القانونية المتحققة
+  participant Engine as حساب المستحق المقترح
+  participant Source as أسطر Oracle الأصلية
+  participant Compare as محرك المطابقة
+  Reviewer->>UI: فتح موظف من مجموعته
+  UI->>Case: فحص الصلاحية ونسخة الحالة
+  Case->>Facts: بيانات الموظف في شهر الاستحقاق
+  Case->>Rules: اختيار إصدار القاعدة الساري
+  Case->>Engine: حساب البنود غير المستثناة
+  Engine-->>Case: مقترحات مع مدخلات وأثر حساب
+  Case->>Source: تحميل السطور المقبولة للقراءة
+  Case->>Compare: مقارنة كل بند وإجمالياته
+  Compare-->>UI: فروق وملاحظات وتوزيع البنود
+  alt فرق أو نقص مستند
+    Reviewer->>Case: تسجيل تصحيح أو مطالبة مستند أو اعتراض
+  else مراجعة مكتملة ومصرح بالاعتماد
+    Reviewer->>Case: اعتماد نسخة المراجعة بعد الضوابط
   end
-  Note over Cases,Source: Reviewer overlay never edits the source PDF/Oracle amount
-```
+  Note over Engine: التأمينات والصناديق المحددة مصدرية دون إعادة حساب
+\`\`\`
 
-## Sequence C: Event arrives AFTER approval — do not overwrite history
-```mermaid
+## 3. تعديل طارئ بعد اعتماد المراجعة
+\`\`\`mermaid
 sequenceDiagram
   autonumber
-  actor Reviewer
-  participant Cases as Review Workflow
-  participant Evidence as Decision Evidence
-  participant Calc as Period-Aware Calculation
-  participant Archive as Original Review Approvals
-  participant Central as External Central-Entitlement Process
-  Reviewer->>Cases: Submit late death / secondment / part-month event
-  Cases->>Evidence: Check decision type, effective date, source
-  Evidence-->>Cases: Verified or pending documents
-  Cases->>Archive: Read previously signed review revision
-  Cases->>Calc: Calculate affected entitlement periods and components
-  Calc-->>Cases: Proposed delta and required follow-up
-  Cases-->>Reviewer: New review revision; old approval retained
-  alt Official correction required
-    Reviewer->>Central: Request competent office to correct/stop payment
-    Note over Central: External human-controlled process
-    Central-->>Reviewer: Revised official file / confirmation if provided
-    Reviewer->>Cases: Attach new independent source evidence
-  else Documents incomplete
-    Cases-->>Reviewer: Keep review amendment pending
+  actor Reviewer as المراجع
+  participant Case as نظام المراجعة
+  participant Evidence as المستندات والقرارات
+  participant Engine as إعادة الحساب حسب الفترة
+  participant Approval as الأرشيف المعتمد
+  participant Central as الجهة المركزية الخارجية
+  Reviewer->>Case: وصول وفاة أو إعارة أو جزء شهر
+  Case->>Evidence: فحص التاريخ والمستند والصلاحية
+  Case->>Approval: قراءة الاعتماد القديم دون تعديله
+  Case->>Engine: اقتراح أثر الحدث على الشهور والبنود
+  Engine-->>Case: فرق مقترح ومراجعة جديدة
+  Case-->>Reviewer: طلب تعديل واعتماد جديد
+  opt ضرورة تصحيح خارجي
+    Reviewer->>Central: طلب إيقاف أو تصحيح عبر الإجراءات المخولة
+    Central-->>Reviewer: مستند رسمي جديد إن ورد
+    Reviewer->>Case: إرفاق المصدر الجديد وتتبعه
   end
-  Note over Cases,Archive: No automatic payment cancellation or changed Oracle file
-```
+  Note over Central: لا يصدر النظام أمر صرف أو إيقاف تلقائي
+\`\`\`
 
-## Sequence D: Promotion arrears across months and later payment
-```mermaid
+## 4. المتجمدات وظهور الصرف لاحقًا
+\`\`\`mermaid
 sequenceDiagram
   autonumber
-  actor Reviewer
-  participant Event as Approved Administrative Decision
-  participant Engine as Historical Rule Engine
-  participant Retro as Retro Entitlement Ledger
-  participant Source as Later Payroll Source
-  participant Proof as Verified Settlement Evidence
-  Reviewer->>Event: Record promotion and financial effective date
-  Event->>Engine: Recompute each historical component and month
-  Engine-->>Retro: Proposed delta by component+period+event/version
-  Retro-->>Reviewer: Review and approve/reject/adjust proposals
-  Source->>Retro: Report later retroactive payroll line(s)
-  alt Component and period mapping proven
-    Retro->>Proof: Await separately verified payment proof
-    Proof-->>Retro: Confirm paid amount/evidence
-    Retro-->>Reviewer: Allocate supported partial/full settlement
-  else Lump sum source unclear
-    Retro-->>Reviewer: Keep reported amount unallocated, pending evidence
+  actor Reviewer as المراجع
+  participant Order as قرار إداري معتمد
+  participant Engine as المحرك التاريخي
+  participant Retro as سجل المتجمدات
+  participant Report as كشوف الصرف اللاحقة
+  participant Proof as أدلة التسوية
+  Reviewer->>Order: إثبات قرار ترقية وتاريخ الأثر
+  Order->>Engine: حساب فرق كل بند وكل شهر سابق
+  Engine-->>Retro: مطالبة مقترحة بفترة وبند وسبب
+  Retro-->>Reviewer: فحص واعتماد أو تعديل المطالبة
+  Report->>Retro: ظهور مبلغ متجمد في كشف لاحق
+  alt ثبتت هوية الشهر والبند والتسوية
+    Retro->>Proof: فحص دليل الصرف الفعلي
+    Proof-->>Retro: مبلغ مثبت وتاريخ مستقل
+    Retro-->>Reviewer: تخصيص المبلغ للمطالبة الأصلية
+  else ظهر مبلغ مجمع غير موضح
+    Retro-->>Reviewer: يبقى غير موزع ويحتاج إثباتًا
   end
-  Note over Retro: Shown on payroll != verified paid; do not assume current-month retro payment
-```
+  Note over Retro: ظهور المبلغ بكشف الصرف لا يعني أنه وصل للبنك
+\`\`\`
 
-## State machine — payee review cycle
-```mermaid
+## 5. مخطط حالات مراجعة المستفيد
+\`\`\`mermaid
 stateDiagram-v2
   [*] --> NotStarted
-  NotStarted --> SourcePending: Open case
-  SourcePending --> ReviewerWork: Valid sources / partial coverage
-  SourcePending --> SourceRejected: Unusable report
-  SourceRejected --> SourcePending: New source / correction
-  ReviewerWork --> AwaitingDocuments: Missing evidence
-  AwaitingDocuments --> ReviewerWork: Documents received
-  ReviewerWork --> ProposedForApproval: Examination complete
-  ProposedForApproval --> ReviewerWork: Returned / difference
-  ProposedForApproval --> ReviewApproved: Authorized sign-off of snapshot
-  ReviewApproved --> ReopenRequested: Later event or newly found error
-  ReopenRequested --> AmendmentInReview: Permission + evidence recorded
-  AmendmentInReview --> ReviewerWork: Recompute and new revision
-  AmendmentInReview --> AwaitingDocuments: Incomplete event evidence
-  ReviewApproved --> [*]
-  Note right of ReviewApproved: Review approval is NOT bank payment confirmation
-```
+  NotStarted --> SourcePending: "بدء الفحص"
+  SourcePending --> UnderReview: "قبول مصدر للفحص"
+  SourcePending --> SourceRejected: "رفض المستند"
+  SourceRejected --> SourcePending: "مصدر رسمي بديل"
+  UnderReview --> WaitingEvidence: "نقص مستند"
+  WaitingEvidence --> UnderReview: "استيفاء البيانات"
+  UnderReview --> Proposed: "اكتمال الفحص"
+  Proposed --> UnderReview: "إرجاع للمراجع"
+  Proposed --> Approved: "اعتماد نسخة ثابتة"
+  Approved --> ReopenRequested: "حدث جديد بعد الاعتماد"
+  ReopenRequested --> AmendmentReview: "فحص سبب التعديل"
+  AmendmentReview --> UnderReview: "إعادة الحساب بنسخة جديدة"
+  AmendmentReview --> WaitingEvidence: "بيانات غير مكتملة"
+  Approved --> [*]
+  Note right of Approved: "اعتماد المراجعة ليس إثبات دفع"
+\`\`\`
 
-## State machine — finding and settlement tracking
-```mermaid
+## 6. مخطط حالات الملاحظة والمتابعة
+\`\`\`mermaid
 stateDiagram-v2
   [*] --> Detected
   Detected --> UnderReview
-  UnderReview --> AwaitingEvidence
-  UnderReview --> CorrectionRequested
-  UnderReview --> AcceptedWithDocumentedException
-  UnderReview --> ResolvedByEvidence
-  CorrectionRequested --> OfficialCorrectionReceived
-  OfficialCorrectionReceived --> Rechecked
-  Rechecked --> ResolvedByEvidence
-  Rechecked --> CorrectionRequested
-  AwaitingEvidence --> UnderReview
-  AcceptedWithDocumentedException --> [*]
-  ResolvedByEvidence --> [*]
-  Note right of CorrectionRequested: Case can be reviewed while correction remains open
-```
+  UnderReview --> WaitingEvidence: "طلب إثبات"
+  WaitingEvidence --> UnderReview: "وصول الإثبات"
+  UnderReview --> CorrectionRequested: "طلب تصحيح مركزي"
+  UnderReview --> ExceptionAccepted: "قبول استثناء موثق"
+  UnderReview --> Resolved: "ثبوت عدم وجود فرق"
+  CorrectionRequested --> OfficialCorrectionReceived: "وصول مستند مصحح"
+  OfficialCorrectionReceived --> UnderReview: "إعادة الفحص"
+  Resolved --> [*]
+  ExceptionAccepted --> [*]
+  Note right of CorrectionRequested: "يمكن اكتمال فحص الموظف مع بقاء طلب التصحيح"
+\`\`\`
 
-## Special branch: part-time insured wage base
-For an owner-approved part-time work arrangement: proposed reduced **cash** entitlement and independently approved **insured wage base** are separate. If a source actually documents use of the reduced amount as pension assessment base against a verified required full base, create exceptional reviewer finding. If the base or law applicability is unknown, request verification rather than assume a contribution rate. No general insurance calculation engine.
+## اختبارات السلوك المطلوبة
+- تكرار كود بند داخل صفحة أو عبر صفحات لا يؤدي لدمج السطور.
+- عدم وضوح الاسم أو فقد السالب يعطي مراجعة لازمة بدل اعتماد تلقائي.
+- مراجعة يفتحها أكثر من شخص لا تمسح تغيرات أحدهما؛ هناك \`ConcurrencyConflict\`.
+- اعتماد سابق لا يختفي بعد قرار وفاة/إعارة متأخر.
+- المتجمد الظاهر في ديسمبر عن يوليو لا يسجل مدفوعًا بلا دليل تسوية.
+- لا تُنشئ قيمة متوقعة مستقلة لبند صندوق يقبل من المركزية.
+- في حالة جزء الوقت يكون وعاء المعاش مستقلًا عن الاستحقاق النقدي وتُتحقق قاعدة الاستثناء أولًا.
 
-## Required acceptance tests
-- Death/secondment effective after signed review does **not** mutate prior snapshot; triggers a new revision with cause/evidence.
-- Same Oracle account code and Arabic label appears twice; each physical occurrence remains accessible through original-page evidence.
-- Two reviewers edit same case revision: stale update conflicts, never last-write-wins.
-- Payment line appears in December for July–September promotion but no bank proof: `ReportedInPayroll`, not `PaidVerified`.
-- Central-source-accepted funds have no independent expected formula; missing local formula cannot become a false discrepancy.
-- Unknown PDF report or missing signs: rejected or ReviewRequired, never silently approved.
+## مدخلات ومخرجات ملموسة
+راجع [مثال UML التدريبي](../examples/02-UML-REVIEW-EXAMPLES.md) الذي يحتوي على طلب JSON ونتيجة تحليل PDF ومراجعة وتعديل بعد اعتماد.

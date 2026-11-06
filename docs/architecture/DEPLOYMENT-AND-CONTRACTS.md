@@ -1,85 +1,83 @@
-# Deployment, data contracts, relational integrity and operational constraints
+# التشغيل على الشبكة الداخلية وعقود البيانات والقيود
 
-**Draft proposal, not approval to deploy or create schemas.** Actual stack chosen by an ADR. Candidate implementation: ASP.NET Core on .NET, Angular RTL, SQL Server, modular monolith for single-accounting-unit network scope; PDFium + selected physical-table adapter behind interfaces.
+**مقترح لا يخول إنشاء قاعدة بيانات أو نشر البرنامج.** تقنية \`.NET/ASP.NET Core + Angular RTL + SQL Server\` و\`Modular Monolith\` مقترحة وتحتاج ADR. يُستخدم PDFium وخدمة جداول مادية خلف Adapter مناسب.
 
-## Internal-network deployment view
-```mermaid
+## الشكل المقترح للتشغيل
+\`\`\`mermaid
 flowchart TD
-  subgraph LAN[Protected accounting unit LAN]
-    Client[Reviewer PCs browser Arabic RTL]
-    Proxy[Internal HTTPS reverse proxy]
-    Api[ASP.NET application API]
-    Jobs[Restricted import worker]
-    SQL[(SQL Server transactional audit data)]
-    Vault[(Encrypted private original PDF archive)]
+  subgraph LAN["الشبكة الداخلية المحمية للوحدة الحسابية"]
+    Client["أجهزة المراجعين - متصفح عربي RTL"]
+    Proxy["خادم HTTPS داخلي"]
+    API["واجهة الخدمة ASP.NET API"]
+    Worker["معالج استيراد PDF بصلاحيات محدودة"]
+    SQL[("قاعدة SQL Server - البيانات والمعاملات")]
+    Vault[("أرشيف PDF أصلي مشفر")]
     Client -->|HTTPS| Proxy
-    Proxy --> Api
-    Api -->|RBAC plus transactions| SQL
-    Api -->|Authorized import request| Jobs
-    Jobs -->|Write original SHA and evidence| Vault
-    Jobs -->|Append parsed versions| SQL
-    Api -->|Authorized original PDF access| Vault
+    Proxy --> API
+    API -->|"صلاحيات RBAC ومعاملات"| SQL
+    API -->|"طلب استيراد مصرح به"| Worker
+    Worker -->|"حفظ الملف والبصمة"| Vault
+    Worker -->|"حفظ نتائج التحليل بإصدارات"| SQL
+    API -->|"قراءة أصل بتصريح"| Vault
   end
-  External[Oracle or GFMIS exported PDFs] -.->|Controlled human import| Client
-  Backup[(Restricted encrypted backup)] -.-> SQL
+  External["PDF مصدر من Oracle/GFMIS"] -.->|"رفع بشري محكوم"| Client
+  Backup[("نسخ احتياطية مشفرة ومحددة الصلاحية")] -.-> SQL
   Backup -.-> Vault
-```
+\`\`\`
 
-This is **not** an Oracle/GFMIS direct integration. A local network alone does not remove authentication, TLS or file access control requirements. A server/service identity and physical archive permissions must be specified in security ADR.
+هذا ليس اتصالًا مباشرًا بمنظومة Oracle. الشبكة الداخلية لا تعفي من التوثيق والصلاحيات وHTTPS والحماية والنسخ الاحتياطي.
 
-## Proposed bounded contexts
-| Bounded context | Owns truth of | External-read-only relationship |
+## الوحدات التي تملك البيانات
+| الوحدة المنطقية | مسؤوليتها | ضابط الثقة |
 | --- | --- | --- |
-| Organization and Identity | units, protected persons, employment and payee relationships | source names and numbers are never identities by themselves |
-| Approved Financial Facts | historical factual bases, approved assignments, dates and documents | Oracle source can raise a mismatch, not overwrite facts |
-| Rule Catalogue | verified rule versions, legal sources and applicability | no AI-generated statutory rate or guessed 2015 base |
-| Intake & Evidence | original PDFs, parsers, source rows, mapping and validation status | source is immutable even if corrected officially |
-| Financial Proposals | versioned expected calculations and traces | no direct payment |
-| Audit Workbench | review cases, findings, approved overlays and amendments | no Oracle edits |
-| Retro & Proof | component/month claim revisions, reported payments and independently verified settlement | no autopayment or recovery |
-| Identity, Access & Logging | users, rights, group assignments, audit events | no reviewer cross-group access unless authorized |
+| المؤسسات والهوية | الجهات والأشخاص وعلاقات العمل والصرف | اسم Oracle لا يحدد الشخص وحده |
+| الوقائع المالية المعتمدة | القيم التاريخية والقرارات والوقائع وتواريخها | لا تعدّلها ملفات المصدر تلقائيًا |
+| القواعد القانونية | نسخ النصوص وشروط السريان | لا نسب قانونية مخترعة |
+| الاستيراد والمستندات | PDF الأصلي والسطور وجودة الاستخراج | الأصل لا يتغير بعد تصحيحه رسميًا |
+| حساب المستحقات المقترحة | حسابات بإصدارات وأثر قابل للتفسير | لا تنفيذ صرف |
+| ملف المراجعة | الملاحظات والإجراءات والاعتماد وإعادة فتحه | لا تعديل Oracle |
+| المتجمدات والتسوية | حق كل شهر وبند وما ظهر وما ثبت صرفه | لا افتراض دفع أو استرداد |
+| المستخدمون والتدقيق | توزيع مجموعات وصلاحيات وسجل كامل | لا وصول لمجموعة مرتبات بلا تفويض |
 
-## Critical database constraints to design and test
-1. Opaque primary keys; external national ID, employee code and Oracle account code are **not** canonical PKs. Protect sensitive identity data and use access-limited lookup/index methods.
-2. Referential integrity for person -> employment/payee, org -> cycle, cycle -> import/review, source document -> parse attempt -> source financial occurrence, review -> approval revision, retro -> payment allocation.
-3. Exactly one immutable source PDF byte stream per unique stored evidence object hash where content deduplication makes sense; **do not lose import history** when the same hash appears in multiple batches.
-4. **NO UNIQUE** `(RawAccountCode)` or `(Kind,RawAccountCode,RawLabel)` on original lines. Uniqueness applies to internal `SourceLineId` and to *confirmed physical occurrence keys within a specific parse attempt only when stable coordinates exist*.
-5. Duplicate physical or logical source rows should trigger detection and reviewer intervention, not arbitrary sum/deduplication.
-6. `decimal` for all money and rule-defined rounding. Never globally apply an unexplained 0.02 tolerance to separate document types.
-7. Date ranges use `[from,to)` semantics where appropriate; flags and revised records must preserve both **effective date** and **knowledge/recording date**. Exclusion/overlap policies require an ADR per fact/assignment type.
-8. Approved financial data, legal rule versions, source PDFs, signed review snapshots and review actions are immutable-by-version; proposed changes create new revisions and supersession references.
-9. Pessimistic or optimistic concurrency (suggest `rowversion` for mutable review cases and assignments) prevents two reviewers silently overwriting each other.
-10. Unique `ApprovalId` plus `AuditCaseId, ReviewRevision, SnapshotHash`; a prior approved revision cannot be rewritten by new event.
-11. Retro claims: uniqueness and idempotency on **payee + component + entitlement period + causing event + calculation revision**; prevent claiming the same entitlement twice across reruns.
-12. Retro allocation: signed numeric sum and proof caps, no guessed division of one unallocated lump sum into salary items and months; proof must be independently verified.
-13. Reporter/approver segregation of duties enforced by API, not just Angular buttons; role rights scoped by payroll group and cycle.
-14. Financial status `SourceTrusted` means no local recomputation, **not** extraction acceptance without numeric and identity checks.
-15. Semantic mappings of repeated Oracle codes are versioned and reviewer-approved. Map by context, side, Arabic alias, period, payee category and observed evidence; do not equate account code with expenditure chapter.
-16. Original/raw Arabic label text and normalized variants stored distinctly, with extraction confidence and page/cell, not rewritten in place.
-17. Apply per-file upload size/content validation, safe PDF parser isolation, timeouts/resource limits and anti-malware processes where authorized.
-18. Excel exports must sanitize formula injection and preserve leading-zero IDs, RTL display, and selected-user permission scope; do not leak global report warnings with unrelated employee PII.
-19. `PayrollPeriod`, `EntitlementPeriod`, `SettlementPeriod`, `RecordedAt`, `DecisionIssuedAt` have different meaning and cannot be collapsed.
-20. Never expose production secrets or salary reports to the repository, even after repository is made Private unless legally approved storage/retention policy explicitly permits use.
+## قيود قاعدة البيانات التي يجب اختبارها
+1. مفاتيح داخلية غير كاشفة للهوية؛ الرقم القومي وكود Oracle واسم الموظف **ليست مفاتيح أساسية**.
+2. Foreign Keys بين الأشخاص وعلاقاتهم، والوحدات والدورات، والمستند ومحاولات التحليل والسطور، وحالة المراجع واعتماده، والمتجمد والدليل.
+3. يسمح تخزين الكائن الأصلي مرة لكل بصمة محتوى مع الاحتفاظ **بتاريخ كل عملية استيراد** حتى إن تكرر الملف.
+4. ممنوع \`UNIQUE(RawAccountCode)\` أو \`UNIQUE(Kind,RawAccountCode,RawLabel)\` على الأسطر؛ قد يتكرر البند رسميًا.
+5. لا تحذف صفًا مكررًا ولا تجمعه دون التحقق من مصدره ومجاميعه.
+6. \`decimal\` مع تقريب معتمد لكل قاعدة، لا سماح عام \`0.02\` لكل النماذج.
+7. \`[ValidFrom,ValidTo)\` و\`RecordedAt\` يحفظان تاريخ السريان وتاريخ العلم بالواقعة بصورة مستقلة.
+8. الأصل والوقائع المعتمدة ونسخ الحساب والاعتماد والتدقيق لا تتغير تاريخيًا؛ التصحيح نسخة جديدة.
+9. استخدم \`rowversion\` أو بديل موثوق على حالات المراجعة القابلة للتغيير لمنع \`last-write-wins\`.
+10. ربط الاعتماد بالـCase والنسخة وبصمة المدخلات؛ أي تعديل بعد الاعتماد يفتح نسخة جديدة.
+11. المتجمد يمنع ازدواج المطالبة لنفس المستفيد والبند والشهر والسبب والإصدار، مع إبقاء النسخ التاريخية.
+12. مجموع التسويات المثبتة لا يتجاوز دليله، ولا توزع دفعة مجمعة على الشهور بالحدس.
+13. صلاحيات المراجع ومانح الاعتماد تُفحص على الخادم، وبحسب مجموعة المرتب ودور المستخدم.
+14. سياسة \`CentralSourceAmount\` تمنع إعادة الحساب فقط، ولا تمنع كشف تكرار أو خطأ قراءة المبلغ.
+15. تعيين الكود الخارجي لبند داخلي يتم بسياق الاسم العربي والجانب والفترة والكادر ومراجعة الاسم غير المؤكد.
+16. الاحتفاظ بالنص الأصلي وأسماء مرشحة وتفاصيل الصفحة والصف والخلية.
+17. قيود حجم PDF ونوع الملف وتوقيعه والوقت والعزل عن النظام عند التحليل.
+18. تصدير Excel يحافظ على الأرقام النصية ذات الأصفار الأولى ويمنع Formula Injection ولا يسرب ملاحظات موظفين آخرين.
+19. فصل \`PayrollPeriod\` عن \`EntitlementPeriod\` و\`SettlementPeriod\` و\`RecordedAt\`.
+20. ممنوع وضع مستندات رواتب أو أسرار إنتاج في GitHub حتى لو أصبح Private دون اعتماد سياسة الحفظ.
 
-## API contract groups (conceptual, not routes implemented)
-- `SourceUpload`: secure import and idempotency token -> `DocumentId`, `ImportBatchId`.
-- `ImportPreview`: source kind, parsing status and verified source-page references.
-- `ReviewMapping`: proposed identity/component mapping, decision, concurrency token.
-- `CalculationProposal`: input snapshot version, proposed lines and non-calculated source-trusted lines.
-- `Reconcile`: structured differences, reports, group and item validation traces.
-- `ReviewDecision`: case revision, reviewer, status, evidence, optimistic token.
-- `ReviewApproval`: snapshot hash and approver action; no payment side effect.
-- `ReviewAmendment`: cause/evidence/date; creates new review revision, not update to old.
-- `RetroClaims`: claims with original month/item and cause, observed later movement, proven payment allocation.
-- `AuditLog/Exports`: permission-filtered evidence and audit views.
+## واجهات API المقترحة — ليست Routes موجودة
+- \`SourceUpload\`: رفع ملف، فترة، وبصمة وفكرة عدم الازدواج.
+- \`ImportPreview\`: نوع التقرير والصفحات والسطور والتحذيرات.
+- \`ReviewMapping\`: ربط الشخص والبند مع إصدار ومراجع.
+- \`CalculationProposal\`: قيم مستقلة مقترحة وتفسيرها، مع تمييز البنود المصدرية.
+- \`Reconcile\`: فروق على مستوى السطر والمجموع والموظف والمجموعة.
+- \`ReviewDecision\` و\`ReviewApproval\`: قرار واعتماد مرتبطان بنسخة ومستخدم.
+- \`ReviewAmendment\`: فتح مراجعة معتمدة لأسباب جديدة دون مسحها.
+- \`RetroClaims\`: المتجمدات وظهور الصرف والدليل المثبت.
+- \`AuditLog/Exports\`: تقارير مفلترة بالصلاحيات.
 
-## Physical design guidance — not DDL
-- Split SQL schemas logically (e.g. `identity`, `payroll`, `source`, `finance`, `audit`, `security`) only after ADR and ORM/migration provider choice.
-- Avoid ORM `CascadeDelete` on evidence/approval/financial claims; make retention/purge policy explicit and legally reviewed.
-- Plan indexes for `PayeeRelationshipId + period`, `PayrollCycleId + group`, source hash, `ParseAttemptId + page/row/pane`, component mappings by scope, `CaseId + revision`, retro `payee + component + original month`.
-- Audit event rows should reference only necessary masked claims/IDs. Consider event hash chain/WORM storage for independent tamper resistance; DB append-only alone is not anti-admin-tampering.
-- Tests for first SQLite/SQL migration should run against chosen real DB provider. Do not trust unit tests with an in-memory store to prove referential and concurrency constraints.
-- After final approval, generate **true SQL ERD, migrations and ORM class mappings from one authoritative physical model**; keep diagram/schema drift checked by CI in a later authorized implementation.
+## توجيهات التصميم الفيزيائي
+يمكن تقسيم SQL Schemas إلى \`identity\` و\`source\` و\`finance\` و\`audit\` وغيرها بعد ADR؛ ممنوع \`CascadeDelete\` على أصل المستند وقرارات الاعتماد والمتجمدات. فهارس على المستفيد/الشهر/المجموعة/البصمة/مواضع السطور/الحالة. سجلات التدقيق تحتاج حماية من تعديل المسؤول نفسه إذا كان ذلك ضمن المتطلبات.
 
-## Security and operations open decisions
-Authentication integration (Windows/AD or app accounts); server OS and managed security configuration; secure archive location and retention; official original/legal file permissions; role approval hierarchy; backup restore objectives; exact expected concurrent reviewers/annual document volume; whether an asynchronous import worker is needed for large files.
+اختبارات Migration النهائية يجب أن تعمل على قاعدة البيانات **الحقيقية المختارة**، لا InMemory فقط. توليد Class وSQL والفهارس يحصل من مخطط فيزيائي واحد بعد اعتماد المعايير.
+
+## مسائل تشغيل لم تُحسم
+هل الاعتماد عبر Windows/Active Directory أم حسابات التطبيق؟ أين أرشيف PDF المشفر؟ كم مستخدم وموظف وصفحة سنويًا؟ ما سياسة النسخ الاحتياطي والاستعادة والاحتفاظ؟ ومن يسمح له بإعادة فتح اعتماد أو إيقاف صرفية عبر الجهة المختصة؟
+
+[مثال تطبيقي للمدخلات والمخرجات](../examples/01-ERD-INPUT-OUTPUT.md).
