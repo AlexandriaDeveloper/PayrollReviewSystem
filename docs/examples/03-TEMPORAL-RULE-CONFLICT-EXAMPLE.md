@@ -100,6 +100,7 @@ erDiagram
   EFFECTIVE_EVENT {
     string EventId PK
     string DecisionId FK
+    string EmploymentId FK
     string EventKind
     date ValidFrom
     date ValidTo
@@ -107,6 +108,7 @@ erDiagram
   DECISION_SUPERSESSION_SCOPE {
     string ScopeId PK
     string EventId FK
+    string CorrectionDecisionId FK
     date ValidFrom
     date ValidTo
     string Reason
@@ -148,6 +150,7 @@ erDiagram
   }
   RULE_RESOLUTION_RUN {
     string RunId PK
+    string PayeeRelationshipId FK
     string SnapshotHash
   }
   RULE_SEGMENT {
@@ -166,7 +169,7 @@ erDiagram
   EXPECTED_CALCULATION_LINE {
     string LineId PK
     string SegmentId FK
-    decimal ProposedAmount
+    decimal ProposedAmount_nullable
   }
 ~~~
 
