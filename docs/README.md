@@ -38,3 +38,11 @@ Historical reference repos: Payroll-Auditor, Py-Ai-Moratabat, OraclePdfParser, P
 - [Deep audit of actual OraclePdfParser code, earlier PR findings and known unresolved risks](reference/ORACLE-PARSER-FAILURE-AUDIT.md)
 - [Source financial line occurrence identity, repeated codes and Arabic label normalization](specs/ORACLE-FINANCIAL-LINE-IDENTITY.md)
 These files are mandatory for the Gemini PDF implementation handoff; no OraclePdfParser source has been copied to this repository.
+
+## Owner-confirmed operational clarifications — 2026-11-06
+- [Owner workflow and 30200105 unit scope](governance/OWNER-OPERATING-REQUIREMENTS.md)
+- [Part-time cash entitlement versus pension assessment base control](domain/PART-TIME-INSURANCE-CONTROL.md)
+- [Centrally calculated items: disability-support and martyrs funds](domain/CENTRAL-CALCULATED-ITEMS.md)
+These clarify workflow and bounded insurance exception. They are not authority to implement general insurance recalculation or activate an unverified legal rule.
+
+- [Documentation-only merge delegation policy](governance/COLLABORATION.md)

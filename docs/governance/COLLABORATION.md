@@ -23,6 +23,20 @@ Use this repository's **Issues** to assign decisions and tasks, **Pull Requests*
 7. Only Owner-designated maintainers merge and authorize deployment. Merge is not deployment.
 8. Update docs/decision register and change log for substantive changes.
 
+## Owner delegation: autonomous Markdown-only merges (2026-11-06)
+The Owner explicitly authorized the ChatGPT architect to **review and merge Markdown (`.md`)-only changes in this repository without asking for separate merge confirmation each time**. This is an exception to Owner-only merge approval **for documentation artifacts only**.
+
+- Read the full changed-file list and diff (or compare actual documents); confirm every changed path is a Markdown file and that the changes are genuinely documentation, instructions, specifications, ADRs or tests-as-text.
+- Check for confidential personnel/financial data, credentials, unsupported legal formulas, or contradictions with verified Owner policy. Do not silently introduce unverified requirements as approved law.
+- Check mergeability and reconcile concurrent documentation edits without discarding earlier content; use a PR linked to a GitHub Issue where practical.
+- Merge docs-only PRs after completing this review; do not await a fresh Owner message **solely** for approval to merge Markdown.
+- **Never extend this permission** to application code, configuration, CI workflows, binaries, database migrations, secrets, production deployment or changes to other repositories. Mixed PRs require independent Owner authorization for non-Markdown changes or extraction of a docs-only PR.
+- Gemini must not self-merge its PRs. ChatGPT's delegated docs permission does not give Gemini merge privileges.
+- Document merge SHA and any review findings in GitHub. If the documentation itself includes a material business/legal change not grounded in Owner decisions or verified sources, mark it proposed/review-required rather than declaring the rule approved.
+- Existing implementation, legal-rule activation, schema and deployment authorization gates remain unchanged.
+
+This policy records explicit delegated authority; the Markdown itself does not create permissions or background monitoring. A scheduled review/merge automation, if configured, must use the same safety restrictions.
+
 ## Handoff message convention
 PR body: Task, motivation, approved reference, change summary, test results, source/evidence handling, open questions, backward compatibility, privacy assessment.
 Review comment: severity + precise file/behavior + reproduction + expected behavior + recommended test.

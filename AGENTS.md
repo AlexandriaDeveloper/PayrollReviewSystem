@@ -38,6 +38,9 @@ If documents conflict, identify the conflict in the assigned Issue. Do not silen
 ## Oracle PDF importer gate
 For any importer/parser work, first read docs/reference/ORACLEPDFPARSER-CODE-STUDY.md and docs/specs/ORACLE-PDF-ADAPTER-DESIGN.md. OraclePdfParser is a high-value proven *starting point for code discovery*, not an automatically accepted library or proof that extracted money is correct. Treat source types as payslip, cover and payment sheet with report-specific validation. Do not implement or copy parser code until Owner explicitly authorizes the scoped issue.
 
+## Markdown-only merge delegation
+The Owner authorized the ChatGPT architect to merge **reviewed Markdown-only changes** without seeking separate merge approval; see docs/governance/COLLABORATION.md. This does **not** authorize Gemini to self-merge, or any application code/configuration/schema/deployment changes.
+
 ## Before doing any change
 - Read docs/README.md and only the relevant domain specs; inspect main HEAD, current branch and authorized Issue.
 - State what exists, what is planned, exact change scope, acceptance cases and any open legal/business questions.

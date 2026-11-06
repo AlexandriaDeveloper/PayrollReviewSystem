@@ -32,3 +32,6 @@ Do not rely on a universal IsPaid boolean. Keep separate **classification**, **c
 
 ## Example (illustrative ONLY, NOT law)
 Historical reference 500 -> illustrative grade allowance 40% = 200; functional wage 6500. Cash gross from those payable items = 6700, not 7200. Different rule may keep the grade allowance fixed or disallow it entirely. Do not turn example percentages into production config.
+
+## Separate cash entitlement and insured wage base for part-time exception
+An approved employee work-time reduction may affect cash entitlements but **not** the separately documented insured wage assessment base in the Owner's example. E.g., 1000 pre-reduction cash, 650 current cash, documented 1000 insured base: never infer contribution base from 650 cash. This is a **narrow flagged check**, not blanket insurance recomputation; verify original legal applicability and the actual central insured base before concluding. See [part-time control](PART-TIME-INSURANCE-CONTROL.md).

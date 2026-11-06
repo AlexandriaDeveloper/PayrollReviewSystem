@@ -31,3 +31,27 @@
 - Which user roles and environment/hosting controls are required?
 
 Do not turn a proposal into an approved business decision through implementation alone. Document Owner approval with Issue/ADR links.
+
+## Owner-validated operational scope (2026-11-06)
+| ID | Decision |
+| --- | --- |
+| D-006 | Accounting unit: Alexandria Medical Complex; institutional code **30200105**; faculties Medicine, Dentistry and Pharmacy. |
+| D-007 | Coverage includes staff, university teaching faculty, contracted workers and honorarium/reward payees. |
+| D-008 | Review ordinarily occurs before payroll approval; documented urgent events can require post-approval review amendments. |
+| D-009 | Reviewers provide approved employee financial reference data; Oracle source never silently substitutes for these. |
+| D-010 | Financial-event engine proposes component adjustments; reviewer accepts/modifies/rejects proposals with evidence. |
+| D-011 | Aggregating multiple entitlements into one central line can be reviewer-accepted as a documented distribution exception when within one expenditure chapter **subject to other required controls**; do not auto-approve. |
+| D-012 | Generic central pension/insurance calculations are outside independent approval scope; a **part-time full-base vs reduced-cash-base** review exception is required. |
+| D-013 | Multiple reviewers, salary group assignments per cycle and shared authorization for other payrolls; every change attributed and historic. |
+| D-014 | System to run on internal network with protected access; Owner intends repository private. |
+| D-015 | Amounts for **صندوق دعم المعاقين** and **صندوق الشهداء** received from central entitlements are accepted as centrally calculated and **not recomputed** by the reviewer; still validate extraction and aggregates. Exact account mappings pending. |
+| D-016 | Owner explicitly delegated **Markdown-only PR merge authority** to ChatGPT architect without repeated confirmation, subject to documentation review and protection of sensitive data. No code/config/deployment changes authorized. |
+
+**Source:** owner's direct workflow clarifications; not a determination of what Egyptian law authorizes for every employee class. See ../domain/PART-TIME-INSURANCE-CONTROL.md and OWNER-OPERATING-REQUIREMENTS.md.
+
+### Remaining clarifications (narrowed by Owner input)
+- Confirm specific regulatory source/cadre coverage for full insured wage treatment during part-time work.
+- Confirm what source reveals the centrally assessed insurance wage base (not simply the contribution amount).
+- Confirm who can approve emergency amendment/reopening after review approval.
+- Confirm all relevant باب الصرف codes and constraints for accepting aggregated component entries.
+- Confirm group assignment authority and concurrent-work locking policy.
