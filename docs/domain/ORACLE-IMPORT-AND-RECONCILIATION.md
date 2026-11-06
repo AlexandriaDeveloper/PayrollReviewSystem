@@ -1,46 +1,55 @@
-# Central payroll ingestion, parsing, matching and source quality
+# استيراد Oracle ومطابقة التقارير وجودة أدلة المصدر
 
-**Mandatory implementation-read:** [OraclePdfParser code study](../reference/ORACLEPDFPARSER-CODE-STUDY.md) and [adapter design / acceptance](../specs/ORACLE-PDF-ADAPTER-DESIGN.md). No implementation authorized from a docs-only PR.
+**قراءة إلزامية قبل الكود:** [دراسة OraclePdfParser](../reference/ORACLEPDFPARSER-CODE-STUDY.md)، [مشكلاته](../reference/ORACLE-PARSER-FAILURE-AUDIT.md)، [مواصفات Adapter](../specs/ORACLE-PDF-ADAPTER-DESIGN.md)، و[هوية السطر المالي](../specs/ORACLE-FINANCIAL-LINE-IDENTITY.md).
 
-## Report classes (confirm by actual samples)
-Oracle/GFMIS inputs may include **individual detailed employee payslips**, **cover/bank group summaries** (sometimes described as كافر), and **payment sheet/kشوف صرف**. Official 47/55/132 form references and their exact content must be confirmed from **the actual official source** before coding hard-coded classification.
+## أنواع التقارير
+1. **صرفية موظف مفصلة:** بيانات الشخص والبنود وحصص جهة العمل والإجماليات.
+2. **الكافر:** مجموعات البنوك والأعداد والإجماليات.
+3. **كشوف الصرف:** صفوف الموظفين والمجموعات والصافي، بحسب النموذج الفعلي.
 
-## Required import steps
-1. Secure upload and immutable original archive; hash, timestamp, filename and MIME verification; detect duplicate hash.
-2. Classify file by **content**, not filename alone; verify period, employer, page count and recognized report headings.
-3. Extract Unicode/Arabic normalized text and/or structured table cells; preserve raw original text order and exact page/row/cell evidence. No universal reversed Arabic rule.
-4. Segment employee records independent of fixed pages-per-employee or employee-count assumptions.
-5. Parse identity separately from financial line items; full disbursement number, national ID and organizational prefix never masquerade as an account code.
-6. Distinguish earning, deduction, informational employer contribution, printed aggregate, metadata and unknown line. Account code prefix alone is insufficient.
-7. Validate line amounts, printed total(s), appropriate report-specific net equation, employee counts and bank-group totals.
-8. Match multiple files by verified stable identifiers, period, organizational context and amount — no fuzzy name match as sole authoritative identity.
-9. Produce granular parser issues, ambiguous fields, confidence/evidence; unresolved becomes ReviewRequired, not fabricated 0 or auto Verified.
-10. Reviewer accepts/overrides mapping and identity through an audited staging workflow; only eligible records are promoted to canonical source observations.
-11. Reimport corrected files as new versions; never mutate an immutable historical import.
+أرقام النماذج الرسمية التي وردت في بعض الأبحاث مثل 47/55/132 **تحتاج إثبات نوعها من النسخ الأصلية** ولا تثبتها بالاسم وحده.
 
-## Current known failure-risk regression families (from earlier source notes; retest in new code)
-- Negative/mirrored amount sign lost.
-- Net matches but gross/deductions item subtotals do not.
-- Net matches, but bank group coverage/total differs.
-- Identity field from header incorrectly classified as an informational financial entry.
-- Rejected/unknown report silently degraded to nonblocking ReviewRequired or "verified".
-- Separate Arabic RTL side-by-side columns interleaved.
-- Different number of pages per employee; continued lines/employer contributions on next page.
-- Two rows share same numeric account code but have distinct descriptions and treatment.
-- Missing/repeated national ID, changed payment code, unknown account.
-- Partial source with missing total: missing is NOT zero.
+## مراحل الاستيراد المطلوبة
+1. رفع آمن وحفظ أصل PDF دون تعديله وبصمة SHA-256 والتاريخ والنسخة وكشف التكرار.
+2. تحديد نوع التقرير من **محتواه** والعناوين والشهر والجهة وعدد الصفحات، لا اسم الملف وحده.
+3. استخراج Unicode العربي مع حفظ النص الخام، وإعادة بناء الخلايا والصفوف والجانب الفيزيائي عند الحاجة؛ لا تقلب كل النصوص العربية آليًا.
+4. التعرف على حدود المستفيد دون افتراض عدد صفحات ثابت أو عدد أشخاص معين.
+5. فصل الرقم القومي ورقم الصرف والكود المؤسسي عن **كود البند المالي**.
+6. فصل الاستحقاق والاستقطاع وحصة جهة العمل المعلوماتية والمجموع والعناوين والسطر المجهول؛ لا يكفي أول رقم في الكود لتحديد الجانب.
+7. فحص كل مبلغ وإشارته والإجماليات المطبوعة وعدد المستفيدين ومجموعات البنك وفق **معادلة كل تقرير**.
+8. مطابقة المستندات بهوية موثقة وفترة وجهة وبنك وفرع، لا تشابه الاسم وحده أو ترتيب المجموعة.
+9. إظهار أسباب ضعف الثقة لكل سطر أو مبلغ؛ ما هو غير مؤكد `ReviewRequired` لا صفر أو `Verified`.
+10. يقرر المراجع ربط الهوية والبند داخل منطقة مراجعة مع تاريخ وسبب، قبل قبول الملاحظات المصدرية للمقارنة.
+11. النسخة المصححة رسميًا تخزن منفصلة، ولا تمسح الاستيراد القديم.
 
-## Legacy technique references (research only)
-- Payroll-Auditor uses a Syncfusion adapter in an Employees import flow.
-- OraclePdfParser uses PDFium Unicode stream, cross-file group matching and exports.
-- PDF-EXTRACTOR uses pdfplumber physical-table reconstruction for visual-order two-pane pages.
-Comparison of these is a **design discovery**, not evidence that any is completely accurate on every PDF. Prefer adapter interface + independent fixture matrix and reconciliation checks. Do not copy code without verifying library license/security/compatibility.
+## عائلات الأخطاء التي يجب اختبارها
+- علامة سالب ضاعت أو انعكست بسبب RTL.
+- صافي متطابق لكن إجمالي الاستحقاقات أو الاستقطاعات التفصيلية مختلف.
+- مجموعات بنك تختلف رغم تساوي الصافي.
+- كود مؤسسي أو رقم قومي دخل خطأ كبند مالي معلوماتي.
+- تقرير مرفوض تحول إلى `ReviewRequired` أو `Verified` دون إثبات.
+- عمودان عربيان متقابلان اختلطت بنودهما.
+- اختلاف عدد الصفحات لكل موظف وامتداد حصة جهة العمل إلى صفحة لاحقة.
+- **نفس كود البند يظهر لاسمين أو حركتين مختلفتين**.
+- نقص الرقم القومي، تكرار أو تغير رقم الصرف، كود حساب مجهول.
+- نقص مجموع مطبوع؛ النقص ليس صفرًا.
 
-## Import state
-Uploaded -> Classified -> Parsing -> ParsedWithIssues / ParseFailed -> IdentityReview -> ComponentMappingReview -> ConfirmedSourceSnapshot. Only verified source **observations** are candidates for downstream reconciliation. No import may directly alter approved employment grade or financial entitlement.
+## ماذا نأخذ من المشاريع القديمة؟
+- `Payroll-Auditor`: تقنيات استيراد سابقة باستخدام Syncfusion.
+- `OraclePdfParser`: PDFium، تقسيم التقارير، المطابقة والتصدير، لكن توجد أخطاء مسجلة لم تُصلح كلها.
+- `PDF-EXTRACTOR`: `pdfplumber` لتجميع خلايا الجداول الفعلية، خاصة الصفوف العربية ذات العمودين.
 
-## Reviewer tools
-Side-by-side PDF original page and extracted fields; edit only a separate proposed correction; per-line source page anchor; show rejected/ambiguous and unmatched group; export Excel with RTL and text identifiers (avoid formula injection and leading-zero loss).
+كل مشروع مرجع تقني لا إثبات كفاية لكل ملفات PDF. نحتاج Adapter واختبارات متنوعة ورخصًا وتبعيات آمنة قبل نسخ أي كود.
 
-## Cross-file precision
-All money decimal fixed precision; no general .02 tolerance unless specifically approved for a given report/rounding context. Treat informational shares per **documented** source equation rather than one universal gross - deductions = net rule.
+## حالات الاستيراد
+`Uploaded` ← `Classified` ← `Parsing` ← `ParsedWithIssues` أو `ParseFailed` ← `IdentityReview` ← `ComponentMappingReview` ← `ConfirmedSourceSnapshot`.
+
+لا تعدّل مرحلة الاستيراد درجة الموظف أو مرجعه أو استحقاقه المعتمد.
+
+## أدوات المراجع
+عرض PDF الأصلي بجانب السطور المستخرجة، والصفحة والخلية والاسم الخام والاسم المقترح والمبلغ، وقائمة السطور غير المعروفة والمجموعات غير المتطابقة. التعديل يُحفظ قرارًا إضافيًا وليس تغييرًا للمصدر. Excel عربي RTL وأرقام هوية نصية من دون فقد الأصفار الأولى أو Formula Injection.
+
+## دقة المطابقة
+تستخدم المبالغ `decimal` وليس `float`، ولا تُفرض سماحية `0.02` عامة دون سياسة موثقة. تعامل مع حصص جهة العمل ومعادلات الصافي وفق **نوع المستند الفعلي**، وليس دائمًا جملة الاستحقاقات ناقص الاستقطاعات.
+
+[مثال كامل لإدخال السطور ونتيجة المراجعة](../examples/01-ERD-INPUT-OUTPUT.md).

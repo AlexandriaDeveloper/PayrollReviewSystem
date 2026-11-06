@@ -1,57 +1,61 @@
-# Owner-confirmed operating requirements: Medical Complex Accounting Unit
+# متطلبات التشغيل المؤكدة من مالك الوحدة الحسابية بالمجمع الطبي
 
-**Status:** owner-confirmed operational requirements, captured on 2026-11-06. This is a specification, not implementation authorization or a verified legal ruling.
+**المصدر:** توضيحات المالك بتاريخ 6 نوفمبر 2026. **متطلبات عمل مؤكدة** وليست ترخيصًا لإنشاء كود ولا حكمًا قانونيًا نهائيًا لكل فئة.
 
-## Organizational boundary
-- Accounting unit institutional code **30200105**.
-- Three colleges: **Medicine**, **Dentistry**, **Pharmacy** (Alexandria University Medical Complex accounting unit).
-- Recipient groups include public-service employees, teaching/research faculty, contractual workers and nonemployee reward beneficiaries.
-- Employee and nonemployee payees must have separate relationship models. No accidental national ID or salary matching as sole canonical authority.
+## النطاق المؤسسي
+- الكود المؤسسي للوحدة الحسابية: **30200105**.
+- تخدم الوحدة كليات **الطب وطب الأسنان والصيدلة** بجامعة الإسكندرية.
+- تشمل مراجعة الموظفين وأعضاء هيئة التدريس ومعاونيهم والعمالة المتعاقدة ومستحقي المكافآت.
+- افصل `Person` عن `EmploymentRelationship` وعن `PayeeRelationship`؛ صاحب المكافأة ليس موظفًا بالضرورة. الرقم القومي وحده لا يسمح بدمج علاقات صرف مختلفة.
 
-## Review stages and changes after approval
-- Routine review occurs **before** payroll-disbursement approval.
-- Exceptional administrative events can be received **after** review approval: death, secondment, partial-month entitlement and similar changes.
-- Support controlled **post-approval review amendment/request-to-reopen**, with original approved version, event time, legal effective time, reason, proof, reviewer, approver and modified/replacement source.
-- The program does NOT send payment cancellation/edits to central payroll or bank automatically; the competent administrative process is external. No "death" event should automatically annul payments without evidence and authoritative decision.
-- Distinguish approved internal review, official revised central payroll report, and actual bank settlement.
+## قبل الاعتماد وبعده
+- تتم مراجعة المرتب المعتادة **قبل اعتماد الصرف**.
+- قد يرد حدث بعد الاعتماد مثل وفاة أو أمر إعارة أو استحقاق عن جزء من الشهر أو قرار إداري جديد.
+- يدعم النظام **طلب إعادة فتح نسخة مراجعة معتمدة**، مع حفظ الاعتماد القديم والقرار ووقت وصوله وتاريخ أثره والمراجع والمستند والنتيجة.
+- **لا يوقف التطبيق صرف الموظف أو يتصل بالبنك أو يعدل Oracle تلقائيًا** حتى في الوفاة؛ الإجراء الرسمي بيد الجهة المختصة بعد الإثبات.
+- افصل اعتماد المراجعة الداخلية عن وصول صرفية مركزية مصححة وعن إثبات التسوية المالية الفعلية.
 
-## Independent approved reference data
-Reviewers will provide the already approved and currently available employee financial data. Oracle PDF values may be compared against it but cannot overwrite it. If a missing historical source or a newly effective decision changes a fact, stage it for reviewer approval and retain old revision/history.
+## البيانات المالية الصحيحة
+المراجع يوفر البيانات والقرارات والمبالغ التي يعتمد عليها حاليًا. يستخدمها النظام مرجعًا مستقلًا. لا يُحدّث Oracle ملفات الموظفين الداخلية تلقائيًا عند اختلافها مع قيم المصدر. إذا تغيرت واقعة تاريخية أو وصل حكم جديد، ينشأ اقتراح يراجعه المستخدم وتحفظ النسخ السابقة.
 
-## Changes / entitlement calculations
-For promotions, allowances, leave and financial events the engine **proposes** affected component calculations, and the reviewer explicitly accepts, corrects with documented explanation or rejects them. Engine calculations do not automatically create a legally approved employee entitlement or affect central payroll.
+## أثر القرارات
+الترقية والعلاوة والإجازة والإعارة والجزاء والقرار المالي تؤدي إلى **اقتراح حساب** للبنود المتأثرة. يراجع الشخص المختص المقترح، ثم يقبله أو يعدله مع توضيح السبب أو يرفضه. الحساب المقترح لا ينتج اعتمادًا قانونيًا تلقائيًا ولا يغير الصرفية بالمركزية.
 
-## Aggregated central payroll lines
-Central entitlements may report several distinct payable components aggregated under one Oracle line (e.g. 4 components totaling 1,000 EGP).
-- Retain the expected **original 4 component lines** and the actual **single reported line** separately.
-- Show item-level allocation/distribution mismatch even if grand total matches.
-- Reviewer MAY mark an aggregation exception **accepted with recorded reason** where components are within the **same expenditure chapter/bab (باب الصرف)** and all required supporting controls permit it.
-- Same spending chapter is a necessary consideration from Owner's workflow, NOT an unconditional legal authorization. Verify other component-specific accounting constraints and reviewer authority; no automatic approval/auto-distribution.
-- Distinguish "amount accepted with distribution exception" from "each line matched".
+## تجميع البنود داخل Oracle
+قد يستحق الموظف أربعة بنود يبلغ مجموعها **1000 جنيه**، لكن الاستحقاقات المركزية تُظهرها تحت **بند واحد**.
+- احتفظ بالبنود الأربعة المتوقعة منفصلة وبسطر Oracle الواحد كما ورد.
+- اعرض فرق التوزيع حتى لو الإجمالي صحيح.
+- يمكن للمراجع المختص **قبول الاختلاف باستثناء موثق** إذا كان ضمن باب الصرف نفسه وتحققت الشروط المحاسبية والصلاحيات الأخرى.
+- باب الصرف الواحد ليس تصريحًا قانونيًا آليًا لقبول أي تجميع؛ لا تبرمج قبولًا صامتًا.
+- الحالة «المبلغ مقبول باستثناء توزيع» **ليست** «كل البنود متطابقة».
 
-## Pension / social insurance
-- **General scope exclusion:** the accounting-unit reviewers accept insurance/pension amounts produced by central entitlement system without checking/approving/challenging their generic rate calculations; figures can be displayed/reconciled with source totals.
-- **One explicit exception:** part-time/partial-work-time arrangements. Owner's illustrated case: former full-time cash entitlement **1,000 EGP** -> cash entitlement at 65% = **650 EGP**, while the **pension-contribution assessment base is still the approved full basis of 1,000 EGP**. The central system sometimes uses 650 instead, and the reviewer must object/seek correction.
-- The 65% is a **specific illustrated part-time fraction**, not a universal contribution percentage, not the insurance deduction amount, and not authority to apply the rule to all job classes without verified applicable rule.
-- The **approved full-time insured wage base** is a separate reference fact; full cash pay of 1,000 only equals it when explicitly documented and established for that employee/period. Never blindly use gross payroll or full earnings as the insured contribution base.
-- Do not build universal insurance recalculation in MVP. Build an **exceptional risk control** comparing documented approved insurance calculation base to actual central-calculation base **if that base is available**. If only the withheld monetary premium is printed and central base/formula are not available, do not infer the base simply from premium without a verified legal rate/rule; flag for documentary verification.
-- For a confirmed base mismatch: raise ReviewRequired / central correction request with source evidence; neither change original amount nor automatically recompute payroll deduction.
-- Source law/decision, employee scope, dates, contractual/work arrangement and any exceptions still require authenticated primary documentation before activating a deterministic alert. Until then flag as a **proposed rule/check** requiring reviewer confirmation, not a proven legal finding.
+## التأمينات والمعاشات
+- في المراجعة المعتادة، تقبل الوحدة **قيم اشتراكات المعاشات والتأمينات الواردة من المركزية** ولا تعيد حساب نسبها.
+- **استثناء:** موظف يعمل جزءًا من الوقت؛ في المثال الذي عرضه المالك انخفض الأجر النقدي من **1000 إلى 650 جنيهًا**، بينما الوعاء التأميني المعتمد لهذا الموظف بقي **1000 جنيه**. إذا استخدمت المركزية 650 وعاءً بدل 1000، فيجب تسجيل اعتراض وتصحيح.
+- نسبة 65% تخص **مثال قرار العمل** لا نسبة الاستقطاع ولا حكمًا عامًا لكل الموظفين.
+- قد لا يساوي الوعاء التأميني المعتمد الأجر النقدي الكامل؛ خزّنه كواقعة مستقلة بدليل وتاريخ.
+- لا تبنِ محرك إعادة حساب التأمينات كاملًا في الإصدار الأول.
+- إذا أظهر كشف Oracle **قيمة الخصم فقط** ولم يُظهر الوعاء المستخدم، اطلب المصدر اللازم ولا تستنتج الوعاء دون معادلة وقاعدة مثبتتين.
+- إثبات الخطأ يحتاج قرارًا وسندًا قانونيًا ساريًا على الكادر والفترة ووعاءً مركزيًا مثبتًا، وإلا الحالة «قاعدة/دليل يحتاج تحققًا»، لا مخالفة مثبتة.
 
-## Other centrally calculated deductions / fund items
-The Owner also explicitly excludes independent recalculation of the amounts reported by central entitlements for **صندوق دعم المعاقين** and **صندوق الشهداء**. Ingest the actual amounts as verified original-source observations and include them in source total checks without validating their rates/eligibility independently. Their exact Oracle account codes, official document labels, deduction/employer classification and legal bases are **not yet verified**. See [centrally calculated item policy](../domain/CENTRAL-CALCULATED-ITEMS.md). The existing pension partial-work-time assessment-base exception remains.
+## الصناديق المحسوبة مركزيًا
+**صندوق دعم المعاقين** و**صندوق الشهداء**: يأخذ النظام قيمة المركزية دون إعادة حساب النسبة أو الأهلية، لكن يدقق سلامة استخراج الاسم والكود والجانب والمبلغ والشهر ومجاميعه. **لم تُعتمد بعد** أسماء Oracle الرسمية وأكواد الحسابات وطرق العرض. [تفاصيل السياسة](../domain/CENTRAL-CALCULATED-ITEMS.md).
 
-## Multiple reviewers and security
-- Several reviewers work on the same internal-network installation.
-- In regular monthly payroll, each reviewer is responsible for an assigned group of employees **per payroll review cycle**; preserve historic assignments, substitutions and reassignment audit.
-- Other payroll/disbursement types can be accessed by all authorized reviewers as Owner directs.
-- Store actor/time/field before-after/document/version and reviewer decision for every material modification; guard conflicting concurrent updates.
-- Deploy on a protected internal network with role-based authorization; no assumption that intranet is inherently secure.
-- Repository currently public in verified GitHub state; Owner intends to make it private. Until confirmed, no personal/payroll attachments or secrets.
+## المراجعون والصلاحيات
+- عدة مراجعين على شبكة داخلية واحدة.
+- **المرتب الشهري:** لكل مراجع مجموعة موظفين مخصصة **لكل دورة صرف**، مع إمكان تغيير الإسناد وتوثيق السابق.
+- **الصرفيات الأخرى:** يستطيع المراجعون المخولون الوصول إليها وفق النطاق الذي يحدده المالك.
+- احفظ هوية كل من عدّل، وتوقيت التعديل، والحقل قبل/بعد، والمستند والنسخة والقرار، وامنع تعارض تعديلين متزامنين.
+- الشبكة الداخلية ليست تصريحًا بتجاوز تسجيل الدخول أو صلاحيات API.
+- المستودع كان عامًا عند التحقق، والمالك ينوي تغييره إلى خاص؛ لا تُرفع إليه مرتبات أو هوية شخصية أو أسرار.
 
-## Verification / open questions before implementation
-- Specific legal treatment of part-time pension bases in each covered cadre, source article/regulation and evidence, and whether percentage is constant per decision.
-- Which original document or system field establishes full insured wage base and actual central insured wage base.
-- How to define the allowed expenditure chapter code and acceptable aggregation exception; what else must be checked.
-- Named authorities to approve post-approval review reopening or emergency payment suspension request.
-- Proof and final approval flow for assignment/review coverage.
+## المسائل التي تحتاج حسمًا قبل الكود
+1. سند الاشتراك التأميني في جزء الوقت لكل كادر والقرار وتاريخ بدء أثره.
+2. موضع الوعاء المعتمد ومصدر الوعاء الذي **استخدمته المركزية بالفعل**.
+3. أكواد أبواب الصرف وشروط قبول التجميع والموافقة عليه.
+4. من له صلاحية إعادة فتح الاعتماد وطلب إيقاف صرفية طارئة.
+5. طريقة تعيين المجموعات وتغيير المراجع والاعتماد النهائي والإثبات.
+
+## أمثلة تطبيقية
+- [ERD: الموظف والملفات والجداول والمخرجات](../examples/01-ERD-INPUT-OUTPUT.md).
+- [UML: التعديل بعد الاعتماد وجزء الوقت والتجميع](../examples/02-UML-REVIEW-EXAMPLES.md).

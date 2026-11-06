@@ -1,29 +1,30 @@
-# Conceptual ERD 1 — Organization, identities, approved facts and legal rules
+# ERD رقم 1 — الوحدات والأشخاص والعلاقات الوظيفية والقواعد المالية
 
-**Draft, non-executable**. The three colleges are organizational units below a parent unit carrying code `30200105`. No employee legal status follows merely from organizational membership.
+**مخطط تصوري وليس تعليمات إنشاء SQL.** المجمع الطبي هو الجهة الحسابية التي تخدم كليات الطب وطب الأسنان والصيدلة، ولا نحدد الكادر القانوني تلقائيًا من اسم الكلية.
 
+## العلاقات المرسومة
 ```mermaid
 erDiagram
-  ORGANIZATION_UNIT ||--o{ ORGANIZATION_UNIT : parent_of
-  PERSON ||--o{ PERSON_IDENTIFIER : holds
-  PERSON ||--o{ EMPLOYMENT_RELATIONSHIP : enters
-  PERSON ||--o{ PAYEE_RELATIONSHIP : receives_as
-  ORGANIZATION_UNIT ||--o{ EMPLOYMENT_RELATIONSHIP : appoints
-  ORGANIZATION_UNIT ||--o{ PAYEE_RELATIONSHIP : pays
-  EMPLOYMENT_RELATIONSHIP o|--o{ PAYEE_RELATIONSHIP : may_underlie
-  EMPLOYMENT_RELATIONSHIP ||--o{ GRADE_HISTORY : has
-  EMPLOYMENT_RELATIONSHIP ||--o{ STATUS_HISTORY : has
-  EMPLOYMENT_RELATIONSHIP ||--o{ WORK_ARRANGEMENT : has
-  PAYEE_RELATIONSHIP ||--o{ APPROVED_FINANCIAL_FACT : records
-  PAYEE_RELATIONSHIP ||--o{ COMPONENT_ASSIGNMENT : receives
-  FINANCIAL_COMPONENT ||--o{ COMPONENT_ASSIGNMENT : assigned_as
-  FINANCIAL_COMPONENT ||--o{ COMPONENT_AUDIT_POLICY : controlled_by
-  FINANCIAL_COMPONENT ||--o{ FINANCIAL_RULE_VERSION : calculated_by
-  LEGAL_PROVISION_VERSION o|--o{ FINANCIAL_RULE_VERSION : authorizes
-  LEGAL_SOURCE ||--o{ LEGAL_PROVISION_VERSION : contains
-  ADMINISTRATIVE_DECISION ||--o{ EVENT_EFFECT : creates
-  FINANCIAL_COMPONENT o|--o{ EVENT_EFFECT : affects
-  PAYEE_RELATIONSHIP o|--o{ ADMINISTRATIVE_DECISION : concerns
+  ORGANIZATION_UNIT ||--o{ ORGANIZATION_UNIT : يتبع
+  PERSON ||--o{ PERSON_IDENTIFIER : يمتلك
+  PERSON ||--o{ EMPLOYMENT_RELATIONSHIP : يرتبط_وظيفيا
+  PERSON ||--o{ PAYEE_RELATIONSHIP : يستفيد
+  ORGANIZATION_UNIT ||--o{ EMPLOYMENT_RELATIONSHIP : يعين
+  ORGANIZATION_UNIT ||--o{ PAYEE_RELATIONSHIP : يصرف
+  EMPLOYMENT_RELATIONSHIP o|--o{ PAYEE_RELATIONSHIP : يرتبط
+  EMPLOYMENT_RELATIONSHIP ||--o{ GRADE_HISTORY : لديه
+  EMPLOYMENT_RELATIONSHIP ||--o{ STATUS_HISTORY : لديه
+  EMPLOYMENT_RELATIONSHIP ||--o{ WORK_ARRANGEMENT : لديه
+  PAYEE_RELATIONSHIP ||--o{ APPROVED_FINANCIAL_FACT : يسجل
+  PAYEE_RELATIONSHIP ||--o{ COMPONENT_ASSIGNMENT : يتلقى
+  FINANCIAL_COMPONENT ||--o{ COMPONENT_ASSIGNMENT : يسند
+  FINANCIAL_COMPONENT ||--o{ COMPONENT_AUDIT_POLICY : يخضع_لسياسة
+  FINANCIAL_COMPONENT ||--o{ FINANCIAL_RULE_VERSION : يحسب_بقاعدة
+  LEGAL_PROVISION_VERSION o|--o{ FINANCIAL_RULE_VERSION : يسند_قانونيا
+  LEGAL_SOURCE ||--o{ LEGAL_PROVISION_VERSION : يتضمن
+  ADMINISTRATIVE_DECISION ||--o{ EVENT_EFFECT : ينشئ
+  FINANCIAL_COMPONENT o|--o{ EVENT_EFFECT : يؤثر
+  PAYEE_RELATIONSHIP o|--o{ ADMINISTRATIVE_DECISION : يخص
   ORGANIZATION_UNIT {
     uuid OrganizationUnitId PK
     uuid ParentUnitId FK
@@ -164,16 +165,24 @@ erDiagram
   }
 ```
 
-## Important business invariants
-1. **Person != Employment != PayeeRelationship**. Someone receiving a one-off reward does not need an `EmploymentRelationship`; a faculty member may have more than one valid payment relationship.
-2. `PayeeRelationship.EmploymentId` is optional but **never inferred** merely because a person shares the same name or national ID.
-3. A `WORK_ARRANGEMENT.CashFraction=0.65` (when proved by decision) changes the **cash entitlement proposal**. It does not automatically change `APPROVED_FINANCIAL_FACT` for the insured wage base.
-4. `APPROVED_FINANCIAL_FACT` includes reference-only facts like `BasicAsOf2015_06_30` and a separately evidenced `ApprovedInsuredWageBase`. These are **not** automatically cash payable.
-5. Generic social insurance and the two Owner-specified funds are source-trusted under a **contextual component policy**; they are not subject to generic local calculation. The narrow work-time insurance-base exception is a separate check.
-6. A rule version is not active merely because its source has a title, number or secondary summary. Store original provision, effective dates, population and human approval.
-7. `ValidFrom/ValidTo` and `RecordedAt`/revision timestamps distinguish entitlement effect from time the auditor learned of changes. Record independent *functional* and *financial* dates.
-8. Use separately authorized referential consistency checks for optional `DecisionId` links and contradictory event/period history. The ERD is a sketch of cardinalities, not a license to hardcode a global exclusive history rule.
-9. The finance source chapter/باب الصرف is associated with the component's **versioned accounting classification** (to be defined in approved physical schema), not confused with its Oracle account code; more than one component can share an Oracle code.
+## معنى العلاقات
+- `Person` كيان للشخص، وقد يمتلك أكثر من `EmploymentRelationship` عبر الزمن وأكثر من `PayeeRelationship`، بما فيها مكافأة لمستفيد غير موظف.
+- `OrganizationUnit` تنظم الجهة الحسابية والكليات، و`EmploymentRelationship` تحفظ جهة التعيين وتواريخها.
+- `GradeHistory` و`StatusHistory` و`WorkArrangement` تحفظ الدرجة والكادر والانتداب/جزء الوقت **بحسب الفترة**.
+- `ApprovedFinancialFact` تحفظ قيم المراجع المعتمدة: أساسي مرجعي تاريخي، وعاء معاشات موثق، ثابت مالي وغير ذلك. ليس كل Fact بندًا نقديًا.
+- `FinancialComponent` اسم البند الداخلي، و`ComponentAssignment` إسناده إلى علاقة صرف. `ComponentAuditPolicy` تحدد هل يحسب مستقلاً أو يأخذ مبلغ المركزية.
+- `FinancialRuleVersion` يربط القاعدة بالبند والفئات وفترة السريان والمادة القانونية الأصلية؛ لا يُفعل قبل اعتماد المصدر.
+- `AdministrativeDecision` يحتفظ بتاريخ القرار والسريان الإداري والأثر المالي، ويحدد `EventEffect` الأثر لكل بند وفترة.
 
-## Additional fields intentionally omitted
-Record author/approver, `RecordedAt`, `SupersededAt`, organization scope, original documentary evidence, privacy classification, row version, and temporal uniqueness constraints are mandatory for physical implementation design, but not repeated on every Mermaid box.
+## قواعد مهمّة
+1. لا تجعل `PersonId` مساويًا للرقم القومي أو كود الجهة أو رقم الصرف.
+2. قد يكون ارتباط `PayeeRelationship` بعلاقة العمل اختياريًا؛ فصاحب المكافأة قد لا يكون موظفًا.
+3. انخفاض استحقاق جزء الوقت إلى 65% في مثال معين لا يعني انخفاض **وعاء المعاشات المعتمد**؛ الوعاء Fact مستقل عن الأجر النقدي.
+4. المرجع المؤرخ في 30 يونيو 2015 ليس استحقاقًا جديدًا ولا يضاف للإجمالي.
+5. بعض الصناديق والتأمينات مصدرها المركزية ولا تُحسب مجددًا؛ الرقابة الاستثنائية تحتاج إثباتًا.
+6. يمكن أن يحتوي `FinancialComponent` على تصنيف محاسبي وباب صرف مختلفين عن كود Oracle الخارجي.
+7. احتفظ بتواريخ السريان ووقت التسجيل وأسباب التصحيح، وأسماء من يعتمدون التعديلات؛ أضف الحقول في التصميم الفيزيائي بعد ADR.
+8. لا تفرض قاعدة منع التداخل الزمني على كل العلاقات دون دراسة نوعها؛ لبعض الوقائع أكثر من أثر متزامن مشروع.
+
+## مثال بيانات ومخرجات
+راجع [مثال ERD للبيانات الفعلية الافتراضية](../examples/01-ERD-INPUT-OUTPUT.md) الذي يوضح Person وعلاقة العمل والصرف والمبالغ المعتمدة والأسطر المستخرجة.

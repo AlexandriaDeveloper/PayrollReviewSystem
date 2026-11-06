@@ -1,41 +1,44 @@
-# Research provenance and gaps — 2026-11-06
+# فهرس الأبحاث والمصادر السابقة والفجوات — 6 نوفمبر 2026
 
-## What has informed the domain proposal
-Previous project discussion included a batch of ~40 Markdown uploads (39 distinct, one byte-identical duplicate), describing government and university salary laws, Oracle PDF extraction, payroll execution, civil service and university employment, public finance, tax, insurance and source inventories.
+## ما الذي استند إليه التصميم؟
+تضمنت مناقشات المشروع السابقة نحو **40 ملف Markdown مرفوعًا (39 ملفًا مختلفًا ونسخة مطابقة مكررة)**، عن القوانين المالية والجامعات والخدمة المدنية وضريبة المرتبات والتأمينات وقراءة Oracle والمراجع والمستندات.
 
-A separate inventory *reported* 287 primary source objects (PDF/Word/images/article), and a study status file identified 27 sources as fully reviewed. These are **research inventory assertions**, not current verification that every original is available here or legally up to date. Some related _review reading-note Markdown links were not in the uploaded group.
+ذكر فهرس بحثي سابق **287 عنصر مصدر أصلي** (PDF/Word/صور/مقالات)، وأشار سجل حالة دراسة إلى **27 مصدرًا تمت مراجعته بالكامل**. **هذه بيانات فهرسة من ملاحظات سابقة، وليست تحققًا حاليًا من توافر كل أصل أو صحة آخر تعديل قانوني.** بعض ملاحظات مراجعة الأصول لم تكن ضمن الملفات المرفوعة.
 
-No real primary legal library has been copied into this public repo. Every production legal rule needs independent source verification using docs/domain/LEGAL-AND-RULE-GOVERNANCE.md.
+لم تُنسخ المكتبة القانونية الأصلية السرية إلى GitHub. لا تُبنى قاعدة حساب إنتاجية إلا من النص الأصلي بعد الفحص؛ راجع [حوكمة القانون](../domain/LEGAL-AND-RULE-GOVERNANCE.md).
 
-## Highest priority background studies (Markdown names from earlier uploads, NOT repository files)
-| Category | Relevant study titles | Intended use |
+## الملفات البحثية السابقة حسب الموضوع
+الأسماء أدناه **عناوين مذكرات بحث مرفوعة سابقًا وليست ملفات موجودة بالضرورة في المستودع الحالي**.
+
+| الموضوع | مذكرات البحث الأصلية | الغرض |
 | --- | --- | --- |
-| Architecture/project | project-understanding-ar.md, oracle-parser-review-ar.md, payroll-execution-discovery-ar.md | Define audit boundaries, PDF risks and official document flow. |
-| University & civil service | university-service-discovery-ar.md, university-2006-compendium-discovery-ar.md, civil-service-matrix-discovery-ar.md, wage-policy-training-discovery-ar.md | Distinct legal regimes, employee conditions and job grades. |
-| Allowances and salary | wage-package-discovery-ar.md, special-allowances-history-discovery-ar.md, job-description-evaluation-discovery-ar.md | Rules require historic date and correct base/beneficiary. |
-| Tax & insurance | tax-integration-discovery-ar.md, social-insurance-148-discovery-ar.md, income-tax-regulation-discovery-ar.md | Withholding, insurance bases and versioning. |
-| Public financial control | financial-control-discovery-ar.md, public-finance-law-2022-2024-discovery-ar.md, finance-2021-circulars-discovery-ar.md | Internal review evidence and authority controls. |
-| HR and special cases | caoa-caseletters-discovery-ar.md, service-events-discovery-ar.md, discipline-discovery-ar.md, labor-and-service-boundaries-ar.md | Administrative facts, leave, sanction and scope exceptions. |
-| Inventory | source-reading-inventory-ar.md, source-study-status-ar.md, source-findings-continuation-ar.md | Trace original source and completeness. |
+| فهم المشروع والاستخراج | `project-understanding-ar.md`، `oracle-parser-review-ar.md`، `payroll-execution-discovery-ar.md` | حدود المراجعة ومخاطر PDF ودورة مستندات الصرف |
+| الجامعات والخدمة المدنية | `university-service-discovery-ar.md`، `university-2006-compendium-discovery-ar.md`، `civil-service-matrix-discovery-ar.md`، `wage-policy-training-discovery-ar.md` | اختلاف الكوادر وشروط الخدمة |
+| الرواتب والعلاوات | `wage-package-discovery-ar.md`، `special-allowances-history-discovery-ar.md`، `job-description-evaluation-discovery-ar.md` | المرجع الزمني وقواعد العلاوات |
+| الضرائب والتأمينات | `tax-integration-discovery-ar.md`، `social-insurance-148-discovery-ar.md`، `income-tax-regulation-discovery-ar.md` | الأوعية وتواريخ السريان |
+| الرقابة المالية | `financial-control-discovery-ar.md`، `public-finance-law-2022-2024-discovery-ar.md`، `finance-2021-circulars-discovery-ar.md` | الدليل المالي والصلاحيات |
+| شئون العاملين والحالات الخاصة | `caoa-caseletters-discovery-ar.md`، `service-events-discovery-ar.md`، `discipline-discovery-ar.md`، `labor-and-service-boundaries-ar.md` | القرارات والإجازات والجزاءات |
+| فهرس المصادر | `source-reading-inventory-ar.md`، `source-study-status-ar.md`، `source-findings-continuation-ar.md` | متابعة الأصول والفجوات |
 
-## Known unresolved source work
-- Confirm all source editions and any post-2024/2026 amendments (do not rely only on historical titles).
-- Review implementing regulation 2437/2021 for Law 148/2019 in full before shipping insurance calculations.
-- Validate local Alexandria University decisions and unit-level entitlements/authority.
-- Verify contradictory statements about historical allowance/inclusion and percentages from different summaries with originals.
-- Establish official Oracle code-to-component mapping per report type, period and institution.
-- Verify diverse real report fixtures with independent control totals, privately.
-- Determine which legal regimes apply to faculty, emeritus members, civil-service employees, contractors and external payees.
-- Confirm official payment/settlement data and retentions beyond Oracle printed statements.
-- Obtain missing _review notes or redo original-source verification when needed.
+## أهم النواقص
+- التحقق من إصدارات القوانين وما صدر من تعديلات حديثة، دون الاكتفاء بملخصات قديمة.
+- مراجعة اللائحة `2437/2021` للقانون `148/2019` من أصلها قبل أي محرك حساب تأمينات (مع بقاء هذا المحرك خارج النطاق المعتاد).
+- القرارات المحلية لجامعة الإسكندرية وصلاحيات الوحدة الحسابية.
+- التضارب بين مذكرات بعض العلاوات التاريخية والضم والنسب، والعودة للمواد الأصلية.
+- الربط الرسمي بين أكواد Oracle والبنود بحسب التقرير والفترة والجهة.
+- اختبارات خاصة على ملفات PDF متعددة وبضوابط مستقلة.
+- تحديد القواعد المنطبقة على أعضاء التدريس والمعيدين والإداريين والمتعاقدين وأصحاب المكافآت.
+- تحديد أدلة الدفع الحقيقية وبيانات التسويات وليس مجرد كشوف المرتب.
+- استكمال مذكرات `_review` المفقودة أو إعادة فحص مصادرها الأصلية.
 
-## Legacy repositories examined (not dependencies)
+## المستودعات السابقة — مراجع لا تبعيات تلقائية
 - https://github.com/AlexandriaDeveloper/Payroll-Auditor
 - https://github.com/AlexandriaDeveloper/Py-Ai-Moratabat
 - https://github.com/AlexandriaDeveloper/OraclePdfParser
 - https://github.com/AlexandriaDeveloper/PDF-EXTRACTOR
 - https://github.com/AlexandriaDeveloper/IProgram2
-No schema, algorithm, code or business rule is imported by reference.
 
-## Rule evidence register to be created in an authorized later phase
-For every source: source_id, original secure archive, issuing authority, title, version, publication/effect date, original page verified, review status, applicable employee categories, amendments/supersession, verified legal reviewer, related active/disabled rule IDs, unresolved conflicts.
+لا تنتقل قواعد الأعمال أو أكواد الاستحقاقات أو الجداول تلقائيًا بسبب وجود رابط مشروع سابق.
+
+## سجل مصادر مطلوب لاحقًا
+لكل مصدر: رقم داخلي، مكان أرشيف أصلي مؤمن، الجهة المصدرة، العنوان والإصدار، تاريخ النشر والسريان، الصفحة المتحقق منها، حالة الدراسة، الفئات المنطبقة، التعديل والإلغاء، المراجع المعتمد، القواعد المرتبطة، والتعارضات المفتوحة.

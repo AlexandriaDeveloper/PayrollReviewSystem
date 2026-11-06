@@ -1,45 +1,30 @@
----
-name: "Implementation task for Gemini"
-about: "Architect-authored scoped implementation with explicit Owner authorization"
-title: "TASK: "
-labels: []
-assignees: []
----
+# مهمة تنفيذ — {{عنوان المهمة}}
 
-## Status / Authorization
-DESIGN ONLY / APPROVED FOR IMPLEMENTATION (mark one, with Owner approval link)
+**الحالة:** مقترحة / معتمدة للتنفيذ / قيد العمل / مراجعة / مكتملة
+**المسؤول عن التنفيذ:** Gemini
+**المراجع المعماري:** ChatGPT
 
-## Business goal
-Describe financial-audit outcome and why needed.
+## المتطلب المعتمد
+رابط قرار المالك وADR والوثائق اللازمة.
 
-## Scope
-- Modules/files:
-- In scope:
-- Out of scope:
-- Explicit legal rules (with source verification):
+## نطاق التنفيذ
+المكونات والملفات التي يجوز تغييرها، وما يجب عدم تغييره.
 
-## Required reading
-- AGENTS.md, GEMINI.md
-- Relevant docs and ADRs:
-- Relevant reviewed source evidence (non-public location, NO sensitive content here):
+## السلوك الحالي
+ماذا يحدث فعلًا؟ وما الدليل من الكود أو الاختبارات؟
 
-## Acceptance scenarios
-1.
-2.
-3.
+## السلوك المطلوب
+المداخل والمخرجات والحالات العادية والاستثنائية، مع مراعاة عدم تغيير بيانات Oracle الأصلية.
 
-## Safety invariants
-- Original Oracle source immutable
-- No guessed salary/legal facts
-- Review-required for unresolved evidence
-- No production or external payroll mutations
+## معايير القبول
+- [ ] نجاح مسار الاستخدام الصحيح.
+- [ ] اختبار الأخطاء والبيانات المفقودة والمبالغ السالبة والتكرار.
+- [ ] التحقق من الهوية والفترة والبند والصلاحيات.
+- [ ] حفظ إثباتات المصدر وتاريخ التعديل.
+- [ ] عدم تسريب بيانات موظفين حقيقية أو أسرار.
 
-## Implementation & evidence
-- Proposed branch:
-- Tests required:
-- Screenshots with synthetic data only:
-- Migration/security notes:
+## طريقة الاختبار والإثبات
+أوامر التنفيذ والاختبارات، والنتائج المتوقعة، وأمثلة اصطناعية.
 
-## Architect review and Owner approval
-Architect specification reviewed:
-Owner implementation authorization:
+## المخاطر والاعتماد
+التأثير على البيانات الحالية والهجرات والأداء والخصوصية. لا يدمج Gemini كودًا دون مراجعة واعتماد مستقلين.

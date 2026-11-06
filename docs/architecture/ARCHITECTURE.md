@@ -1,41 +1,41 @@
-# Architecture baseline (proposal, no code yet)
+# البنية المعمارية العامة لنظام مراجعة الصرفيات
 
-**Diagrammed design:** [Architecture Blueprint v0.1](BLUEPRINT-V1.md) with ERD, UML class/sequence/state and deployment views. The blueprint is conceptual until the Owner approves specific physical schema and tech-stack ADRs.
+**الحالة: تصميم تصوري قابل للتطوير، وليس مشروعًا برمجيًا منشورًا.** راجع [المخطط الشامل](BLUEPRINT-V1.md) ومثال [المدخلات والمخرجات](../examples/01-ERD-INPUT-OUTPUT.md).
 
-## Mission and boundaries
-The system independently reconstructs lawful expected payroll for each person/employment/entitlement period from approved personnel, reference, event and legal evidence, then compares with central payroll source, records review decisions and monitors whether corrections/arrears are subsequently shown and paid.
+## الهدف وحدود النظام
+يعيد النظام بناء الاستحقاقات **المقترحة للمراجعة** اعتمادًا على بيانات الموظف المعتمدة والتاريخ الوظيفي والقرارات والقواعد القانونية الموثقة، ثم يقارنها بالمستندات المستوردة من Oracle، ويسجل الملاحظات والقرارات والتصحيحات والمتجمدات وأدلة التسوية.
 
-**Out of scope:** replacing GFMIS/Oracle, posting disbursements, altering central entitlement records, automatically recovering overpayments, and declaring legal violations without human review.
+لا يحل محل الاستحقاقات المركزية، ولا يعدّل قواعد Oracle، ولا يرسل أوامر صرف للبنك، ولا يسترد مبالغ تلقائيًا أو يجزم بالمخالفة القانونية دون سند ومراجعة.
 
-## Logical modules
-1. **Source Intake & Evidence**: archive original files and versions, extract, validate, page/row evidence; import intent and quality.
-2. **People & Employment**: person identities, multiple employment relations, grades, departments, appointments, historical status.
-3. **Financial Catalog & Facts**: canonical components, account mapping, 30-Jun-2015 and other historical reference bases, approved amounts.
-4. **Legal Rules & Administrative Events**: versioned eligibility/calculation rules, orders, promotions, leave, disciplinary, court rulings, effective date.
-5. **Expected Payroll Engine**: dependency-aware per-period calculations, snapshots, detailed traces.
-6. **Reconciliation & Review**: comparison, ambiguity management, reviewer adjustments, documents, findings, decisions.
-7. **Arrears & Follow-up**: retro entitlements, allocation of partial disbursements, over/under-payment tracking, no payment execution.
-8. **Centrally Calculated Items / Narrow Insurance Exception**: preserve pension and Owner-named funds as source-trusted amounts, not independently recalculated; review only evidenced part-time insured-wage base errors under verified applicable rules. Tax/remittance controls remain separate future scoping decisions.
-9. **Reports & Administration**: dashboard, audit workpapers, RBAC, immutable audit trail, exports.
+## الوحدات المنطقية
+1. **الاستيراد وأدلة المصدر:** حفظ PDF الأصلي وبصمته، والتصنيف والاستخراج وجودة القراءة ورقم الصفحة والسطر والخلية.
+2. **الهوية والعلاقات الوظيفية:** Person، والعمل في كلية الطب/الأسنان/الصيدلة، والحالات والدرجات التاريخية.
+3. **دليل البنود والوقائع المالية:** البنود الداخلية، قيمها المعتمدة، وأساسي 30 يونيو 2015 كمرجع وليس مستحقًا نقديًا.
+4. **القواعد والقرارات:** أحكام قانونية بإصدارات موثقة، والترقيات والإجازات والإعارات والقرارات ذات التواريخ المختلفة.
+5. **محرك الحساب المقترح:** حساب مستقل لكل بند وفترة مع سجل المدخلات والقاعدة المستعملة.
+6. **المطابقة والمراجعة:** الفروق، ربط البنود والأسماء غير الواضحة، وإجراءات المراجع والاعتماد.
+7. **المتجمدات والتسويات:** حساب الفروق بأصل كل شهر وبند، والربط بصرف لاحق عند ثبوت الدليل.
+8. **البنود المحسوبة مركزيًا:** قبول أرقام التأمينات والصناديق المحددة دون إعادة حساب عام؛ رقابة وعاء المعاش في حالة جزء الوقت فقط وفق دليل وسند.
+9. **الإدارة والتقارير:** لوحة مراجعين وصلاحيات ومجموعات عمل، وسجل تدقيق، وتصدير Excel عربي RTL.
 
-These are **logical boundaries**, not a mandatory microservice count or DB schema list.
+**هذه حدود منطقية، وليست عددًا إلزاميًا من الخدمات أو قواعد البيانات.**
 
-## Ports / anti-corruption layers
-Import adapters for Oracle payslips, cover sheets, payment sheets, spreadsheets and future authorized sources. Translators produce canonical **source facts** with provenance, never internal approved facts. A rules engine may consume approved source facts only after identity and evidence gates.
+## اتجاه البيانات
+`ملف Oracle` ← حفظ الأصل ← تحديد النوع والشهر ← استخراج الأسطر والتواريخ ← فحص الجودة ← مراجعة ربط المستفيد والبند ← مقارنة أرقام المصدر بالاستحقاقات المستقلة ← ملاحظة وقرار ← تصحيح رسمي أو تتبع تسوية.
 
-## Processing flow
-Source file -> hash/archive -> classify -> parse -> validate report type/month/identity/gross/deductions/net -> reviewer intake decisions -> canonical source observations -> independently calculate expected snapshot -> compare -> finding -> reviewer decision -> official correction or follow-up -> evidence-based settlement/closure.
+لا يحق للمستورد تعديل `ApprovedFinancialFact`؛ النص والرقم الخارجيان يظلان أدلة منفصلة. الربط بين الأسماء والأرقام المقروءة وبين البند الداخلي يتم بقرار قابل للتدقيق.
 
-At each step preserve originals and trace transformations; do not make one-time import the canonical truth for legal grade or salary.
+## تخزين البيانات المقترح
+قاعدة علائقية للحالات والوقائع التاريخية والحسابات والإجراءات؛ وأرشيف آمن منفصل لملفات PDF الأصلية؛ وحفظ نسخ الاعتماد وعدم مسح النسخة القديمة. `SQL Server` مقترح وليس معتمدًا نهائيًا.
 
-## Storage guidance
-Proposed SQL Server relational transactional core with separate object/archive storage for originals. Append-only source and approval journals, versioned financial facts, employer/payment evidence and reproducible calculation snapshots. No cross-source update to originals.
+## ضوابط الحساب
+- لا تعبيرات برمجية يكتبها المستخدم وتُنفّذ مباشرة.
+- استخدم مشغلات قواعد آمنة، وتحقق الأهلية والفترة والوعاء والتقريب والتبعيات والدورات الحسابية.
+- لا تفترض قيمة مفقودة أو إصدار قانون أو مرجع تاريخي.
+- النظام **يقترح** أثر الترقيات والعلاوات، ولا ينقل النتيجة إلى مرجع الموظف إلا بإجراء مراجعة معتمد.
 
-## Calculation engine boundary
-No arbitrary executable expressions from users or AI. Typed, validated operators with explicit eligibility, reference base, date basis, rounding and safe ordering. Detect dependency cycles and missing inputs.
+## أولويات الجودة
+سلامة الأرقام والإثبات أعلى من سهولة الاستخدام، والعربية RTL أساسية، و`decimal` واجب للحسابات، وتشغيل داخلي آمن مع نسخ احتياطية وصلاحيات. لا يعتمد نظام حي على نجاح ملف PDF واحد فقط.
 
-## Quality attributes
-Auditability > convenience; correctness > silent fallback; Arabic RTL first; availability without external Oracle runtime; deterministic financial arithmetic; secure on-prem/private deployment preference; privacy by default; testable before any salary data is processed.
-
-## Candidate technologies (NOT approved stack)
-.NET/ASP.NET Core + Angular RTL + SQL Server, modular monolith. Keep final selection and version in ADR and a scoped Issue before coding. Existing legacy implementation is not a dependency.
+## التقنية المقترحة — غير معتمدة
+`ASP.NET Core/.NET` مع `Angular RTL` و`SQL Server` داخل `Modular Monolith`. يُحسم ذلك في ADR قبل التنفيذ. لا يوجد اعتماد تلقائي على مشاريع قديمة.

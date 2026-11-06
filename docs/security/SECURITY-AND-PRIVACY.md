@@ -1,32 +1,41 @@
-# Payroll audit confidentiality and security baseline
+# سرية بيانات المرتبات وضوابط أمان نظام المراجعة
 
-## Public repository notice
-This repo is PUBLIC as of initial inspection. Do not commit actual:
-- National IDs, employee names linked to pay, employment codes, passport/bank/insurance numbers, salary PDFs, XLSX exports or personal screenshots.
-- User's legal library if confidential or restricted, database backups, SQL dumps, debug logs or example outputs containing confidential employee data.
-- .env, appsettings secrets, tokens, passwords, private endpoints, production config, private signing keys.
-Use fictional synthetically generated fixtures and anonymized general designs.
+## تنبيه المستودع
+كان هذا المستودع **Public** عند التحقق من حالته أولًا. ممنوع رفع:
+- الأرقام القومية أو أسماء موظفين مرتبطة برواتبهم أو أرقام الصرف والبنوك والتأمينات والجوازات.
+- PDF الرواتب الفعلية أو تصدير Excel الحقيقي أو الصور التي تكشف بيانات شخصية.
+- نسخ قواعد البيانات وSQL Dump وسجلات التصحيح والملفات القانونية الخاصة أو المحمية.
+- `.env` أو أسرار `appsettings` أو Tokens أو كلمات المرور أو المفاتيح والمنافذ الداخلية الخاصة.
 
-## Authorization boundaries
-- Source intake: upload/read and validate only.
-- Domain/legal approver: approve rule version after actual source verification.
-- Reviewer: inspect differences and enter separate approved overlay; no central payroll edit.
-- Senior reviewer: approve final review findings under defined policy.
-- Administrator: configure users/system, not necessarily entitled to approve money.
-- Owner-authorized deployment operator: distinct from architect review.
-Scope permissions by organization, role and task where practical.
+استخدم أمثلة مختلقة بوضوح، مثل ملفات `docs/examples/`، دون محاكاة بيانات موظف فعلي.
 
-## Technical controls for later implementation
-Validate file types/signatures, size/page limits and parser resource limits; isolate untrusted PDF processing. Encrypt protected data at rest and in transit. Minimize/segment personal data; limit export and mask identifiers. Log meaningful access and changes without storing full PII payload in logs. Retain and version originals, hash to detect accidental changes, secure backups and access logs, recovery procedures, audit retention policy and safe deletion/redaction under governance. Consider formal threat model before production.
+## حدود الصلاحيات
+- مسؤول الاستيراد: رفع المصدر والتحقق منه، دون اعتماد القيم المالية.
+- مسؤول القواعد القانونية: لا يعتمد إصدارًا إلا بعد مراجعة النص الأصلي.
+- المراجع المالي: يطلع على الموظفين المخصصين له ويثبت الفرق والقرار المستقل، لا يغير Oracle.
+- المراجع الأعلى/المعتمد: يعتمد النتائج وفق مصفوفة سلطات مقررة.
+- مسؤول النظام: يدير الحسابات والإعدادات، ولا يمنح نفسه تلقائيًا حق اعتماد المال.
+- مسؤول النشر: دوره منفصل عن اعتماد النتائج والمراجعة.
 
-## High-risk anti-patterns
-- Central imported PDF overwrites validated master record or tribunal/court ruling fact.
-- Source amounts change after reviewer finds mismatch.
-- Generic admin can purge audit events, evidence or completed runs.
-- Blind formula execution from untrusted source.
-- Exposing local API publicly without auth or TLS.
-- Debug file with employee IDs/financial details committed to GitHub.
-- Auto employee repayment or salary changes initiated by reviewer without official delegated authority.
+تُقيَّد الصلاحيات حسب الوحدة ونوع الصرف ومجموعة الموظفين ودور المستخدم والدورة، من داخل API وليس الواجهة فقط.
 
-## Security review of Gemini PRs
-Before merge check authentication and authorization at API (not only UI), data minimization, audit attribution, privacy tests and no secret leaks. Production secrets must be supplied outside Git, and any leak requires rotation and incident review.
+## ضوابط مطلوبة في التنفيذ
+- التحقق من MIME وتوقيع PDF والحجم وعدد الصفحات وحدود الوقت والذاكرة، وعزل معالجة ملفات غير موثوقة.
+- تشفير نقل البيانات عبر HTTPS وتشفير المحتوى المحمي وقت التخزين.
+- تقليل بيانات الهوية وإخفاؤها عند العرض والتصدير وإعطاء صلاحيات أقل قدر ممكن.
+- سجل وصول وتعديل واضح **دون إدراج مرتبات وأرقام قومية كاملة في السجلات**.
+- نسخ أصل PDF مع البصمة والإصدارات وسياسة الاحتفاظ، وتسجيل محاولات الوصول، ونسخ احتياطي مشفر قابل للاستعادة.
+- تصحيح الأخطاء في نسخ جديدة مع الاحتفاظ بما يثبت المصدر والاعتماد السابق.
+- مراجعة Threat Model وخطر تسرب البيانات أو تغيير المستندات قبل الاستخدام الفعلي.
+
+## ممارسات ممنوعة
+- استبدال البيانات المعتمدة بقيمة من PDF بشكل تلقائي.
+- تغيير قيمة المصدر بعد اكتشاف فرق أو مسح سجل رقابي.
+- صلاحية عامة لمسؤول التطبيق لحذف اعتماد أو دليل أصلي بصمت.
+- تنفيذ صيغ مجهولة قادمة من PDF أو AI ككود.
+- فتح API المحلي على الإنترنت دون توثيق وتشفير.
+- رفع ملفات Debug تحتوي على بيانات صرفية حقيقية.
+- طلب استرداد من الموظف أو خصم جديد دون السلطة والإجراء القانوني المختص.
+
+## فحص Pull Requests الخاصة بـGemini
+راجع التوثيق والصلاحيات في **الخادم** واختبارات الخصوصية وعمليات تصدير موظف واحد، وتأكد من عدم تسريب معلومات غير مختارة. أسرار الإنتاج من خارج Git، وتسرب أي سر يستلزم إيقافه/تدويره وفحص الأثر.

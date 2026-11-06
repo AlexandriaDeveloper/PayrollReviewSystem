@@ -1,40 +1,26 @@
-# Audit-grade engineering review gates
+# بوابات مراجعة هندسية مناسبة لنظام رقابي مالي
 
-## Gate 0 — Authority
-- Correct repository, branch, Issue, explicit implementation authorization.
-- Confirm applicable ADRs, unresolved domain questions, legal-source verification.
-- No implementation based solely on a design document.
+## البوابة 0 — الصلاحية
+تأكد من المستودع والفرع وIssue والتصريح البرمجي، وقرارات ADR والأسئلة القانونية المفتوحة. ملف التصميم لا يجيز التنفيذ بمفرده.
 
-## Gate 1 — Data trust
-- Original document checksum, type, period, import timestamp, version, source page/row anchors.
-- Unverified parsing is visible; no manufactured identifiers or zeros.
-- External source cannot silently overwrite canonical employment/financial data.
+## البوابة 1 — الثقة بالمصدر
+احتفظ ببصمة المستند ونوعه وشهره وتاريخ استيراده وإصداره ومكان كل قيمة. القراءة غير المؤكدة تظهر بوضوح؛ لا تختلق رقمًا أو صفرًا. المصدر الخارجي لا يحدّث الملف المالي المعتمد تلقائيًا.
 
-## Gate 2 — Accounting
-- Positive/negative amounts preserved as printed, decimals not floats.
-- Separate cash earning, deduction, employer contribution, reference base, calculated total, adjustment.
-- Reconcile statement gross, deductions, net, contributions only under applicable report-specific equation.
-- Cross-report same employee/period/bank group appropriately verified, not assumed by list position.
-- Partial and duplicate processing idempotent with exact provenance.
+## البوابة 2 — السلامة المحاسبية
+- احتفظ بالمبالغ الموجبة والسالبة، واستخدم `decimal`.
+- افصل الاستحقاق النقدي والاستقطاع وحصة الجهة والوعاء المرجعي والإجمالي والتسوية.
+- طابق إجمالي الاستحقاقات والاستقطاعات والصافي والحصص **بالمعادلة الصحيحة لكل نوع تقرير**.
+- طابق الموظف والفترة والمجموعة البنكية عبر المستندات دون الاعتماد على ترتيب الصفوف.
+- الاستيراد المتكرر لا يكرر المعاملة ولا يخفي المصدر أو تصحيحه.
 
-## Gate 3 — Legal & temporal
-- Correct legal regime, employment relationship, grade and entitlement date.
-- Law/rule effective dates, independent revision/recording dates, clear decision/eligibility date.
-- Retroactive calculation by component and underlying month with no duplicate entitlement.
-- Explicit data insufficiency where legal applicability/rate/source not proven.
+## البوابة 3 — القانون والتاريخ
+تحقق من نظام الخدمة والدرجة والقرار وتاريخ الأثر، والقواعد السارية وقت الاستحقاق. احسب المتجمد حسب البند والشهر الأصلي دون تكرار، وارفع نقص السند القانوني للمراجعة.
 
-## Gate 4 — Reviewer control
-- Distinct expected/source/reviewed/corrected/paid values.
-- ReviewRequired is blocking where applicable; unknown payment cannot be called unpaid/paid.
-- Adjustments and settled amounts are separate ledger events; immutable history.
-- No payroll disbursement, payroll edit or automatic recovery from the review app.
+## البوابة 4 — ضبط المراجعين
+افصل مبالغ `Source` و`Expected` و`Reviewed` و`Corrected` و`Paid`. ما يحتاج مراجعة يمنع الاعتماد بحسب الضوابط، وعدم ثبوت الصرف لا يعني ثبوت عدمه. حافظ على تاريخ القرارات والتسويات دون محوه. البرنامج لا يصرف ولا يسترد ولا يعدل Oracle.
 
-## Gate 5 — Privacy and security
-- No real financial records or identity numbers in git, logs, screenshots or synthetic fixtures.
-- RBAC and separation of duties for rules, review, evidence, correction and administration.
-- Integrity/retention of sources, decisions and audit logs.
+## البوابة 5 — الخصوصية
+لا بيانات حقيقية في المستودع أو السجلات والصور. تحقق من الصلاحيات والفصل بين المقترح والمعتمد، ومن سلامة أرشيف الملفات وسجل التدقيق.
 
-## Gate 6 — Delivery
-- Tests for boundary conditions, promotions, 2015 reference, arrears, duplicate imports, missing data and wrong source period.
-- PR review includes actual diff + clear test evidence.
-- Owner approval for breaking schema, data migrations, production access and merging.
+## البوابة 6 — التسليم
+اختبارات للتواريخ والترقيات والمرجع التاريخي والمتجمدات وتكرار الملفات ونقص البيانات واختلاف الأشهر؛ مراجعة diff والاختبارات الفعلية؛ تصريح المالك للهجرات والكود والنشر.

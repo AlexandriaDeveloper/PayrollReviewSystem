@@ -1,16 +1,16 @@
-# ADR-001 — Separate review system, non-mutating central source
+# ADR-001 — فصل نظام المراجعة عن نظام الصرف المركزي
 
-- **Status:** DESIGN RECORD — Owner confirmed independent repo and review-only goal; implementation details pending.
-- **Date:** 2026-11-06
+**الحالة:** قرار متفق عليه من ناحية استقلال المستودع وهدف المراجعة، والتفاصيل التقنية تتطلب اعتمادًا مستقلًا.
+**التاريخ:** 6 نوفمبر 2026.
 
-## Context
-Government central entitlements and Oracle/GFMIS provide observed payroll records. Review must independently determine expected amounts and preserve external evidence, rather than recalculate from a payroll system's own potentially erroneous figures.
+## الخلفية
+Oracle/GFMIS يوفر المبالغ الظاهرة في الصرفيات، وقد تحتوي أخطاء. لا يصح أن يكون المصدر الذي سنراجعه هو المرجع الوحيد لتحديد المبلغ الصحيح. يجب أن تُحسب الاستحقاقات المقترحة من وقائع وقواعد ومستندات معتمدة بشكل مستقل.
 
-## Decision boundary
-This repository builds a separate independent payroll review application. It must not alter central payroll, perform disbursement, issue automatic employee recovery or replace payroll provider decisions. Imported source is read-only and archived with provenance; reviewer adjustment is separate from original. Financial truth is not inferred merely because a document reconciles arithmetically.
+## القرار
+يبنى تطبيق مستقل لمراجعة الصرفيات. لا يغير سجلات المركزية، ولا ينفذ دفعًا أو استردادًا أو استقطاعًا تصحيحيًا تلقائيًا. تحفظ ملفات المصدر مع إثبات أصلها، وتبقى تعديلات المراجع قرارات مستقلة عن المبلغ المستورد. تطابق الإجمالي وحده ليس إثباتًا لصحة كل بند أو قانونيته.
 
-## Consequences
-Requires independent employee histories, legal/rule catalogue and evidence for actual payment. Complex date and audit needs are intentional. Existing legacy repositories serve as evidence and engineering research only; no direct migration or reuse is authorized by this ADR.
+## النتائج
+نحتاج تاريخًا وظيفيًا وماليًا وقوانين متحققة وإثباتات تسوية وسجل تعديلات، رغم زيادة التعقيد. المشاريع القديمة مواد بحث وخبرة، لا أمرًا بنقل قاعدة بيانات أو كود دون دراسة.
 
-## Implementation
-Only following approved Issues/stack decisions. Not a code instruction by itself.
+## التنفيذ
+يتطلب Issues معتمدة وتقنية مقررة؛ هذا ADR وحده لا يأذن بالتنفيذ.

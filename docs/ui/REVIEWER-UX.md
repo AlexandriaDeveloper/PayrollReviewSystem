@@ -1,25 +1,31 @@
-# Arabic RTL audit workbench — proposed screens
+# تصميم واجهات المراجع المالي بالعربية من اليمين إلى اليسار
 
-## UX principles
-Native Arabic RTL, readable mixed Arabic/English accounting identifiers, precise amounts, right-aligned Arabic and clear monetary column alignment. Never use color alone to convey risk, and do not present preliminary differences as proven losses.
+## المبادئ
+واجهة عربية `RTL` أصلية، واتجاه مناسب عند تداخل أكواد إنجليزية وأرقام، وإظهار المبالغ بدقة ووضوح. **لا تستخدم اللون وحده** لتحديد المخاطرة، ولا تعرض فروقًا مبدئية باعتبارها خسائر مؤكدة.
 
-## Main navigation
-Dashboard; Source Import; Payroll Runs; Review Workbench; Employee File; Legal Sources & Rule Versions; Retro/Settlements Follow-up; Tax/Insurance Review; Workpapers & Reports; Settings and Audit Log.
+## القائمة الرئيسية المقترحة
+لوحة المتابعة، استيراد المستندات، دورات المرتبات، شاشة المراجعة، ملف المستفيد، القرارات والقوانين والإصدارات، متابعة الأثر الرجعي والتسويات، رقابة التأمينات الاستثنائية، أوراق المراجعة والتقارير، الصلاحيات وسجل التدقيق.
 
-## Dashboard
-Summary of reviewed employees, covered payroll groups, open findings, incomplete documents, proposed differences versus verified over/underpayments, correction turnaround time. Numbers must always state the filter period and evidence status.
+## لوحة المتابعة
+عدد المستفيدين الذين تمت مراجعتهم في فترة محددة، والمجموعات التي شملتها المراجعة، والملاحظات المفتوحة، ونقص المستندات، والفروق **المقترحة** مقابل المبالغ التي ثبتت صحتها أو صرفها، ووقت متابعة طلبات التصحيح. كل إحصائية توضح الشهر وحالة الإثبات.
 
-## Employee workbench
-Top: person/employee, employment/legal classification, date-scoped grade, originating organization, payroll period, source file status.
-Middle: side-by-side SourceAmount / ExpectedAmount / ReviewedAmount / OfficialCorrectionAmount and variance, by component with null explicitly distinguished from 0.
-Bottom: source PDF page viewer + rule/source article + decision/evidence tab + change history; actions Request Evidence, Record Reviewed Value, Flag Central Error, Request Correction, Defer, Refer for Adjustment, Verify Resolution.
-An action is not equal to payment approval.
+## شاشة الموظف
+**أعلى الصفحة:** اسم الشخص وعلاقة العمل/الصرف والكادر والدرجة في شهر الاستحقاق والكلية والمجموعة وحالة المصدر.
 
-## Historical/retro review
-Timeline of grade and rule changes; split financial impact by original entitlement month and financial component; ledger of reported versus independently proved payments; partial/unallocated amounts; warning on future expected dates without proof.
+**وسط الصفحة:** لكل سطر؛ الاسم الخام من Oracle والاسم المفسر، الكود، باب الصرف، الجانب، `SourceAmount` و`ExpectedAmount` و`ReviewedAmount` و`OfficialCorrectionAmount`، والفرق. يجب إظهار **غير متاح** بدل صفر عندما يكون المبلغ مجهولًا.
 
-## Import quality view
-Report type, period, employee counts, per-line and aggregate totals, bank-group reconciliation, unverified/unknown rows. Importer cannot auto-silence warnings.
+**أسفل الصفحة:** PDF الأصلي مفتوح على الصفحة والسطر، والمستند القانوني وأثر الحساب والقرار وسجل التعديلات. الإجراءات: طلب مستند، تسجيل مبلغ مراجعة، إثبات خطأ مركزي، طلب تصحيح، تأجيل، إحالة للتسوية، إثبات حل الملاحظة.
 
-## Visual states
-Unverified, ParsingFailed, ReviewRequired, SourceMatched, DifferenceDetected, ReviewedWithException, CorrectionRequested, OfficialCorrectionReceived, ReportedInPayroll, PaidVerified, PartiallySettled, ClosedWithEvidence. Never equate one of these states with another.
+الضغط على «إنهاء المراجعة» لا يعني تنفيذ الدفع أو إيقافه.
+
+## شاشة التاريخ والمتجمدات
+خط زمني للدرجة والعلاوة والقرار، وتوزيع أثر كل قرار على الشهر الأصلي والبند، والمبالغ التي ظهرت في كشوف لاحقة، والمدفوعات المثبتة والمبالغ غير الموزعة، وتحذير عند غياب دليل التسوية.
+
+## شاشة جودة الاستيراد
+نوع التقرير والشهر وعدد الصفحات والمستفيدين، ومجموع الاستحقاقات والاستقطاعات والصافي والمجموعات البنكية، والحالات غير المعروفة والأكواد المتكررة والأسماء العربية المعكوسة. لا تختفي التحذيرات تلقائيًا بسبب تطابق صافي الصرفية.
+
+## حالات مرئية مستقلة
+`Unverified` غير متحقق؛ `ParsingFailed` فشل قراءة؛ `ReviewRequired` يحتاج مراجعة؛ `SourceMatched` تطابق مصدر؛ `DifferenceDetected` فرق؛ `ReviewedWithException` قبول باستثناء؛ `CorrectionRequested` تصحيح مطلوب؛ `OfficialCorrectionReceived` وصل مصدر مصحح؛ `ReportedInPayroll` ظهر بكشف؛ `PaidVerified` تسوية مثبتة؛ `PartiallySettled` تسوية جزئية؛ `ClosedWithEvidence` مغلق بدليل. **لا تساوي حالة بأخرى.**
+
+## مثال للشكل المعروض
+راجع [مثال جدول مستفيد مع البنود والنتائج](../examples/01-ERD-INPUT-OUTPUT.md) و[مثال إعادة فتح الاعتماد في UML](../examples/02-UML-REVIEW-EXAMPLES.md).

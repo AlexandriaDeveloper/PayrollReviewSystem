@@ -1,58 +1,47 @@
-# Decisions and open questions
+# سجل القرارات والمسائل المفتوحة
 
-## Confirmed by Owner interaction
-| ID | Decision |
+## قرارات مؤكدة من مالك المشروع
+
+| المعرف | القرار |
 | --- | --- |
-| D-001 | Project repository is **AlexandriaDeveloper/PayrollReviewSystem**, separate from legacy repositories. |
-| D-002 | System targets **independent review of government payroll/central entitlements**, not payroll disbursement. |
-| D-003 | ChatGPT acts as system architect and code reviewer; Gemini is the coding implementer; GitHub is the communication channel. |
-| D-004 | Domain documentation and explicit agent instructions must be durable Markdown in repository. |
-| D-005 | Document-only architecture baseline is needed before source-code work; new implementation has not been authorized by this PR. |
+| D-001 | المستودع المستقل هو `AlexandriaDeveloper/PayrollReviewSystem` ولا يندمج تلقائيًا مع المشاريع القديمة. |
+| D-002 | الهدف مراجعة الصرفيات والاستحقاقات المركزية بصورة مستقلة، وليس تنفيذ الدفع. |
+| D-003 | ChatGPT مصمم ومراجع، وGemini مطور منفذ، والتواصل الدائم عبر GitHub. |
+| D-004 | حفظ المعرفة والمتطلبات وتعليمات أدوات الذكاء الاصطناعي في Markdown داخل المستودع. |
+| D-005 | توثيق التصميم أولًا، والموافقة على التوثيق لا تساوي إذن إنشاء كود. |
+| D-006 | الوحدة الحسابية للمجمع الطبي، كود `30200105`، وتضم الطب والأسنان والصيدلة. |
+| D-007 | يشمل الموظفين وأعضاء هيئة التدريس والمتعاقدين ومستحقي المكافآت. |
+| D-008 | المراجعة تسبق اعتماد الصرف غالبًا، وقد تصل أحداث طارئة تستلزم تعديل المراجعة بعد اعتمادها. |
+| D-009 | المراجع يوفر البيانات المالية الأصلية المعتمدة؛ Oracle لا يستبدلها تلقائيًا. |
+| D-010 | البرنامج **يقترح** أثر القرارات والعلاوات، والمراجع يقبل أو يعدل مع إثبات السبب. |
+| D-011 | يمكن للمراجع قبول تجميع بنود تحت نفس باب الصرف **بضوابط ومبررات**، وليس باعتباره تطابقًا تفصيليًا تلقائيًا. |
+| D-012 | المعاشات والتأمينات تُقبل عمومًا من المركزية دون إعادة حساب؛ حالة جزء الوقت تحتاج رقابة محددة على الوعاء. |
+| D-013 | عدة مراجعين، وتوزيع مجموعات المرتب بحسب الدورة، وحق المخولين في الصرفيات الأخرى مع سجل تعديلات كامل. |
+| D-014 | التشغيل على شبكة داخلية محمية، وينوي المالك تحويل المستودع إلى Private؛ لا تُخزن به بيانات الموظفين. |
+| D-015 | صندوق دعم المعاقين وصندوق الشهداء من البنود التي تؤخذ قيمتها من المركزية دون إعادة حساب، مع سلامة استخراجها. |
+| D-016 | ChatGPT مفوض بدمج ملفات Markdown فقط بعد مراجعتها دون إذن متكرر؛ لا يشمل الكود. |
 
-## Strong architecture recommendations — pending approval as specific ADRs
-| ID | Proposal | Why |
+## اقتراحات تصميم تحتاج اعتمادًا رسميًا
+
+| المعرف | المقترح | السبب |
 | --- | --- | --- |
-| P-001 | .NET/ASP.NET Core, Angular RTL, SQL Server, modular monolith | Consistent existing skill set and auditable modular boundaries; exact versions open. |
-| P-002 | Temporal relational schema and immutable source/archive | Repeatable review at old entitlement dates. |
-| P-003 | Independent rule engine with approved versions and calculation traces | Legal/rule applicability is not fixed. |
-| P-004 | Adapter-based Oracle PDF import with strict verification | Existing extraction tools handle different PDF layouts. |
-| P-005 | Per-component/period arrears ledger and paid-allocation ledger | Delayed or partial settlement and no double counting. |
-| P-006 | Role-separated reviewer and rule approver | Financial segregation of duties. |
-| P-007 | Blueprint v0.1 split ERD, UML classes/sequences, internal deployment and schema constraints | Formalize approved relationships before any Gemini database migration; diagrams are proposals. |
+| P-001 | `.NET / ASP.NET Core + Angular RTL + SQL Server` بنظام `Modular Monolith` | مناسب لتطوير محلي قابل للمراجعة؛ الإصدار والتقنية لم يُعتمدا بعد. |
+| P-002 | بيانات تاريخية بفترات سريان وحفظ أرشيف المصادر | إعادة مراجعة فترات قديمة دون فقد أصلها. |
+| P-003 | محرك قواعد معتمد بالإصدارات وآثار حساب تفصيلية | منع تطبيق قوانين أو تواريخ غير صحيحة. |
+| P-004 | قارئ Oracle يعتمد Adapter قابلًا للاستبدال مع فحص صارم | اختلاف أشكال PDF. |
+| P-005 | سجل متجمدات وربط المدفوعات ببنود وفترات الاستحقاق | منع الازدواج وتحديد الرصيد الحقيقي. |
+| P-006 | فصل صلاحيات المراجع ومعتمد القاعدة المالية | منع تعارض المصالح. |
+| P-007 | مخطط Blueprint v0.1 بثلاثة ERD وUML ومخطط تشغيل | مراجعة العلاقات قبل الهجرات البرمجية. |
 
-## Business/legal questions — cannot be silently inferred
-- Which college/administrative entities and employee categories are in MVP?
-- Which Oracle report layouts and official form numbers belong to actual input types?
-- Which authoritative laws/decisions/rates apply per employee class and period?
-- What accounting/finance criteria allow release with unresolved findings, and who may approve exceptions?
-- How to confirm actual bank/payment settlement versus only Payroll sheet inclusion?
-- Which official rules govern backdated promotion effects on each item, tax and social-insurance correction?
-- What is the rule-specific rounding/proration and prior-year policy?
-- Source of employee master data, identity reconciliation procedure and approved encryption/retention controls?
-- Which user roles and environment/hosting controls are required?
+## أسئلة لم تحسم بعد
+- أشكال تقارير Oracle المعتمدة وأرقام النماذج الرسمية.
+- النصوص والقواعد السارية على كل كادر وزمن.
+- من يوافق على الاعتماد مع ملاحظة، ومن يعيد فتح اعتماد سابق بعد حدث طارئ؟
+- دليل إثبات التسوية البنكية الفعلية مقابل مجرد ظهور المبلغ في كشف الصرف.
+- التقريب واحتساب جزء الشهر وفترات الضرائب والتأمينات بأحكامها الموثقة.
+- مرجع الهوية الموثوقة، وسياسات تشفير الملفات والاحتفاظ بها.
+- تفاصيل التوثيق والصلاحيات على الشبكة الداخلية ومجموعات المراجعين.
+- أكواد باب الصرف الرسمية وشروط قبول تجميع البنود.
+- كيفية الحصول على الوعاء الذي استخدمته المركزية لحساب الاشتراكات عند العمل جزءًا من الوقت.
 
-Do not turn a proposal into an approved business decision through implementation alone. Document Owner approval with Issue/ADR links.
-
-## Owner-validated operational scope (2026-11-06)
-| ID | Decision |
-| --- | --- |
-| D-006 | Accounting unit: Alexandria Medical Complex; institutional code **30200105**; faculties Medicine, Dentistry and Pharmacy. |
-| D-007 | Coverage includes staff, university teaching faculty, contracted workers and honorarium/reward payees. |
-| D-008 | Review ordinarily occurs before payroll approval; documented urgent events can require post-approval review amendments. |
-| D-009 | Reviewers provide approved employee financial reference data; Oracle source never silently substitutes for these. |
-| D-010 | Financial-event engine proposes component adjustments; reviewer accepts/modifies/rejects proposals with evidence. |
-| D-011 | Aggregating multiple entitlements into one central line can be reviewer-accepted as a documented distribution exception when within one expenditure chapter **subject to other required controls**; do not auto-approve. |
-| D-012 | Generic central pension/insurance calculations are outside independent approval scope; a **part-time full-base vs reduced-cash-base** review exception is required. |
-| D-013 | Multiple reviewers, salary group assignments per cycle and shared authorization for other payrolls; every change attributed and historic. |
-| D-014 | System to run on internal network with protected access; Owner intends repository private. |
-| D-015 | Amounts for **صندوق دعم المعاقين** and **صندوق الشهداء** received from central entitlements are accepted as centrally calculated and **not recomputed** by the reviewer; still validate extraction and aggregates. Exact account mappings pending. |
-| D-016 | Owner explicitly delegated **Markdown-only PR merge authority** to ChatGPT architect without repeated confirmation, subject to documentation review and protection of sensitive data. No code/config/deployment changes authorized. |
-
-**Source:** owner's direct workflow clarifications; not a determination of what Egyptian law authorizes for every employee class. See ../domain/PART-TIME-INSURANCE-CONTROL.md and OWNER-OPERATING-REQUIREMENTS.md.
-
-### Remaining clarifications (narrowed by Owner input)
-- Confirm specific regulatory source/cadre coverage for full insured wage treatment during part-time work.
-- Confirm what source reveals the centrally assessed insurance wage base (not simply the contribution amount).
-- Confirm who can approve emergency amendment/reopening after review approval.
-- Confirm all relevant باب الصرف codes and constraints for accepting aggregated component entries.
-- Confirm group assignment authority and concurrent-work locking policy.
+**الحسم يتطلب مستندًا أصليًا أو قرارًا من المالك حسب طبيعة السؤال، ولا يجوز افتراض الإجابة في الكود.**

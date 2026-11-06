@@ -1,52 +1,47 @@
-# Conceptual data model — source of truth and time
+# نموذج البيانات والمفاهيم الأساسية
 
-**Design proposal; not an executable migration.** See visual [Core ERD](ERD-CORE.md), [Source ERD](ERD-IMPORT-AND-AUDIT.md), [Audit/Retro ERD](ERD-REVIEW-AND-RETRO.md) and [Blueprint glossary](BLUEPRINT-V1.md). A canonical identity is distinct from employment, payee, and one or more payment relationships.
+> **مقترح تصوري وليس Migration.** الرسوم: [الهوية والوقائع](ERD-CORE.md)، [مصادر Oracle](ERD-IMPORT-AND-AUDIT.md)، [المراجعة والأثر الرجعي](ERD-REVIEW-AND-RETRO.md).
 
-## Entity terminology used in diagrams
-- `EmploymentRelationship` is the narrow Employment/Employee relation originally described here. `Person` can have multiple employment relations.
-- `PayeeRelationship` is the financial/recipient relationship; it is valid for employee and nonemployee reward payees, with optional linked employment.
-- `ApprovedFinancialFact` represents the formerly proposed `EmployeeFinancialFact`; its attachment to a payee relationship rather than only an employee is a **proposed schema refinement**, not an approved migration.
-- `SourceFinancialOccurrence` is a physical source line, not equivalent to `FinancialComponent`. It cannot be keyed by code or name.
-These aliases will be finalized in the first physical schema ADR and must not be implemented as parallel duplicated tables.
-
-## Core entities
-| Concept | Minimum durable fields / relationships | Important invariant |
+## معاني الكيانات ومن يملك الحقيقة
+| الكيان | البيانات والعلاقات | ضابط أساسي |
 | --- | --- | --- |
-| Person | PersonId, names, separately protected identities (national ID/passport), verification | National ID is not PK; foreign recipients supported. |
-| EmploymentRelationship (Employees) | EmployeeId, PersonId, employer/appointing entity, employee number, appointment/end dates, provenance | One person may have multiple relationships across periods. |
-| FinancialRelationship/Payee | PayeeId, PersonId, paying entity, entitlement reason, validity | A recipient of fees is not automatically an employee. |
-| OrganizationalAssignmentHistory | EmployeeId, unit, from/to, evidence | Do not overwrite historical unit. |
-| EmploymentStatusHistory | EmployeeId, legal regime, status, from/to, decision | Grade, emeritus, contract, leave etc are dated facts. |
-| EmployeeGradeHistory | EmployeeId, grade/rank, from/to, decision, verification | Past grade drives past entitlement. |
-| FinancialComponent | ComponentId, stable code, name, classification | Separate cash earning/deduction/reference base/employer cost/display total. |
-| FinancialRuleVersion | RuleVersionId, component, coverage, rule type, date range, verified legal anchor | Never silently change a used rule version. |
-| EmployeeFinancialFact | FactId, EmployeeId, fact type, amount, reference date, validity, recorded date, source, verification | A frozen historical base is not a payable item. |
-| EmployeeComponentAssignment | EmployeeId, component, parameters/value, from/to, decision | Use for genuine assignments; not repeated calculated monthly values. |
-| AdministrativeDecision | DecisionId, type, issuing authority, issue/effect dates, evidence, approval | Promotion's functional and financial dates may differ. |
-| FinancialEventEffect | EventId/DecisionId, affected component, scope, period, rule basis | One order can affect multiple components differently. |
-| SourceDocument | DocumentId, SHA-256 hash, source, version, received time, secure archive pointer | Source unchanged even after later correction. |
-| ImportBatch / SourceObservation | BatchId, file, type, report period, person identifiers, exact observed item/amount/page | Imported data is external evidence, not canonical entitlement. |
-| ComponentMapping | External system/code/label/context -> internal component, date, reviewer decision | Account code alone may be ambiguous. |
-| ExpectedCalculationRun/Line | RunId, employee, entitlement period, component, expected amount, rule/input snapshot, trace | Repeatable explainable calculation. |
-| ReconciliationDifference | Source line, calculation line, amount, classification, evidence quality | Missing data is not zero. |
-| AuditFinding / ReviewerAction | FindingId, opinion, classification, reason, evidence, actor/time | Finishing review != settling payment. |
-| Correction / ReviewedOverlay | Original value, review value, official correction source and actor | Do not edit Oracle original. |
-| RetroEntitlement | Employee, component, entitlement period, cause, calculation version, expected differential | Unique logical claim; avoid duplicate issue. |
-| RetroDisbursement / Allocation | Payment evidence, settlement period, amount, allocation to specific claims | Unallocated partial payment remains unresolved. |
-| RemittanceEvidence | Tax/insurance liability period, remitted amount/date, proof | Withheld != remitted. |
-| AuditEvent | Actor, action, entity, before/after refs, timestamp, reason, evidence | Append-only, no silent deletion. |
+| `Person` | رقم داخلي واسم ومعرّفات شخصية محفوظة بحماية | الرقم القومي ليس Primary Key؛ يمكن وجود مستفيد غير مصري |
+| `EmploymentRelationship` | علاقة الشخص بجهة التعيين ورقمه الوظيفي وتاريخ بدايتها ونهايتها | الشخص قد يرتبط بأكثر من عمل في أزمنة مختلفة |
+| `PayeeRelationship` | علاقة مالية بالجهة الصارفة وسبب الاستحقاق ومدته | صاحب المكافأة ليس بالضرورة موظفًا |
+| `OrganizationAssignmentHistory` | تاريخ جهة/كلية/وحدة العمل | لا تُستبدل جهة تاريخية بالحالية |
+| `StatusHistory` | الكادر والحالة الوظيفية والإجازات وفترات السريان | يعتمد حساب كل شهر على حالته |
+| `GradeHistory` | الدرجة أو الرتبة والفترة والقرار | الترقية لا تُطبّق على كل الأوقات |
+| `FinancialComponent` | البند الداخلي ونوعه الاقتصادي | استحقاق/استقطاع/حصة جهة/مرجع/إجمالي |
+| `FinancialRuleVersion` | إصدار القاعدة وسندها والفئات والفترة | لا تعديل لقاعدة استخدمت في اعتماد سابق |
+| `ApprovedFinancialFact` | مبلغ أو وعاء مرجعي معتمد وتاريخه ومستنده | أساسي 2015 ليس مبلغ صرف |
+| `ComponentAssignment` | إسناد بند لمستفيد مع قيمة ثابتة أو معاملات وفترة | ليست تكرارًا لقيم كل شهر |
+| `AdministrativeDecision` | القرار والجهة والتواريخ الإدارية والمالية | قد تختلف تواريخ الإصدار والسريان والأثر |
+| `EventEffect` | تأثير قرار على بند وفترة محددين | القرار الواحد قد يؤثر على بنود مختلفة |
+| `SourceDocument` | ملف PDF الأصلي وبصمة SHA-256 والإصدار ومكان التخزين | أصل غير قابل للتعديل |
+| `SourceFinancialOccurrence` | ظهور مالي مستقل داخل صفحة وصف وعمود | لا دمج على أساس الكود أو الاسم |
+| `ComponentMappingDecision` | تفسير السطر الخارجي وربطه ببند داخلي | الربط يحتاج سياق وقرار عند الغموض |
+| `ExpectedCalculationRun/Line` | حساب مقترح لكل بند وفترة وإصدار ومدخلاته | قابل لإعادة الإنتاج |
+| `AuditCase/Finding` | ملف مراجعة وملاحظات وفروق | انتهاء الفحص لا يعني تسوية الدفع |
+| `ReviewedOverlay` | القيمة التي أثبتها المراجع وسببها | لا تتغير قيمة Oracle الأصلية |
+| `RetroEntitlement` | فرق أصلي بسبب قرار/شهر/بند وإصدار حساب | عدم الازدواج |
+| `PaymentEvidence/Allocation` | دليل الصرف والربط ببنود المتجمدات | ما ظهر في كشف الصرف ليس بالضرورة مدفوعًا |
+| `AuditEvent` | المراجع والوقت والقيمة السابقة واللاحقة والمستند | لا حذف صامت لتاريخ القرارات |
 
-## Historical semantics
-Every effective-dated entity needs a domain-relevant interval [ValidFrom, ValidTo) and when-the-system-knew-it timestamps, including supersession/correction linkage. Dates alone do not establish employer obligations; legal RuleVersion identifies which temporal dimension governs each effect.
+## مصطلحات متكافئة في الوثائق القديمة
+`Employees` يقصد بها علاقة وظيفية وليس الشخص نفسه. `FinancialRelationship` أصبح `PayeeRelationship`. `EmployeeFinancialFact` يقابله `ApprovedFinancialFact`، وربطه بعلاقة الصرف لا بعلاقة العمل وحدها **مقترح Schema** يحتاج اعتمادًا.
 
-## Constraints
-- Strong foreign keys within logical ownership, uniqueness/identity policies with temporal checks.
-- No duplicate active overlapping values for an exclusive employee+fact-type+validity dimension unless law explicitly permits it.
-- Do not convert an Oracle employee code or institution prefix to PersonId/EmployeeId.
-- Imported unknown fields must not null existing canonical fields.
-- Source file rows and calculation snapshots immutable; review corrections are new revisions.
-- Indexed lookups by employee, component, entitlement month, import batch, external code, source hash and review state.
-- Private data access masked by role and audit scope.
+## التاريخ بنوعيه
+- `ValidFrom/ValidTo`: متى كان الحكم أو المبلغ أو الدرجة ساريًا؟
+- `RecordedAt` و`Supersedes`: متى عرف النظام الواقعة ومتى صححها؟
+- عند اختلاف `DecisionIssuedAt` و`FinancialEffectiveDate` نستخدم التاريخ الذي يحدده السند لكل بند، ولا نعتمد تاريخ اليوم مكانًا له.
 
-## Employees table itself
-Keep it narrow: EmployeeId (opaque PK), PersonId, employer organization relation, optional employee/personnel codes, start/end relation dates, source and record status/audit metadata. Dates/grades/legal category/bank/earnings/2015 base belong in their own historical tables, not repeating employee columns.
+## قواعد العلاقات والقيود
+- مفاتيح داخلية مستقلة وعلاقات خارجية صحيحة.
+- لا تكرار متداخل في الوقائع الحصرية لنفس الموظف والفترة إلا إذا سمحت طبيعة الواقعة وقرارها.
+- لا يتحول الكود المؤسسي `30200105` أو رقم صرف Oracle إلى `PersonId` أو حساب بند مالي.
+- الفراغ المستورد لا يمسح تاريخًا أو قيمة معتمدة.
+- النتائج الأصلية والحسابات والاعتمادات محفوظة بإصدارات؛ أي تصحيح يسجل نسخة إضافية.
+- فهارس للموظف والشهر والبند ومصدر المستند والمجموعة وحالة المراجعة، مع إخفاء بيانات الهوية حسب الدور.
+
+## جدول الموظفين في قاعدة البيانات
+يبقى `EmploymentRelationship` صغيرًا: مفتاح داخلي، الشخص، جهة التعيين، رقم وظيفي اختياري وتواريخ البداية والنهاية والتوثيق. **الدرجة، الراتب، البنك، الأساسي المرجعي، الحالة والكادر** تُحفظ في جداولها التاريخية، لا أعمدة متغيرة داخل جدول الموظف.

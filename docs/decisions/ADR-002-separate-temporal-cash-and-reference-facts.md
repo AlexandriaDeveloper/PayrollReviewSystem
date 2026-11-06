@@ -1,16 +1,17 @@
-# ADR-002 — Temporal reference facts versus payable components
+# ADR-002 — فصل الوقائع المالية التاريخية المرجعية عن البنود النقدية
 
-- **Status:** PROPOSED — needs Owner confirmation before implementation.
-- **Date:** 2026-11-06
+**الحالة:** مقترح معماري يحتاج اعتمادًا قبل إنشاء Schema.
+**التاريخ:** 6 نوفمبر 2026.
 
-## Problem
-Frozen base (e.g. 30-06-2015), grades, salary assignments, allowance bases, employer contributions and display totals must coexist without double counting or rewriting historical salary data.
+## المشكلة
+أساسي 30 يونيو 2015، والدرجات والعلاوات والمراتب التاريخية وحصص جهة العمل والإجماليات المعروضة قد توجد معًا، لكن بعضها **مرجع حساب** لا يصرف للموظف؛ وضعها في جدول أجر واحد قد يكرر الصرف أو يمحو التاريخ.
 
-## Proposal
-Store canonical immutable/versioned reference facts separately from payable/withheld components and computation snapshots. Use validity dates and knowledge/record dates. Link every calculated component to eligible rule, employee grade and financial input reference. Store external payroll values as source observations. Link arrears to component+entitlement period+event/calc version and verified later settlement allocations.
+## المقترح
+تخزن الوقائع المرجعية المعتمدة في جداول زمنية مستقلة بإصداراتها ومستنداتها، وتخزن الاستحقاقات والاستقطاعات النقدية بشكل منفصل، ويحتفظ المحرك بنسخة حساب تشمل المدخلات والدرجة والقاعدة الموثقة وفترة السريان. القيم المستوردة من Oracle تبقى `SourceObservation`، والمتجمدات تسجل حسب البند وشهر الاستحقاق والقرار وإصدار الحساب والدليل اللاحق للتسوية.
 
-## Alternatives
-One flat employee salary table: simpler but destroys history/role distinction. One row per component per month as mutable truth: quick reports but difficult provenance and incorrect backdated handling.
+## البدائل غير المفضلة
+- جدول واحد للموظف يحتوي على كل المرتبات: بسيط لكنه يطمس التاريخ ويفصل بصعوبة بين المرجع والنقد.
+- تحديث سطر كل بند في كل شهر باعتباره الحقيقة النهائية: يسهل التقرير لكنه يفسد إعادة حساب الفترات القديمة والأثر الرجعي.
 
-## Consequences
-More entities and calculations; correct historical replay, audit traceability and safe correction. Specific table shapes remain conceptual until scoped schema Issue and reviewed ERD.
+## الأثر
+جداول أكثر وتعقيد محسوب مقابل دقة التاريخ والإثبات ومنع الازدواج. تفاصيل SQL والفهارس تخضع لـIssue تصميم فيزيائي ومراجعة ERD.
