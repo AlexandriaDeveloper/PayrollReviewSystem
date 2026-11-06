@@ -56,7 +56,7 @@ erDiagram
     uuid PayeeRelationshipId PK
     uuid PersonId FK
     uuid PayingUnitId FK
-    uuid EmploymentId FK_nullable
+    uuid EmploymentId FK "nullable"
     string ReasonOrRelationshipType
     date ValidFrom
     date ValidTo
@@ -67,7 +67,7 @@ erDiagram
     string GradeOrRank
     date ValidFrom
     date ValidTo
-    uuid DecisionId FK_nullable
+    uuid DecisionId FK "nullable"
   }
   STATUS_HISTORY {
     uuid StatusHistoryId PK
@@ -75,7 +75,7 @@ erDiagram
     string RegimeAndStatus
     date ValidFrom
     date ValidTo
-    uuid DecisionId FK_nullable
+    uuid DecisionId FK "nullable"
   }
   WORK_ARRANGEMENT {
     uuid ArrangementId PK
@@ -95,7 +95,7 @@ erDiagram
     date ValidFrom
     date ValidTo
     string EvidenceStatus
-    uuid SupersedesFactId FK_nullable
+    uuid SupersedesFactId FK "nullable"
   }
   COMPONENT_ASSIGNMENT {
     uuid AssignmentId PK
@@ -104,7 +104,7 @@ erDiagram
     decimal FixedValue_nullable
     date ValidFrom
     date ValidTo
-    uuid DecisionId FK_nullable
+    uuid DecisionId FK "nullable"
   }
   FINANCIAL_COMPONENT {
     uuid ComponentId PK
@@ -115,7 +115,7 @@ erDiagram
   COMPONENT_AUDIT_POLICY {
     uuid PolicyId PK
     uuid ComponentId FK
-    uuid OrganizationUnitId FK_nullable
+    uuid OrganizationUnitId FK "nullable"
     string ReviewTreatment
     date ValidFrom
     date ValidTo
@@ -124,7 +124,7 @@ erDiagram
   FINANCIAL_RULE_VERSION {
     uuid RuleVersionId PK
     uuid ComponentId FK
-    uuid ProvisionVersionId FK_nullable
+    uuid ProvisionVersionId FK "nullable"
     string Applicability
     string Version
     date EffectiveFrom
@@ -146,7 +146,7 @@ erDiagram
   }
   ADMINISTRATIVE_DECISION {
     uuid DecisionId PK
-    uuid PayeeRelationshipId FK_nullable
+    uuid PayeeRelationshipId FK "nullable"
     string DecisionKind
     date IssuedDate
     date FunctionalEffectiveDate_nullable
@@ -157,7 +157,7 @@ erDiagram
   EVENT_EFFECT {
     uuid EventEffectId PK
     uuid DecisionId FK
-    uuid ComponentId FK_nullable
+    uuid ComponentId FK "nullable"
     date EffectiveFrom
     date EffectiveTo
     string ImpactType

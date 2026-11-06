@@ -92,7 +92,7 @@ erDiagram
     uuid AuditCaseId FK
     uuid EarlierApprovalId FK
     string TriggerKind
-    uuid NewDecisionId FK_nullable
+    uuid NewDecisionId FK "nullable"
     string OutcomeStatus
   }
   LINE_ALLOCATION {
@@ -106,8 +106,8 @@ erDiagram
   }
   RETRO_ENTITLEMENT {
     uuid RetroEntitlementId PK
-    uuid ExpectedLineId FK_nullable
-    uuid DecisionId FK_nullable
+    uuid ExpectedLineId FK "nullable"
+    uuid DecisionId FK "nullable"
     uuid PayeeRelationshipId FK
     uuid ComponentId FK
     string EntitlementPeriod
@@ -116,7 +116,7 @@ erDiagram
   }
   REPORTED_RETRO_MOVEMENT {
     uuid ReportedMovementId PK
-    uuid SourceLineId FK_nullable
+    uuid SourceLineId FK "nullable"
     string ReportedPeriod
     decimal ReportedAmount
     string AttributionStatus
@@ -142,7 +142,7 @@ erDiagram
   AUDIT_EVENT {
     uuid EventId PK
     uuid UserId FK
-    uuid AuditCaseId FK_nullable
+    uuid AuditCaseId FK "nullable"
     string EventKind
     string BeforeHash_nullable
     string AfterHash_nullable

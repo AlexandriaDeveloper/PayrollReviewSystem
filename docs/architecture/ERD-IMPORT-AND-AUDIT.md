@@ -23,7 +23,7 @@ erDiagram
   SOURCE_DOCUMENT {
     uuid SourceDocumentId PK
     uuid ImportBatchId FK
-    uuid SupersedesDocumentId FK_nullable
+    uuid SupersedesDocumentId FK "nullable"
     string DocumentKind
     string ReportPeriod_nullable
     string OriginalSha256
@@ -87,7 +87,7 @@ erDiagram
   PARSE_VALIDATION_ISSUE {
     uuid ParseIssueId PK
     uuid ParseAttemptId FK
-    uuid SourceLineId FK_nullable
+    uuid SourceLineId FK "nullable"
     string Severity
     string DiagnosticCode
     string EvidenceLocator
@@ -95,7 +95,7 @@ erDiagram
   RECIPIENT_MATCH_DECISION {
     uuid MatchDecisionId PK
     uuid SourceRecipientOccurrenceId FK
-    uuid PayeeRelationshipId FK_nullable
+    uuid PayeeRelationshipId FK "nullable"
     uuid ReviewerId FK
     string Status
     string EvidenceRef
@@ -103,7 +103,7 @@ erDiagram
   COMPONENT_MAPPING_DECISION {
     uuid ComponentMappingId PK
     uuid SourceLineId FK
-    uuid ComponentId FK_nullable
+    uuid ComponentId FK "nullable"
     uuid ReviewerId FK
     string MappingStatus
     string AliasVersion_nullable
