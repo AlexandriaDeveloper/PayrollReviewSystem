@@ -35,4 +35,5 @@ Historical reference repos: Payroll-Auditor, Py-Ai-Moratabat, OraclePdfParser, P
 ## Owner-confirmed operational clarifications — 2026-11-06
 - [Owner workflow and 30200105 unit scope](governance/OWNER-OPERATING-REQUIREMENTS.md)
 - [Part-time cash entitlement versus pension assessment base control](domain/PART-TIME-INSURANCE-CONTROL.md)
+- [Centrally calculated items: disability-support and martyrs funds](domain/CENTRAL-CALCULATED-ITEMS.md)
 These clarify workflow and bounded insurance exception. They are not authority to implement general insurance recalculation or activate an unverified legal rule.

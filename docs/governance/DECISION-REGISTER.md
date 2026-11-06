@@ -44,6 +44,7 @@ Do not turn a proposal into an approved business decision through implementation
 | D-012 | Generic central pension/insurance calculations are outside independent approval scope; a **part-time full-base vs reduced-cash-base** review exception is required. |
 | D-013 | Multiple reviewers, salary group assignments per cycle and shared authorization for other payrolls; every change attributed and historic. |
 | D-014 | System to run on internal network with protected access; Owner intends repository private. |
+| D-015 | Amounts for **صندوق دعم المعاقين** and **صندوق الشهداء** received from central entitlements are accepted as centrally calculated and **not recomputed** by the reviewer; still validate extraction and aggregates. Exact account mappings pending. |
 
 **Source:** owner's direct workflow clarifications; not a determination of what Egyptian law authorizes for every employee class. See ../domain/PART-TIME-INSURANCE-CONTROL.md and OWNER-OPERATING-REQUIREMENTS.md.
 

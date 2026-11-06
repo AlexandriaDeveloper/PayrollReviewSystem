@@ -25,6 +25,9 @@ You are the **implementation engineer** of PayrollReviewSystem. ChatGPT acts as 
 6. Await architect review. Answer every review blocker with a code commit and a PR reply explaining what changed and how it was verified.
 7. Do not self-approve, self-merge, deploy or silently dismiss BLOCKER findings.
 
+## Centrally calculated source amounts
+Before implementing financial checks, read docs/domain/CENTRAL-CALCULATED-ITEMS.md. For owner-named صندوق دعم المعاقين and صندوق الشهداء, **do not independently calculate their rates or amounts**; import verified Oracle source amounts, preserve report quality checks, and keep unknown account mapping unresolved. The general pension calculation is also out of scope except for the verified, narrowly defined part-time contribution-base exception. Do not equate source trust with independently proven legal correctness.
+
 ## Financial requirements
 - Distinguish actual imported amount, independently calculated expected amount and a reviewer-approved overlay.
 - A component type is not determined solely from a code prefix or appearance in an Oracle column.

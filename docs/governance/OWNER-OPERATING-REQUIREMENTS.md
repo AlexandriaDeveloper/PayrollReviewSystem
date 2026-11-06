@@ -38,6 +38,9 @@ Central entitlements may report several distinct payable components aggregated u
 - For a confirmed base mismatch: raise ReviewRequired / central correction request with source evidence; neither change original amount nor automatically recompute payroll deduction.
 - Source law/decision, employee scope, dates, contractual/work arrangement and any exceptions still require authenticated primary documentation before activating a deterministic alert. Until then flag as a **proposed rule/check** requiring reviewer confirmation, not a proven legal finding.
 
+## Other centrally calculated deductions / fund items
+The Owner also explicitly excludes independent recalculation of the amounts reported by central entitlements for **صندوق دعم المعاقين** and **صندوق الشهداء**. Ingest the actual amounts as verified original-source observations and include them in source total checks without validating their rates/eligibility independently. Their exact Oracle account codes, official document labels, deduction/employer classification and legal bases are **not yet verified**. See [centrally calculated item policy](../domain/CENTRAL-CALCULATED-ITEMS.md). The existing pension partial-work-time assessment-base exception remains.
+
 ## Multiple reviewers and security
 - Several reviewers work on the same internal-network installation.
 - In regular monthly payroll, each reviewer is responsible for an assigned group of employees **per payroll review cycle**; preserve historic assignments, substitutions and reassignment audit.

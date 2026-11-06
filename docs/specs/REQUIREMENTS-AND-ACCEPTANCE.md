@@ -25,6 +25,7 @@ Intake operator; auditor; senior reviewer; legal/rule approver; payroll/central-
 | FR-015 | Log all material actions, rule changes, imports and official corrections with tamper-evident references. |
 | FR-016 | RBAC, confidentiality and non-destructive corrections; no central payroll edit/payment. |
 | FR-017 | Handle incomplete evidence as open review issues without invented amounts. |
+| FR-018 | Support source-trusted central-calculated financial items (including صندوق دعم المعاقين and صندوق الشهداء) with no local recomputation, while preserving source-quality controls and the approved pension part-time exception. |
 
 ## Acceptance scenario matrix (non-exhaustive)
 | ID | Input / event | Expected behavior |
@@ -79,6 +80,12 @@ Intake operator; auditor; senior reviewer; legal/rule approver; payroll/central-
 | AC-042 | Part-time insured base not legally evidenced for employee category | RuleNotVerified; no automatic legal finding. |
 | AC-043 | Salary reviewer assigned group X, outside reviewer attempts modification | Enforce assigned group rights and record denied access; other authorized payroll types remain shared. |
 | AC-044 | Two reviewers edit same payroll observation | Optimistic concurrency conflict, identity/time/action in audit trail, no silent last-write-wins. |
+
+| AC-045 | Correctly extracted central صندوق دعم المعاقين deduction | Accept reported amount without independent legal rate calculation, but keep totals checks. |
+| AC-046 | Correctly extracted central صندوق الشهداء item | Same source-trusted treatment; preserve exact official label and context. |
+| AC-047 | Central-calculated item has no local ExpectedAmount | Mark not calculated by design, not 0 or discrepancy. |
+| AC-048 | Central-calculated fund amount is repeated in PDF extraction | Show duplicate/total inconsistency, not automatically trusted twice. |
+| AC-049 | Official fund item code is unknown or ambiguous | Ask for reviewer mapping/evidence; do not invent an 8-digit code. |
 
 ## Nonfunctional
 - Currency arithmetic precision, period determinism, repeatable runs, latency targets measured from sanitized realistic-sized fixtures.
