@@ -10,63 +10,63 @@
 ## لماذا نبدأ من هذا المشروع؟
 لديه أساس واقعي في ‎.NET 10 وPDFium لتفريغ Unicode، وواجهة للعربية، وثلاثة أنواع من الصرفيات، ومطابقة تقارير، وأرشيف نتائج في SQLite، وتصدير Excel واختبارات. لذلك **الأفضل تطويره من نقطة بداية لا كتابة Regex جديد من الصفر**.
 
-لكن \`PDF-EXTRACTOR\` يستخدم \`pdfplumber\` لاستعادة **الخلايا والصفوف المادية** عندما تضيع دلالة العمودين الاستحقاقات/الاستقطاعات من النص المسطح. لا تفترض دقة أي طريق وحده لكل ملفات المنظومة.
+لكن `PDF-EXTRACTOR` يستخدم `pdfplumber` لاستعادة **الخلايا والصفوف المادية** عندما تضيع دلالة العمودين الاستحقاقات/الاستقطاعات من النص المسطح. لا تفترض دقة أي طريق وحده لكل ملفات المنظومة.
 
 ## خريطة الكود القديم
 
 | الملف | وظيفته |
 | --- | --- |
-| \`README.md\` | الأنواع وطريقة التشغيل والحدود |
-| \`src/OraclePdfParser.Application/Contracts.cs\` | \`IPdfTextSource.ReadPages(Stream)\` و\`IPayrollImportService.Import(fileName,pages)\` |
-| \`src/OraclePdfParser.Infrastructure/PdfiumTextSource.cs\` | استخراج النص لكل صفحة بواسطة PDFium دون إحداثيات X/Y كاملة |
-| \`src/OraclePdfParser.Infrastructure/PdfPigTextSource.cs\` | بديل ترتيب النص باستخدام PdfPig |
-| \`src/OraclePdfParser.Application/Arabic.cs\` | تطبيع العربية والأرقام والفواصل وتحويل \`decimal\` |
-| \`src/OraclePdfParser.Application/PayrollImportService.cs\` | تصنيف نوع التقرير واستخراج الفرد والكافر وكشف الصرف |
-| \`src/OraclePdfParser.Domain/Payroll.cs\` | \`ReportKind\` و\`PayrollEmployee\` و\`PayrollEntry\` و\`CoverGroup\` و\`VerificationStatus\` |
-| \`src/OraclePdfParser.Application/PayrollBatchReconciler.cs\` | مطابقة الأفراد والفترات والأعداد والصافي والمجموعات |
-| \`src/OraclePdfParser.Api/Program.cs\` | \`POST /api/import\` وواجهات الأرشيف والتصدير |
-| \`src/OraclePdfParser.Infrastructure/SqliteImportArchive.cs\` | يحفظ نتيجة الاستيراد، **لا يحتفظ ببايتات PDF الأصلية** |
-| \`src/OraclePdfParser.Infrastructure/PayrollExcelExporter.cs\` | تصدير XLSX مع RTL والأرقام والصفحات |
-| \`tests/OraclePdfParser.Tests\` | اختبارات الاستيراد والعربية والحدود والمطابقة والتصدير وPDFium |
-| \`tools/OraclePdfParser.Verify/Program.cs\` | فحص خاص محلي مع وضع \`--strict\` وأوضاع مرتبطة بعينات |
+| `README.md` | الأنواع وطريقة التشغيل والحدود |
+| `src/OraclePdfParser.Application/Contracts.cs` | `IPdfTextSource.ReadPages(Stream)` و`IPayrollImportService.Import(fileName,pages)` |
+| `src/OraclePdfParser.Infrastructure/PdfiumTextSource.cs` | استخراج النص لكل صفحة بواسطة PDFium دون إحداثيات X/Y كاملة |
+| `src/OraclePdfParser.Infrastructure/PdfPigTextSource.cs` | بديل ترتيب النص باستخدام PdfPig |
+| `src/OraclePdfParser.Application/Arabic.cs` | تطبيع العربية والأرقام والفواصل وتحويل `decimal` |
+| `src/OraclePdfParser.Application/PayrollImportService.cs` | تصنيف نوع التقرير واستخراج الفرد والكافر وكشف الصرف |
+| `src/OraclePdfParser.Domain/Payroll.cs` | `ReportKind` و`PayrollEmployee` و`PayrollEntry` و`CoverGroup` و`VerificationStatus` |
+| `src/OraclePdfParser.Application/PayrollBatchReconciler.cs` | مطابقة الأفراد والفترات والأعداد والصافي والمجموعات |
+| `src/OraclePdfParser.Api/Program.cs` | `POST /api/import` وواجهات الأرشيف والتصدير |
+| `src/OraclePdfParser.Infrastructure/SqliteImportArchive.cs` | يحفظ نتيجة الاستيراد، **لا يحتفظ ببايتات PDF الأصلية** |
+| `src/OraclePdfParser.Infrastructure/PayrollExcelExporter.cs` | تصدير XLSX مع RTL والأرقام والصفحات |
+| `tests/OraclePdfParser.Tests` | اختبارات الاستيراد والعربية والحدود والمطابقة والتصدير وPDFium |
+| `tools/OraclePdfParser.Verify/Program.cs` | فحص خاص محلي مع وضع `--strict` وأوضاع مرتبطة بعينات |
 
 ## أنواع التقارير
-- \`EmployeePayslip\`: تقرير الموظف؛ رقم الصرف، البنك، الاستحقاقات والاستقطاعات وحصة جهة العمل والإجماليات وصفحات التفاصيل.
-- \`Cover\`: الكافر، وفيه مجموعات البنوك وعدد العاملين والإجماليات والصفحات الممتدة.
-- \`PaymentSheet\`: كشوف الصرف، وهويات المستفيدين ومبالغ الصرف والمجموعات، وقد تختلف الخلايا العربية.
-- \`Unknown\`: غير معروف؛ لا تخمن نوع التقرير من اسم الملف وحده.
-- \`Verified\` و\`ReviewRequired\` و\`Rejected\` حالات قراءة ومطابقة، **لا قرارات قانونية بصحة المرتب**.
+- `EmployeePayslip`: تقرير الموظف؛ رقم الصرف، البنك، الاستحقاقات والاستقطاعات وحصة جهة العمل والإجماليات وصفحات التفاصيل.
+- `Cover`: الكافر، وفيه مجموعات البنوك وعدد العاملين والإجماليات والصفحات الممتدة.
+- `PaymentSheet`: كشوف الصرف، وهويات المستفيدين ومبالغ الصرف والمجموعات، وقد تختلف الخلايا العربية.
+- `Unknown`: غير معروف؛ لا تخمن نوع التقرير من اسم الملف وحده.
+- `Verified` و`ReviewRequired` و`Rejected` حالات قراءة ومطابقة، **لا قرارات قانونية بصحة المرتب**.
 
 المسار القديم: PDF ← نص PDFium ← تطبيع واستنتاج النوع ← استخراج موظفين/مجموعات/بنود ← فحص المجاميع ← مطابقة التقارير ← أرشيف النتيجة. المشروع الجديد يجب أن يضيف **أصل PDF وبصمته ومكان السطر**.
 
 ## تشغيل النسخة القديمة محليًا — مثال Windows
 المتطلبات حسب المشروع القديم: ‎.NET 10 SDK وNode.js 22 وnpm ومكتبات PDFium المناسبة. من مجلد المستودع القديم:
 
-\`\`\`powershell
+```powershell
 dotnet restore .\src\OraclePdfParser.Api\OraclePdfParser.Api.csproj
 dotnet run --project .\src\OraclePdfParser.Api\OraclePdfParser.Api.csproj --urls http://localhost:5080
-\`\`\`
+```
 
 في نافذة أخرى:
 
-\`\`\`powershell
+```powershell
 cd web
 npm install
 npm start
-\`\`\`
+```
 
-افتح \`http://localhost:4200\` وافحص عدد المستفيدين والسطور والمجموعات والتحذيرات والتصدير بعد رفع 1–3 ملفات تجريبية في جهاز آمن. **الـAPI القديم محلي وغير معد للمشاركة على شبكة عامة بلا توثيق.**
+افتح `http://localhost:4200` وافحص عدد المستفيدين والسطور والمجموعات والتحذيرات والتصدير بعد رفع 1–3 ملفات تجريبية في جهاز آمن. **الـAPI القديم محلي وغير معد للمشاركة على شبكة عامة بلا توثيق.**
 
 اختبار خاص بملفات محفوظة خارج Git:
 
-\`\`\`powershell
+```powershell
 dotnet run --project tools\OraclePdfParser.Verify -- --strict "C:\PrivatePayroll\payslip.pdf" "C:\PrivatePayroll\cover.pdf" "C:\PrivatePayroll\payment.pdf"
-\`\`\`
+```
 
-المسارات أمثلة. وضع \`--golden-october-2026\` المذكور في المشروع مرتبط بمجموعة **خاصة واحدة** وضوابط ثابتة؛ لا يدل نجاحه على ملفات أشهر أو أعداد صفحات أو تنسيقات أخرى.
+المسارات أمثلة. وضع `--golden-october-2026` المذكور في المشروع مرتبط بمجموعة **خاصة واحدة** وضوابط ثابتة؛ لا يدل نجاحه على ملفات أشهر أو أعداد صفحات أو تنسيقات أخرى.
 
 ## القيود الفعلية والتهديدات الفنية
-1. التعبيرات العددية في \`PayrollImportService\` قد تفقد **علامة السالب** رغم دعم \`Arabic.Amount\` لبعض الأشكال.
+1. التعبيرات العددية في `PayrollImportService` قد تفقد **علامة السالب** رغم دعم `Arabic.Amount` لبعض الأشكال.
 2. مطابقة مجموعات البنك في مسار ما تستخدم **ترتيب المجموعة** بدل هويتها وموقعها.
 3. PDFium يخرج نصًا مسطحًا دون صفوف وخلايا؛ لذلك قد تتداخل الأعمدة والاسم العربي والكود والمبلغ.
 4. مستندات الصرف قد تحمل حصص حكومة معلوماتية؛ تطابق الصافي وحده لا يثبت صحة باقي البنود.
@@ -83,7 +83,7 @@ dotnet run --project tools\OraclePdfParser.Verify -- --strict "C:\PrivatePayroll
 5. فصل عمودي الجدول، وعدم جمع حصة جهة العمل كاستحقاق نقدي.
 6. صفحات امتداد الموظف وتغير ترتيب الأعمدة وأكواد غير معروفة وأسماء مختلفة لكود واحد.
 7. مطابقة البنك والفرع والمجموعة وعدد المستفيدين والفترة عبر التقارير.
-8. القيم المفقودة \`null\` ومراجعة لازمة، لا صفر مخترع.
+8. القيم المفقودة `null` ومراجعة لازمة، لا صفر مخترع.
 9. بصمة مصدر وموقع السطر وعدم الازدواج عند إعادة الاستيراد.
 10. النسخة المركزية الرسمية المصححة تحفظ بجانب القديمة، لا تحل محلها.
 
@@ -92,7 +92,7 @@ dotnet run --project tools\OraclePdfParser.Verify -- --strict "C:\PrivatePayroll
 2. اجعل المخرجات من Adapter موحد يحفظ النص الخام **وموقع الخلية إن توفر** وإصدار المحلل والحالات الدقيقة.
 3. قارن القراءة النصية باستراتيجية الجداول المادية على اختبارات اصطناعية وملفات أصلية محمية.
 4. اجعل جودة القراءة غير قرار الاستحقاق القانوني وغير إثبات الدفع.
-5. طبق \`SourceFinancialOccurrence\` بحيث لا يضيع أي ظهور متكرر للبند.
+5. طبق `SourceFinancialOccurrence` بحيث لا يضيع أي ظهور متكرر للبند.
 
 ## فروق المصطلحات
 - **نجاح القراءة:** أمكن استخراج بنية PDF بقرائن.

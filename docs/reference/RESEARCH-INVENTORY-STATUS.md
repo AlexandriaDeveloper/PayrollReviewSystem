@@ -12,24 +12,24 @@
 
 | الموضوع | مذكرات البحث الأصلية | الغرض |
 | --- | --- | --- |
-| فهم المشروع والاستخراج | \`project-understanding-ar.md\`، \`oracle-parser-review-ar.md\`، \`payroll-execution-discovery-ar.md\` | حدود المراجعة ومخاطر PDF ودورة مستندات الصرف |
-| الجامعات والخدمة المدنية | \`university-service-discovery-ar.md\`، \`university-2006-compendium-discovery-ar.md\`، \`civil-service-matrix-discovery-ar.md\`، \`wage-policy-training-discovery-ar.md\` | اختلاف الكوادر وشروط الخدمة |
-| الرواتب والعلاوات | \`wage-package-discovery-ar.md\`، \`special-allowances-history-discovery-ar.md\`، \`job-description-evaluation-discovery-ar.md\` | المرجع الزمني وقواعد العلاوات |
-| الضرائب والتأمينات | \`tax-integration-discovery-ar.md\`، \`social-insurance-148-discovery-ar.md\`، \`income-tax-regulation-discovery-ar.md\` | الأوعية وتواريخ السريان |
-| الرقابة المالية | \`financial-control-discovery-ar.md\`، \`public-finance-law-2022-2024-discovery-ar.md\`، \`finance-2021-circulars-discovery-ar.md\` | الدليل المالي والصلاحيات |
-| شئون العاملين والحالات الخاصة | \`caoa-caseletters-discovery-ar.md\`، \`service-events-discovery-ar.md\`، \`discipline-discovery-ar.md\`، \`labor-and-service-boundaries-ar.md\` | القرارات والإجازات والجزاءات |
-| فهرس المصادر | \`source-reading-inventory-ar.md\`، \`source-study-status-ar.md\`، \`source-findings-continuation-ar.md\` | متابعة الأصول والفجوات |
+| فهم المشروع والاستخراج | `project-understanding-ar.md`، `oracle-parser-review-ar.md`، `payroll-execution-discovery-ar.md` | حدود المراجعة ومخاطر PDF ودورة مستندات الصرف |
+| الجامعات والخدمة المدنية | `university-service-discovery-ar.md`، `university-2006-compendium-discovery-ar.md`، `civil-service-matrix-discovery-ar.md`، `wage-policy-training-discovery-ar.md` | اختلاف الكوادر وشروط الخدمة |
+| الرواتب والعلاوات | `wage-package-discovery-ar.md`، `special-allowances-history-discovery-ar.md`، `job-description-evaluation-discovery-ar.md` | المرجع الزمني وقواعد العلاوات |
+| الضرائب والتأمينات | `tax-integration-discovery-ar.md`، `social-insurance-148-discovery-ar.md`، `income-tax-regulation-discovery-ar.md` | الأوعية وتواريخ السريان |
+| الرقابة المالية | `financial-control-discovery-ar.md`، `public-finance-law-2022-2024-discovery-ar.md`، `finance-2021-circulars-discovery-ar.md` | الدليل المالي والصلاحيات |
+| شئون العاملين والحالات الخاصة | `caoa-caseletters-discovery-ar.md`، `service-events-discovery-ar.md`، `discipline-discovery-ar.md`، `labor-and-service-boundaries-ar.md` | القرارات والإجازات والجزاءات |
+| فهرس المصادر | `source-reading-inventory-ar.md`، `source-study-status-ar.md`، `source-findings-continuation-ar.md` | متابعة الأصول والفجوات |
 
 ## أهم النواقص
 - التحقق من إصدارات القوانين وما صدر من تعديلات حديثة، دون الاكتفاء بملخصات قديمة.
-- مراجعة اللائحة \`2437/2021\` للقانون \`148/2019\` من أصلها قبل أي محرك حساب تأمينات (مع بقاء هذا المحرك خارج النطاق المعتاد).
+- مراجعة اللائحة `2437/2021` للقانون `148/2019` من أصلها قبل أي محرك حساب تأمينات (مع بقاء هذا المحرك خارج النطاق المعتاد).
 - القرارات المحلية لجامعة الإسكندرية وصلاحيات الوحدة الحسابية.
 - التضارب بين مذكرات بعض العلاوات التاريخية والضم والنسب، والعودة للمواد الأصلية.
 - الربط الرسمي بين أكواد Oracle والبنود بحسب التقرير والفترة والجهة.
 - اختبارات خاصة على ملفات PDF متعددة وبضوابط مستقلة.
 - تحديد القواعد المنطبقة على أعضاء التدريس والمعيدين والإداريين والمتعاقدين وأصحاب المكافآت.
 - تحديد أدلة الدفع الحقيقية وبيانات التسويات وليس مجرد كشوف المرتب.
-- استكمال مذكرات \`_review\` المفقودة أو إعادة فحص مصادرها الأصلية.
+- استكمال مذكرات `_review` المفقودة أو إعادة فحص مصادرها الأصلية.
 
 ## المستودعات السابقة — مراجع لا تبعيات تلقائية
 - https://github.com/AlexandriaDeveloper/Payroll-Auditor
