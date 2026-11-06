@@ -184,5 +184,8 @@ erDiagram
 7. احتفظ بتواريخ السريان ووقت التسجيل وأسباب التصحيح، وأسماء من يعتمدون التعديلات؛ أضف الحقول في التصميم الفيزيائي بعد ADR.
 8. لا تفرض قاعدة منع التداخل الزمني على كل العلاقات دون دراسة نوعها؛ لبعض الوقائع أكثر من أثر متزامن مشروع.
 
+## توسيع مقترح لدعم القواعد المتداخلة
+توسعة `FinancialRuleVersion` و`AdministrativeDecision` في [مخطط تداخل القواعد والدرجات](../examples/03-TEMPORAL-RULE-CONFLICT-EXAMPLE.md) تعرض `RuleApplicability` و`RuleEffect` و`RuleInteraction` و`RuleResolutionSegment` دون تكرار كيان أساسي أو تنفيذ SQL. شاهد [خوارزمية اختيار الحكم](../specs/TEMPORAL-RULE-RESOLUTION-AND-CONFLICTS.md).
+
 ## مثال بيانات ومخرجات
 راجع [مثال ERD للبيانات الفعلية الافتراضية](../examples/01-ERD-INPUT-OUTPUT.md) الذي يوضح Person وعلاقة العمل والصرف والمبالغ المعتمدة والأسطر المستخرجة.
