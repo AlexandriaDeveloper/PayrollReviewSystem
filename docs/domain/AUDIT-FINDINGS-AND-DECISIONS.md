@@ -1,46 +1,46 @@
-# Internal financial review: findings, decisions and correction workflow
+# ملاحظات المراجعة المالية وقرارات المراجع والتصحيحات
 
-## Audit object
-An AuditCase holds target employee/payee, payroll run, entitlement period, financial component, reported source figure, independently calculated expected figure, evidence and reviewer reasoning. Cases may be prompted by positive/negative mismatch, eligibility uncertainty, missing supporting decision, incomplete extraction, incorrect grade, duplicate entry, unexplained bank/group difference or atypical trend.
+## ملف المراجعة
+\`AuditCase\` خاص بمستفيد/علاقة صرف داخل دورة، مع الشهر والمصدر والبند المتوقع ونتيجة الحساب والأدلة وقرارات المراجع. قد تنشأ الملاحظة لفرق موجب أو سالب أو فقد قرار أو خطأ درجة أو ازدواج أو غموض استحقاق أو اختلاف مجموعة البنك أو نتيجة غير معتادة.
 
-## Distinct monetary columns
-- **SourceAmount:** as printed in the original Oracle/central-entitlements report; immutable.
-- **ExpectedAmount:** calculated independently with verified rules and employee history; versioned.
-- **ReviewedAmount:** reviewer-approved interpretation after evaluation; separate overlay.
-- **OfficialCorrectionAmount:** later central-entitlements corrected-source amount and original supporting document.
-- **ReportedDisbursementAmount:** amount present in downstream payroll/payment sheet; not necessarily settled.
-- **VerifiedPaidAmount:** proven by valid payment/settlement evidence; do not infer from expected salary or an unverified report.
-- **OutstandingAmount:** reconciled balance only after allocations and relevant taxes/insurance; otherwise mark tentative.
+## أنواع القيم التي لا يجب اختصارها
+| الحقل | المعنى |
+| --- | --- |
+| \`SourceAmount\` | القيمة كما وردت من Oracle الأصلي، لا تتغير |
+| \`ExpectedAmount\` | الناتج المقترح من قاعدة معتمدة ومدخلات تاريخية |
+| \`ReviewedAmount\` | القيمة التي خلص إليها المراجع بدليل وسبب |
+| \`OfficialCorrectionAmount\` | قيمة جديدة وردت في مستند مركزي مصحح رسميًا |
+| \`ReportedDisbursementAmount\` | مبلغ ظهر في كشف صرف؛ قد لا يكون سُوّي |
+| \`VerifiedPaidAmount\` | مبلغ تدعمه شهادة/إثبات تسوية مستقل |
+| \`OutstandingAmount\` | المتبقي بعد تخصيص الدفعات المثبتة ومعالجة الآثار ذات الصلة؛ قد يكون مؤقتًا |
 
-## Reviewer action taxonomy
-| Action | What it means | Closes case? |
+## الإجراءات المتاحة
+| الإجراء | الأثر | هل يغلق الملف؟ |
 | --- | --- | --- |
-| Match / accept | Rule, source, identity, component and evidence align | Yes, subject to whole-employee gate. |
-| Request documents / verify source | Missing decision or uncertain data | No. |
-| Fix internal data or rule | Defect in review system, not automatically Oracle | No until recomputed and reviewed. |
-| Record approved reviewed value | Verified determination with reasoning and evidence; source stays unchanged | Examination may finish; correction still open. |
-| Flag central entitlement error | Reasoned finding on source amount | No until proper resolution. |
-| Request official correction | Send finding to the authorized central entitlements unit | No until returned source checked. |
-| Defer / hold | Work cannot be completed; preserve blocker | No. |
-| Follow up for settlement/recovery | Wrong amount already reported/possibly paid, action by authorized unit | Financial follow-up stays open until evidenced. |
-| Withdraw finding / not applicable | Evidence disproves finding; reason and approver retained | Yes, with full audit trail. |
+| مطابقة وقبول | توثيق توافق المستند والهوية والبند والقيمة | نعم إذا استوفت مراجعة المستفيد كاملة |
+| طلب مستند أو فحص مصدر | نقص دليل قرار أو صورة واضحة | لا |
+| تصحيح بيانات أو قاعدة داخل النظام | إصلاح خطأ مرجع أو صيغة مراجعة | بعد إعادة الحساب والمراجعة |
+| اعتماد قيمة مراجعة مختلفة | تسجيل قرار بديل مع سبب ومصدر | قد ينهي الفحص لكن التصحيح الخارجي يبقى |
+| الاعتراض على خطأ مركزي | تسجيل فرق يستلزم إجراء الجهة المختصة | لا |
+| طلب تصحيح رسمي | متابعة استجابة المركزية والنسخة الجديدة | لا حتى وصول الإثبات |
+| تأجيل أو إيقاف المراجعة | إبقاء سبب المانع | لا |
+| متابعة تسوية أو استرداد | الإحالة لجهة مختصة إذا ثبت صرف خاطئ | لا حتى إثبات الإجراء |
+| سحب ملاحظة | ثبت عدم صحتها أو عدم انطباقها | نعم مع حفظ سبب السحب ومن اعتمده |
 
-Do not conflate an **action**, a **finding disposition**, a **reviewed employee approval** and a **payment settlement status**.
+**قرار المراجع غير حالة الملاحظة غير حالة اعتماد الصرفية غير حالة الدفع الفعلي.**
 
-## Before vs after payment
-- Before disbursement: report central error, request official recomputation/correction, reimport official response as distinct source version. Program does not modify Oracle or release payroll.
-- After disbursement: record confirmed excess/shortfall if evidence supports; authorized body decides lawful recovery/supplementary payroll. No direct auto employee deduction.
-- In both situations, a reviewer can finish their analysis while finding remains open for implementation or payment evidence.
+## قبل اعتماد الصرف وبعده
+قبل الصرف: إثبات الخطأ وطلب نسخة مركزية مصححة، ثم استيرادها بإصدار مستقل. لا يدفع التطبيق ولا يغير Oracle. بعد الصرف: تسجل الزيادة أو العجز عند ثبوته، وتقرر الجهة المخولة التسوية أو الاسترداد وفق القانون، ولا يخصم البرنامج شيئًا تلقائيًا.
 
-## State model
-Case: New -> UnderReview -> WaitingForEvidence / CorrectionRequested / Deferred -> DecisionRecorded -> FollowUpPending -> Resolved/Closed (or Reopened with version).
-Whole-employee review: Incomplete, ReviewRequired, ReviewerCompleted, EligibleForApproval, Approved, ExceptionApproved (only with owner-approved privilege/policy), Rejected. Do not automatically approve on a matched net total or empty detail list.
+قد يكتمل فحص الموظف مع بقاء طلب تصحيح أو تسوية مفتوحًا.
 
-## Evidence and audit trail
-For every action capture actor, timestamp, scope, source references, versions of expected calculation and rule, before/after, reason and reviewer/approver. Never hard-delete a reviewed case or a correction history to conceal earlier conclusions.
+## الحالات المقترحة
+ملف الملاحظة: \`New\` ← \`UnderReview\` ← \`WaitingForEvidence/CorrectionRequested/Deferred\` ← \`DecisionRecorded\` ← \`FollowUpPending\` ← \`Resolved/Closed\` أو \`Reopened\` بنسخة جديدة.
 
-## Separation of duties
-Staff who proposes or edits a legal rule should not approve its live effect on their own. Intake may not approve final review. Implementation/admin permissions may not override financial authority.
+مراجعة الموظف: \`Incomplete\`، \`ReviewRequired\`، \`ReviewerCompleted\`، \`EligibleForApproval\`، \`Approved\`، \`ExceptionApproved\` (وفق صلاحية وقاعدة معتمدة)، \`Rejected\`. لا يُعتمد الموظف تلقائيًا لمجرد تطابق الصافي أو عدم وجود أسطر تفصيلية.
 
-## Example — illustrative
-Central report shows extra incentive 1200, expected 1000, gross difference +200. Reviewer can request official correction, record independent reviewed value 1000 or request source evidence; none of these changes original SourceAmount=1200. If 200 was actually overpaid, follow a lawful documented recovery process instead of silently deducting next month.
+## إثبات كل إجراء
+هوية المراجع ووقت التغيير ونطاق الصلاحية وأصل المستند وإصدارات القاعدة والحساب والقيمة قبل وبعد والسبب وهوية المعتمد. لا حذف تاريخي لإخفاء قرار أو تصحيح. من يعدل قاعدة مالية لا يحق له افتراضيًا اعتماد أثرها وحده، ومستخدم الاستيراد لا يمنح نفسه صلاحية الاعتماد النهائي.
+
+## مثال اصطناعي
+أظهر Oracle حافزًا 1200، بينما الحساب المعتمد اقترح 1000، إذن فرق +200. يمكن للمراجع طلب تصحيح رسمي أو إثبات قيمة مراجعة 1000 أو طلب مستند إضافي. لا تتغير \`SourceAmount=1200\`. حتى لو ثبت صرف 200 بالزيادة، لا يصدر البرنامج استقطاعًا مباشرًا الشهر التالي.

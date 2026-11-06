@@ -1,42 +1,46 @@
-# Legal knowledge governance — no unsupported payroll rules
+# حوكمة المعرفة القانونية ومنع القواعد غير المسندة
 
-## Scope
-Relevant research includes university employee statutes, service/civil-service laws, salary packages, specific allowances, tax payroll withholding, insurance law, public finance, payment/document controls, disciplinary and administrative cases. This document **does not approve numerical values or declare current applicability**.
+## النطاق
+تشمل موضوعات البحث قوانين الجامعات والخدمة المدنية والاستحقاقات والبدلات والضرائب والتأمينات والمالية العامة والمستندات الإدارية والجزاءات وغيرها. **ذكر قانون أو نسبة في ملف بحثي ليس موافقة على تطبيقها أو على تاريخ سريانها.**
 
-## Legal rule activation checklist
-Before a calculation can be marked APPROVED_FOR_CALCULATION, store:
-- Primary original source and secure document ID/hash; issuing authority, law/decision number/year.
-- Verified **article, subsection and source page** and exact passage as permitted by licensing.
-- Effective date of original rule, amendments/repeal/suspension; overlap precedence if necessary.
-- Covered relationship/cadre (civil service, teaching faculty, emeritus, other distinct relationship).
-- Tax/insurance/financial impact, contribution bases where specified.
-- Calculation method, input reference-date basis, grade/rank conditions, minimum/maximum, proration/rounding.
-- Explicit exceptions, transitional provisions, judicial rulings and local authorized decisions where applicable.
-- Legal reviewer name/date, source conflict status, tests and approval.
-- Semantic version and immutable evidence of rules used in historical calculations.
+## متطلبات تفعيل قاعدة حسابية
+قبل نقل قاعدة إلى \`APPROVED_FOR_CALCULATION\` يجب حفظ:
+1. المستند الأصلي الموثوق ورقمه وبصمته ومصدره وجهة الإصدار والسنة.
+2. **رقم المادة والفقرة والصفحة** والنص الدقيق وفق قواعد الترخيص.
+3. تاريخ بدء القانون والتعديل والإلغاء والتعليق وترتيب الأسبقية.
+4. الكادر وفئة الموظف ونوع علاقة العمل أو المكافأة المنطبق عليه الحكم.
+5. الأثر الضريبي أو التأميني أو المالي وأوعية الحساب عند ارتباطه بالنطاق.
+6. المعادلة وطبيعة الوعاء والفترة والدرجة والحد الأدنى/الأقصى والتقريب وجزء الشهر.
+7. الاستثناءات والأحكام الانتقالية والأحكام القضائية والقرارات المحلية المتحققة.
+8. من راجع النص ومتى وحالة التعارض ونتائج الاختبارات ومن اعتمد.
+9. إصدار القاعدة والمرجع الذي استعملته كل مراجعة تاريخية.
 
-## Source status distinctions
-UNLOCATED -> ACQUIRED -> TEXT_READ -> PAGE_VERIFIED -> APPLICABILITY_ASSESSED -> DRAFT_RULE -> LEGALLY_REVIEWED -> OWNER_APPROVED -> IMPLEMENTED_AND_TESTED -> ACTIVE. A searchable Markdown summary is **not** a PAGE_VERIFIED authoritative source. Validity can later become REVOKED / SUPERSEDED.
+## مراحل الوثيقة القانونية
+\`UNLOCATED\` غير موجود ← \`ACQUIRED\` تم الحصول عليه ← \`TEXT_READ\` تمت القراءة ← \`PAGE_VERIFIED\` تم التحقق من الصفحة ← \`APPLICABILITY_ASSESSED\` فحص الانطباق ← \`DRAFT_RULE\` مسودة ← \`LEGALLY_REVIEWED\` مراجعة قانونية ← \`OWNER_APPROVED\` معتمد من المالك ← \`IMPLEMENTED_AND_TESTED\` نُفّذ واختُبر ← \`ACTIVE\` مفعل.
 
-## Known law families to investigate (not blanket applicability statements)
-- Law 81/2016 Civil Service and executive rules, amendments, special exceptions.
-- University Law 49/1972 and implementing law/regulation materials, historical and updated provisions.
-- Relevant 2015 transitional salary history, frozen base and incorporated/independent allowances.
-- Law 148/2019 Social Insurance and Pensions and implementing regulation 2437/2021.
-- Current income tax/payroll withholding instructions, cumulative settlements and annual rules.
-- Public finance framework including 2022/2024 amendments and Ministry of Finance instructions.
-- Specialized employee legal regimes, healthcare or other categories, outside consultant/wage recipient cases, and applicable Alexandria University decisions.
+قد تتغير الحالة لاحقًا إلى \`REVOKED\` أو \`SUPERSEDED\`. مجرد ملخص Markdown قابل للبحث لا يساوي تحققًا من النص والصفحة الأصلية.
 
-No numeric rate, allowance amount or asserted law status is authorized merely by appearing in these names.
+## مجموعات قوانين مطلوب بحثها — لا تعميم تلقائي
+- قانون الخدمة المدنية رقم **81 لسنة 2016** ولائحته وتعديلاته واستثناءات الكوادر.
+- قانون تنظيم الجامعات رقم **49 لسنة 1972** واللوائح ومواد سريانها التاريخية.
+- قواعد الرواتب الانتقالية عام 2015 والمرجع المجمد والعلاوات المضمومة والمستقلة.
+- قانون التأمينات الاجتماعية والمعاشات **148 لسنة 2019** واللائحة **2437 لسنة 2021**.
+- ضريبة المرتبات والتسويات الدورية والسنوية وفق النصوص السارية فعلًا.
+- إطار المالية العامة وقرارات وزارة المالية والتعديلات ذات الصلة، بما فيها ما يحتاج تحققًا في 2022/2024.
+- نظم الكوادر الخاصة وأعضاء هيئة التدريس والفئات الصحية والمتعاقدين ومستحقي المكافآت وقرارات جامعة الإسكندرية.
 
-## Conflicts and safeguards
-If two secondary research notes disagree (e.g., tax/insurance percentage, allowance calculation or legislative amendment), raise a SOURCE_CONFLICT Issue; quote primary original sections and resolve only with a verified source and authorized reviewer. Never pick the newest-looking note automatically.
+لا يجوز تخمين أن قانونًا من القائمة يطبق على **كل** فئات الوحدة، أو استخراج نسبة من عنوان القانون.
 
-## Rule catalogue design
-LegalSource -> LegalProvisionVersion -> ApplicabilityCondition -> RuleVersion -> ComponentDependency -> RuleTestCase. The engine does not execute arbitrary expressions from PDFs or AI text; use bounded interpretable operations and checked input types.
+## التعارضات
+إذا تضاربت مذكرتان بحثيتان بخصوص نسبة أو وعاء أو تعديل قانون، افتح Issue من نوع \`SOURCE_CONFLICT\`، وحدد النصين ثم عد إلى الأصل والمادة وصفحتها. لا تختَر الأحدث ظاهريًا أو الأكثر تكرارًا دون تحقق.
 
-## Ongoing updates
-When a new legal amendment or ruling arrives: register source; assess applicability/retroactive start; create new rule version; identify affected past calculations; recompute new proposed version without rewriting history; route findings to reviewer. Rule author and approver should be distinct.
+## دليل القواعد المقترح
+\`LegalSource\` ← \`LegalProvisionVersion\` ← \`ApplicabilityCondition\` ← \`RuleVersion\` ← \`ComponentDependency\` ← \`RuleTestCase\`.
 
-## Public repository safety
-Store metadata, synthetic templates and links only. Do not commit confidential copies of the official library, personal salary reports, private PDF scans or unlicensed full book texts.
+ينفذ المحرك عمليات آمنة محددة بأنواع بيانات متحققة، وليس تعبيرات برمجية اعتباطية من PDF أو نموذج AI.
+
+## التعديلات اللاحقة
+عند صدور تعديل أو حكم: احفظ المصدر؛ افحص السريان والرجعية؛ أنشئ إصدار قاعدة جديدًا؛ حدد الشهور والحسابات المتأثرة؛ احسب **مقترحًا جديدًا** دون مسح السابق؛ ثم اعرضه على المراجع. لا يكون مؤلف القاعدة هو المعتمد الوحيد لأثرها.
+
+## حماية المستودع
+ارفع روابط وبيانات وصفية وقوالب اصطناعية فقط. لا ترفع مكتبة تشريعات سرية أو ملفات صرف حقيقية أو ملفات ممسوحة خاصة أو نصوص محمية كبيرة.

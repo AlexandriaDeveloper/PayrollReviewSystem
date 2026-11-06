@@ -1,43 +1,47 @@
-# Centrally calculated deductions — source-trusted amounts (design)
+# البنود التي تُقبل مبالغها من الاستحقاقات المركزية دون إعادة حساب
 
-**Owner-confirmed scope, 2026-11-06. Documentation only; no coding authorization.**
+**متطلبات تشغيل أكدها المالك في 6 نوفمبر 2026؛ ليست تصريح كود ولا اعتمادًا لنسب قانونية.**
 
-## Core policy
-Some financial items are calculated by **central entitlements**. The accounting-unit payroll reviewers do **not** independently calculate or approve/reject the legal formula/rate of these items. Instead, the new application imports the central figure as a **source-trusted amount**, within the verified report and scope.
+## السياسة الأساسية
+في بعض البنود تُنتج الاستحقاقات المركزية الرقم، والمراجع بالوحدة الحسابية **لا يعيد حساب معدل أو نسبة البند** ولا يملك ضمن نطاقه الموافقة أو الاعتراض على طريقة الحساب العادية. يسجل البرنامج القيمة كما وردت من مصدر **متحقق القراءة**.
 
-This is a rule about **responsibility for recalculation**, not blanket trust in corrupt or mismatched PDF extraction. Data completeness, sign, identity, month, duplicates, arithmetic reconciliation, and report authenticity remain subject to import-quality checks.
+هذا ليس تساهلًا في سلامة PDF؛ يجب التأكد من الموظف والشهر والكود والاسم والجانب والمبلغ والإشارة ومنع التكرار وصحة الإجماليات وبصمة الأصل.
 
-## Owner-named items
-| Owner's wording | Proposed treatment | Exact Oracle mapping |
+## البنود التي حددها المالك
+
+| الاسم التشغيلي | طريقة المراجعة | ما لم يثبت بعد |
 | --- | --- | --- |
-| صندوق دعم المعاقين | CENTRAL_SOURCE_AMOUNT; do not independently recalculate contribution/deduction | **UNVERIFIED** — obtain official printed label, eight-digit code and source column from actual report |
-| صندوق الشهداء | CENTRAL_SOURCE_AMOUNT; do not independently recalculate contribution/deduction | **UNVERIFIED** — obtain official printed label, code and source column |
-| معاشات/تأمينات (general) | CENTRAL_SOURCE_AMOUNT; no general recomputation | Only as verified in original report |
-| معاشات/تأمينات (part-time exceptional case) | General source amount remains unchanged; run **separate exceptional assessment-base control** when law and evidence permit | See PART-TIME-INSURANCE-CONTROL.md |
+| صندوق دعم المعاقين | \`CENTRAL_SOURCE_AMOUNT\`، دون إعادة حساب المبلغ | الاسم الرسمي الدقيق وكود Oracle وموضعه |
+| صندوق الشهداء | \`CENTRAL_SOURCE_AMOUNT\`، دون إعادة حساب المبلغ | الاسم الرسمي والكود والجانب |
+| التأمينات والمعاشات عمومًا | أخذ القيمة من المركزية مع سلامة القراءة | موضع البيانات وحصة المؤمن عليه أو الجهة |
+| المعاشات في حالة عمل جزءًا من الوقت | قبول القيمة المصدرية مع **فحص استثنائي مستقل للوعاء** عند ثبوت النص والبيانات | القانون المنطبق والوعاء المستخدم فعليًا |
 
-The Owner's names are colloquial business identifiers. Do not invent official legal names, account codes, rates, expenditure chapters, charge allocation or whether each line is a deduction/employer cost until the real report mapping is confirmed. Do not collapse 'صندوق دعم المعاقين' and 'صندوق الشهداء' into one item even if report code/text is ambiguous; flag for manual source mapping.
+لا تخترع من أسماء البنود المتداولة لدى المراجعين أسماء قانونية أو أكواد حساب أو نسبًا أو باب صرف أو تصنيف حصة جهة. لو تشابه الاسم أو الكود بين بندين، اعرضه للمراجع بدل دمجهما.
 
-## Proposed item control policy
-Component audit treatment should be date/scoped/versioned, not hard-coded in the employee entity:
-- \`INDEPENDENT_CALCULATION\` — reviewer supplies verified facts; engine proposes formula-based expected value.
-- \`CENTRAL_SOURCE_AMOUNT\` — the report's verified amount is carried as source observation; **no independent expected calculation**. The absence of a locally calculated figure is NOT discrepancy and is NOT expected amount 0.
-- \`REFERENCE_ONLY\` — non-payable factual financial base (e.g. frozen basic 30-06-2015).
-- \`EXCEPTION_CONTROL\` — specifically approved audit check with separate legal and factual conditions, never a blanket general-rate review.
+## سياسات محرك المراجعة المقترحة
+| القيمة التقنية | المعنى |
+| --- | --- |
+| \`INDEPENDENT_CALCULATION\` | البرنامج يقترح قيمة من بيانات وقانون معتمدين ويعرضها للمراجع |
+| \`CENTRAL_SOURCE_AMOUNT\` | القيمة الموثوقة من Oracle، ولا يوجد حساب مستقل لها داخل البرنامج |
+| \`REFERENCE_ONLY\` | قيمة مرجعية لا تُصرف، مثل أساسي 2015 |
+| \`EXCEPTION_CONTROL\` | فحص ضيق ومحدد الشروط، مثل وعاء المعاش عند جزء الوقت |
 
-Such policy may vary by institution, payment kind, employee legal regime, effective period and actual observed Oracle line. Reviewer-authorized changes require versioning and audit event, not hidden runtime override.
+تختلف السياسة حسب الجهة ونوع الصرف والكادر وفترة السريان وسياق البند، وتغييرها يحتاج صلاحية وسجل مراجعة وإصدارًا جديدًا.
 
-## Required reviewer UX
-Show the value from Oracle as reported, with badge/text "يُقبل من الاستحقاقات المركزية دون إعادة احتساب" ONLY after mapping/report quality verification. It should still be included once in appropriate gross/deduction/total equations according to actual report classification. Do not create a fictitious ExpectedAmount equal to SourceAmount and then claim the value was independently validated.
+## شكل العرض للمراجع
+يظهر المبلغ مع العبارة: **«يُؤخذ من الاستحقاقات المركزية دون إعادة احتساب»**، بعد ثبوت أنه البند الصحيح وأن القراءة سليمة. لا تخلق \`ExpectedAmount = SourceAmount\` وتدعي أن النظام حسبه مستقلًا؛ غياب القيمة المتوقعة في هذه الحالة **طبيعي** وليس صفرًا أو اختلافًا.
 
-If the import is missing/unreadable/duplicate, label **SourceUnverified / ReviewRequired**. A user may still report a concern or request official correction. The exception does not remove data quality checks, suspicious inconsistencies or financial oversight of the overall payroll.
+إذا لم تُقرأ القيمة أو تكررت أو ظهرت في صفحة أو جانب غير متوقع، فتكون \`SourceUnverified\` أو \`ReviewRequired\`. يظل من حق المراجع إثبات ملاحظة وطلب تصحيح رسمي عند وجود دليل.
 
-## Acceptance tests
-- **CM-001:** a readable, correctly classified named central-source item is shown/imported without independent rate recomputation or automatic legal discrepancy.
-- **CM-002:** no local expected formula exists for central source item -> no false zero or missing-calculation blocker.
-- **CM-003:** duplicate imported contribution -> report duplicate/amount control, do not double-deduct.
-- **CM-004:** amount sign or two-column RTL misparsed -> reject/ReviewRequired, never silently trust a corrupt extraction.
-- **CM-005:** source line belongs to different month/employee -> mismatch despite central-source calculation policy.
-- **CM-006:** unknown ambiguous Oracle account/label for either fund -> mapping review; no guessed official code.
-- **CM-007:** social-insurance general item -> no general recomputation; part-time case with verified full-base mismatch -> separate flagged objection.
-- **CM-008:** central item included in total deduction -> aggregate financial reconciliation still validates total exactly once.
-- **CM-009:** central-source item changes in an official corrected PDF -> preserve original source version, import corrected value and track reviewer follow-up.
+## اختبارات القبول
+| المعرف | المدخل | المخرج |
+| --- | --- | --- |
+| CM-001 | بند مركزي معروف ومقروء جيدًا | عرض قيمته دون إعادة حساب معدل |
+| CM-002 | لا توجد معادلة محلية للبند | لا يظهر خطأ أو \`ExpectedAmount=0\` |
+| CM-003 | استقطاع مكرر أثناء الاستخراج | تنبيه واحتمال ازدواج، لا خصم مرتين |
+| CM-004 | فقد سالب أو خطأ عمود عربي RTL | مراجعة أو رفض بدل قبول قراءة مشوهة |
+| CM-005 | سطر يخص موظفًا أو شهرًا آخر | اختلاف مصدر حتى لو السياسة مصدرية |
+| CM-006 | اسم أو كود صندوق غامض | طلب ربط مدعوم بمستند، لا كود مخترع |
+| CM-007 | تأمين عادي أو حالة جزء وقت مثبتة | لا إعادة حساب عامة؛ فحص استثنائي مستقل عند اللزوم |
+| CM-008 | البند جزء من إجمالي الاستقطاعات | يدخل مرة واحدة في مطابقة الإجمالي |
+| CM-009 | وصول PDF رسمي مصحح بقيمة جديدة | النسختان محفوظتان وتُتابع الملاحظة |

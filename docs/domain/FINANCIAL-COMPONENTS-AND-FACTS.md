@@ -1,37 +1,35 @@
-# Financial items, non-payable reference data and dependencies
+# البنود المالية والوقائع المرجعية غير المصروفة والتبعيات
 
-## Five distinct concepts
-1. **Reference fact / calculation basis**: amount/date used for another calculation, e.g. frozen basic on **30 June 2015**. Not a cash earning by itself.
-2. **Entitlement component**: money owed to payee under verified rule/decision; may be fixed, proportional, contingent, recurring, one-off.
-3. **Deduction**: reduction from employee cash settlement (tax, insured-person contribution etc) only when law requires.
-4. **Employer cost / informational component**: e.g. employer-side social insurance, not cash payable to worker.
-5. **Aggregate/display total**: gross, deductions total, net or financial summary; avoid adding it again to line items.
+## خمسة أنواع مختلفة لا يجب خلطها
+1. **واقعة أو وعاء مرجعي:** مبلغ بتاريخ محدد يستخدم في حساب بند آخر، مثل أساسي **30 يونيو 2015**؛ لا يصرف بحد ذاته.
+2. **بند استحقاق:** مبلغ يستحقه المستفيد وفق سند معتمد، وقد يكون ثابتًا أو نسبيًا أو مشروطًا أو دوريًا أو لمرة واحدة.
+3. **استقطاع:** يؤثر في صافي المستحق النقدي فقط بحسب الأحكام والنطاق المعتمد.
+4. **حصة جهة العمل / بند معلوماتي:** مثل نصيب الحكومة من التأمينات؛ قد يظهر في مستند Oracle لكن ليس راتبًا يُصرف للموظف.
+5. **إجمالي للعرض:** جملة الاستحقاقات أو الاستقطاعات أو الصافي؛ ليس بندًا جديدًا يُضاف مرة أخرى.
 
-Do not rely on a universal IsPaid boolean. Keep separate **classification**, **calculation role**, **cash-net effect** and **treatment in each legal or accounting base**, effective by context and period.
+لا يكفي \`IsPaid\` واحد. افصل **التصنيف** عن **دور المبلغ في المعادلة** عن **أثره في صافي النقد** وعن **أوعية القوانين المختلفة**، مع سريان زمني ولفئة محددة.
 
-## Reference case: 30-06-2015
-- Record the actual **dated baseline fact** with amount, person/employment, type, verification, provenance and revised/superseded facts.
-- A 2026 promotion does **not** automatically rewrite the historic 2015 number. Some grade-linked allowances may change due to grade *without* a change to that reference base.
-- New employees without an actual 2015 historical base must not be assigned an invented value or a default guessed from another grade.
-- Court rulings/administrative corrections may require a new verified reference fact; retain old historical information, dates and affected-item recalculation.
-- A legacy calculation of 2015 base from a percentage or salary ladder may serve as **candidate for investigation** only, not an auto-approved fact.
-- The 2015 item must never be added to payable gross merely because it is in employee financial data.
+## مرجع 30 يونيو 2015
+- احفظ القيمة التاريخية الفعلية وتاريخها ونوعها ومن اعتمدها والمستند وحالات التصحيح.
+- ترقية عام 2026 **لا تعيد كتابة** أساسي 2015 تلقائيًا؛ قد تتغير علاوة مرتبطة بالدرجة وحدها.
+- لا تفترض رقمًا لموظف لم تكن له قيمة تاريخية مثبتة في 2015، ولا تستنتجه من درجة مشابهة.
+- الحكم القضائي أو التصحيح الإداري قد ينتج **نسخة مرجعية جديدة** مع حفظ السابقة وتحديد البنود والشهور المتأثرة.
+- أي صيغة قديمة تستنتج مرجع 2015 من نسبة أو جدول لا تعدو كونها قرينة للبحث، لا حقيقة تعتمد تلقائيًا.
+- **ممنوع إضافة الوعاء المرجعي إلى إجمالي الاستحقاقات النقدية لمجرد وجوده في بيانات الموظف.**
 
-## Calculated components
-- For each employee+date derive only from verified input facts, employment status, event history, grade and versioned rule.
-- Dependency graph: base component -> eligible grade/incentive/allowance -> lawful gross -> legally defined tax/insurance base -> deductions/net.
-- Some amounts use a **fixed historical reference date**, not current wage; the rule specifies.
-- Per-rule minimum/maximum, proration and rounding must be explicit, not hard-coded globally.
-- Frozen/special historical allowances may have their own fixed identity and historical amount; never auto-recalculate all of them when baseline changes.
+## بنود الحساب المستقل
+لكل مستفيد وشهر، ابحث عن الوقائع والدرجة والكادر والأحداث وإصدار القانون الساري فقط، ثم كوّن شجرة تبعيات: وعاء مرجعي ← بدل/حافز/علاوة إذا انطبقت الشروط ← جملة استحقاقات صحيحة ← الأوعية القانونية المقررة إن كانت في النطاق ← صافي المبلغ. قد تستعمل قاعدة تاريخًا مرجعيًا ثابتًا بدل الأجر الحالي، وتحتاج حدًا أدنى/أقصى وتقريبًا واحتساب جزء الشهر خاصًا بها.
 
-## Versioning and history
-- Store base assignments with effective intervals; calculated values are immutable per-run lines/snapshots, not an endlessly overwritten value.
-- Every change: event/decision reference, authority, valid date, knowledge/record date, before/after, reason, affected components.
-- Duplicate imports or duplicate administrative decisions must not generate duplicate entitlement.
-- Separate internal ComponentCode from Oracle code; mapping considers description, side, period and source metadata.
+بعض العلاوات التاريخية مثبتة بمبلغ مستقل لا يتغير بتغير كل وعاء؛ لا تعِد حسابها جميعًا بصورة جماعية عند ترقية.
 
-## Example (illustrative ONLY, NOT law)
-Historical reference 500 -> illustrative grade allowance 40% = 200; functional wage 6500. Cash gross from those payable items = 6700, not 7200. Different rule may keep the grade allowance fixed or disallow it entirely. Do not turn example percentages into production config.
+## الإصدارات والأثر التاريخي
+- إسناد البند مرتبط بفترة السريان، ونتائج الحساب محفوظة في \`ExpectedCalculationRun/Line\` لا تُستبدل بصمت.
+- كل تغيير يحمل القرار وتاريخه الإداري والمالي وتاريخ العلم به والجهة والقيم السابقة واللاحقة.
+- تكرار الاستيراد أو القرار لا يولد حقًا مكررًا.
+- \`FinancialComponent\` الداخلي يختلف عن \`Oracle AccountCode\`؛ الربط يعتمد على الاسم والجانب والفترة والمستند والقرار.
 
-## Separate cash entitlement and insured wage base for part-time exception
-An approved employee work-time reduction may affect cash entitlements but **not** the separately documented insured wage assessment base in the Owner's example. E.g., 1000 pre-reduction cash, 650 current cash, documented 1000 insured base: never infer contribution base from 650 cash. This is a **narrow flagged check**, not blanket insurance recomputation; verify original legal applicability and the actual central insured base before concluding. See [part-time control](PART-TIME-INSURANCE-CONTROL.md).
+## مثال رياضي توضيحي **ليس قانونًا**
+مرجع تاريخي 500، وعلاوة مفترضة 40% منه = 200، وأجر وظيفي افتراضي 6500. إجمالي البنود **التي تُصرف** في المثال 6500 + 200 = **6700** وليس 7200؛ لأن 500 قيمة مرجعية لا تُضاف مرة أخرى. قد يكون القانون الحقيقي مختلفًا أو العلاوة ثابتة أصلًا.
+
+## مثال جزء الوقت والمعاشات
+موظف له أجر نقدي افتراضي 1000 ثم انخفض المستحق إلى 650 بقرار خاص، بينما **وعاء الاشتراك المعتمد المستقل** في المثال 1000. لا تستبدل الوعاء المعتمد تلقائيًا بمبلغ 650؛ ولا تفترض قانونية الحالة لجميع الكوادر. راجع [رقابة جزء الوقت](PART-TIME-INSURANCE-CONTROL.md).
