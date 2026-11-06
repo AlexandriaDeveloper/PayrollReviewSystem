@@ -1,108 +1,103 @@
-# OraclePdfParser — practical technical baseline and gap analysis
+# دراسة OraclePdfParser — المرجع العملي لبدء استيراد Oracle PDF
 
-**Status:** code study / engineering reference, not implementation authorization. Reviewed 2026-11-06 based on the GitHub repository's main branch at that time. Pin the exact upstream SHA before any code reuse or regression claim.
+**الحالة:** دراسة كود ومصدر تقنية؛ ليست تصريحًا باستيراد كود أو دليلًا على عمل كل أنواع الملفات. راجعت النسخة بتاريخ 6 نوفمبر 2026؛ قبل النقل يجب تثبيت SHA المصدر والاختبارات.
 
-**Upstream:** https://github.com/AlexandriaDeveloper/OraclePdfParser
-**Project target:** AlexandriaDeveloper/PayrollReviewSystem — separate independent audit system; no Git submodule/dependency/code copied in this documentation PR.
+**المشروع الحالي:** https://github.com/AlexandriaDeveloper/OraclePdfParser  
+**المشروع المستهدف:** https://github.com/AlexandriaDeveloper/PayrollReviewSystem
 
-**Follow-up in-depth audit:** [Oracle parser failure audit](ORACLE-PARSER-FAILURE-AUDIT.md) and [financial-line identity / Arabic mapping](../specs/ORACLE-FINANCIAL-LINE-IDENTITY.md). The code-study baseline should not be interpreted as a claim that all known bugs have been fixed.
+المراجعة التفصيلية الإلزامية: [25 مشكلة](ORACLE-PARSER-FAILURE-AUDIT.md) و[المفاتيح والعربية](../specs/ORACLE-FINANCIAL-LINE-IDENTITY.md).
 
-## Why this repository is important
-OraclePdfParser is an existing working *starting point* for Arabic payroll PDF ingestion, not just an architectural idea. It already contains a .NET 10 parser, input abstraction, PDFium text extraction, Arabic text/number normalization, three Oracle report types, cross-document checks, local import archive, review statuses, Excel export and focused unit/integration tests.
+## لماذا نبدأ من هذا المشروع؟
+لديه أساس واقعي في ‎.NET 10 وPDFium لتفريغ Unicode، وواجهة للعربية، وثلاثة أنواع من الصرفيات، ومطابقة تقارير، وأرشيف نتائج في SQLite، وتصدير Excel واختبارات. لذلك **الأفضل تطويره من نقطة بداية لا كتابة Regex جديد من الصفر**.
 
-A separate existing PDF-EXTRACTOR project uses **physical-table cell reconstruction** (pdfplumber) to handle mirrored two-pane Arabic layouts where flattened Unicode text loses column meaning. Evaluate both strategies without assuming either covers every source.
+لكن \`PDF-EXTRACTOR\` يستخدم \`pdfplumber\` لاستعادة **الخلايا والصفوف المادية** عندما تضيع دلالة العمودين الاستحقاقات/الاستقطاعات من النص المسطح. لا تفترض دقة أي طريق وحده لكل ملفات المنظومة.
 
-## Existing code map — read these first
-| Upstream path | Role |
+## خريطة الكود القديم
+
+| الملف | وظيفته |
 | --- | --- |
-| README.md | Current requirements, run commands, supported types and limits. |
-| src/OraclePdfParser.Application/Contracts.cs | `IPdfTextSource.ReadPages(Stream)` and `IPayrollImportService.Import(fileName,pages)`. |
-| src/OraclePdfParser.Infrastructure/PdfiumTextSource.cs | Page-by-page PDFium Unicode text stream; no X/Y geometry; native dependency. |
-| src/OraclePdfParser.Infrastructure/PdfPigTextSource.cs | Alternate page text source based on PdfPig content order. |
-| src/OraclePdfParser.Application/Arabic.cs | Arabic normalization, digits/separators, decimal conversion. |
-| src/OraclePdfParser.Application/PayrollImportService.cs | Kind recognition and individual payslip / cover / payment-sheet parsing. |
-| src/OraclePdfParser.Domain/Payroll.cs | `ReportKind`, `PayrollEmployee`, `PayrollEntry`, `CoverGroup`, `VerificationStatus` etc. |
-| src/OraclePdfParser.Application/PayrollBatchReconciler.cs | Cross-source employee/period/count/net/group comparisons. |
-| src/OraclePdfParser.Api/Program.cs | `POST /api/import`, archive/review/export endpoints; multi-file upload. |
-| src/OraclePdfParser.Infrastructure/SqliteImportArchive.cs | Local import snapshot archive; **raw PDF bytes are not saved there**. |
-| src/OraclePdfParser.Infrastructure/PayrollExcelExporter.cs | Native XLSX, RTL sheets, numeric cells, source page and text identifiers. |
-| tests/OraclePdfParser.Tests | Import, Arabic, edge-case, cross-file, metadata, Excel, PDFium and archive tests. |
-| tools/OraclePdfParser.Verify/Program.cs | Local strict and sample-specific private verification CLI. |
+| \`README.md\` | الأنواع وطريقة التشغيل والحدود |
+| \`src/OraclePdfParser.Application/Contracts.cs\` | \`IPdfTextSource.ReadPages(Stream)\` و\`IPayrollImportService.Import(fileName,pages)\` |
+| \`src/OraclePdfParser.Infrastructure/PdfiumTextSource.cs\` | استخراج النص لكل صفحة بواسطة PDFium دون إحداثيات X/Y كاملة |
+| \`src/OraclePdfParser.Infrastructure/PdfPigTextSource.cs\` | بديل ترتيب النص باستخدام PdfPig |
+| \`src/OraclePdfParser.Application/Arabic.cs\` | تطبيع العربية والأرقام والفواصل وتحويل \`decimal\` |
+| \`src/OraclePdfParser.Application/PayrollImportService.cs\` | تصنيف نوع التقرير واستخراج الفرد والكافر وكشف الصرف |
+| \`src/OraclePdfParser.Domain/Payroll.cs\` | \`ReportKind\` و\`PayrollEmployee\` و\`PayrollEntry\` و\`CoverGroup\` و\`VerificationStatus\` |
+| \`src/OraclePdfParser.Application/PayrollBatchReconciler.cs\` | مطابقة الأفراد والفترات والأعداد والصافي والمجموعات |
+| \`src/OraclePdfParser.Api/Program.cs\` | \`POST /api/import\` وواجهات الأرشيف والتصدير |
+| \`src/OraclePdfParser.Infrastructure/SqliteImportArchive.cs\` | يحفظ نتيجة الاستيراد، **لا يحتفظ ببايتات PDF الأصلية** |
+| \`src/OraclePdfParser.Infrastructure/PayrollExcelExporter.cs\` | تصدير XLSX مع RTL والأرقام والصفحات |
+| \`tests/OraclePdfParser.Tests\` | اختبارات الاستيراد والعربية والحدود والمطابقة والتصدير وPDFium |
+| \`tools/OraclePdfParser.Verify/Program.cs\` | فحص خاص محلي مع وضع \`--strict\` وأوضاع مرتبطة بعينات |
 
-## Upstream report kinds and parsing approach
-- `EmployeePayslip` — individual employee report: identity, payment number, bank, earnings/deductions, employer informational shares, printed gross/deductions/net, line-item/page evidence. Employees may occupy more than one page.
-- `Cover` (كافر) — bank-group totals, staff counts, continuation pages.
-- `PaymentSheet` (كشوف صرف) — employee rows, split/RTL values and bank-group controls.
-- `Unknown` — reject / flag; never invent a report kind from filename.
-- Existing statuses: `Verified`, `ReviewRequired`, `Rejected`. These are **extraction/reconciliation** statuses, not a legal entitlement decision.
+## أنواع التقارير
+- \`EmployeePayslip\`: تقرير الموظف؛ رقم الصرف، البنك، الاستحقاقات والاستقطاعات وحصة جهة العمل والإجماليات وصفحات التفاصيل.
+- \`Cover\`: الكافر، وفيه مجموعات البنوك وعدد العاملين والإجماليات والصفحات الممتدة.
+- \`PaymentSheet\`: كشوف الصرف، وهويات المستفيدين ومبالغ الصرف والمجموعات، وقد تختلف الخلايا العربية.
+- \`Unknown\`: غير معروف؛ لا تخمن نوع التقرير من اسم الملف وحده.
+- \`Verified\` و\`ReviewRequired\` و\`Rejected\` حالات قراءة ومطابقة، **لا قرارات قانونية بصحة المرتب**.
 
-Existing approach: PDF file -> PDFium Unicode pages -> normalize matching text -> detect content-based document type -> parse employees/groups/items -> report-specific numerical checks -> cross-file reconciler -> archive parsed snapshots. The original PDF is processed in memory and **not** archived by upstream; the NEW audit system must archive the original securely with hash and page references.
+المسار القديم: PDF ← نص PDFium ← تطبيع واستنتاج النوع ← استخراج موظفين/مجموعات/بنود ← فحص المجاميع ← مطابقة التقارير ← أرشيف النتيجة. المشروع الجديد يجب أن يضيف **أصل PDF وبصمته ومكان السطر**.
 
-## How to run existing OraclePdfParser independently on a Windows dev machine
-Prerequisites: .NET 10 SDK, Node.js 22 and npm, native PDFium runtime supported by upstream. Clone or open existing repository. Run from repository root:
+## تشغيل النسخة القديمة محليًا — مثال Windows
+المتطلبات حسب المشروع القديم: ‎.NET 10 SDK وNode.js 22 وnpm ومكتبات PDFium المناسبة. من مجلد المستودع القديم:
 
-```powershell
+\`\`\`powershell
 dotnet restore .\src\OraclePdfParser.Api\OraclePdfParser.Api.csproj
 dotnet run --project .\src\OraclePdfParser.Api\OraclePdfParser.Api.csproj --urls http://localhost:5080
-```
+\`\`\`
 
-In another terminal:
+في نافذة أخرى:
 
-```powershell
+\`\`\`powershell
 cd web
 npm install
 npm start
-```
+\`\`\`
 
-Open http://localhost:4200. Upload 1–3 files from the locally protected machine; inspect kinds, employee count, IDs, page evidence, warning list, bank groups and exported XLSX. **Do not expose this local unauthenticated app on the public internet.**
+افتح \`http://localhost:4200\` وافحص عدد المستفيدين والسطور والمجموعات والتحذيرات والتصدير بعد رفع 1–3 ملفات تجريبية في جهاز آمن. **الـAPI القديم محلي وغير معد للمشاركة على شبكة عامة بلا توثيق.**
 
-Strict CLI verification of private test PDFs without putting originals in GitHub:
-```powershell
+اختبار خاص بملفات محفوظة خارج Git:
+
+\`\`\`powershell
 dotnet run --project tools\OraclePdfParser.Verify -- --strict "C:\PrivatePayroll\payslip.pdf" "C:\PrivatePayroll\cover.pdf" "C:\PrivatePayroll\payment.pdf"
-```
-(The example paths are placeholders; keep real source files in approved secure local storage, not the repository.)
+\`\`\`
 
-The upstream README also describes a `--golden-october-2026` mode tied to ONE private reference set and hard-coded controls. That is a regression fixture only, **not** proof that other reports/layouts/periods parse correctly; do not copy its confidential control amounts into this new public repository.
+المسارات أمثلة. وضع \`--golden-october-2026\` المذكور في المشروع مرتبط بمجموعة **خاصة واحدة** وضوابط ثابتة؛ لا يدل نجاحه على ملفات أشهر أو أعداد صفحات أو تنسيقات أخرى.
 
-## Known implementation limitations / verification gaps
-**Code-observed risk:** `PayrollImportService` has `Money` / `Currency` regular expressions that do not include a leading minus sign even though `Arabic.Amount` can parse negative values. Any sign-sensitive extraction must receive a fail-first regression test before reuse.
+## القيود الفعلية والتهديدات الفنية
+1. التعبيرات العددية في \`PayrollImportService\` قد تفقد **علامة السالب** رغم دعم \`Arabic.Amount\` لبعض الأشكال.
+2. مطابقة مجموعات البنك في مسار ما تستخدم **ترتيب المجموعة** بدل هويتها وموقعها.
+3. PDFium يخرج نصًا مسطحًا دون صفوف وخلايا؛ لذلك قد تتداخل الأعمدة والاسم العربي والكود والمبلغ.
+4. مستندات الصرف قد تحمل حصص حكومة معلوماتية؛ تطابق الصافي وحده لا يثبت صحة باقي البنود.
+5. SQLite يخزن نتائج مفككة وليس PDF الأصلي؛ المشروع الجديد يحتاج SHA-256 وأرشيفًا محميًا وإصدارات.
+6. حماية الإنتاج لا تنقل من API المحلي كما هي؛ يلزم دخول وصلاحيات وسجل تحكم.
+7. ملفات PDF الممسوحة أو المجهولة التنسيق تحتاج رفضًا/مراجعة صريحة؛ لا تفترض دقة OCR.
+8. لا تنقل كودًا من مشروع قديم قبل التحقق من التراخيص والمكتبات الأصلية والتحديثات الأمنية.
 
-**Code-observed risk:** `PayrollBatchReconciler` compares cover/payment groups by their **position** in a list in one path rather than guaranteed bank+branch+batch identity. Equal net with wrong group/ordering is not an acceptable financial validation.
+## مصفوفة التحقق المحلي
+1. الأنواع الثلاثة وترتيب رفعها المختلف، ورفض النوع غير المعروف.
+2. الرقم القومي ورقم الصرف ومعرّف الجهة منفصلة، مع التكرار والنقص والتضارب.
+3. المبلغ السالب والفواصل العشرية والأرقام العربية والفارسية والأصفار الأولى.
+4. مطابقة الاستحقاقات والاستقطاعات والصافي وحصة الحكومة بحسب النموذج.
+5. فصل عمودي الجدول، وعدم جمع حصة جهة العمل كاستحقاق نقدي.
+6. صفحات امتداد الموظف وتغير ترتيب الأعمدة وأكواد غير معروفة وأسماء مختلفة لكود واحد.
+7. مطابقة البنك والفرع والمجموعة وعدد المستفيدين والفترة عبر التقارير.
+8. القيم المفقودة \`null\` ومراجعة لازمة، لا صفر مخترع.
+9. بصمة مصدر وموقع السطر وعدم الازدواج عند إعادة الاستيراد.
+10. النسخة المركزية الرسمية المصححة تحفظ بجانب القديمة، لا تحل محلها.
 
-**Architecture risk:** PDFium Unicode stream has no physical X/Y cell layout. Two-column RTL reports, continuation pages, separated codes/amounts and mirrored Arabic text can require an alternate cell-aware adapter; PDF-EXTRACTOR is evidence that this is material.
+## خطة الاستفادة المقترحة
+1. ابدأ بعقود PDFium والتحليل والمطابقة الموجودة، ثم أصلح المشكلات المثبتة.
+2. اجعل المخرجات من Adapter موحد يحفظ النص الخام **وموقع الخلية إن توفر** وإصدار المحلل والحالات الدقيقة.
+3. قارن القراءة النصية باستراتيجية الجداول المادية على اختبارات اصطناعية وملفات أصلية محمية.
+4. اجعل جودة القراءة غير قرار الاستحقاق القانوني وغير إثبات الدفع.
+5. طبق \`SourceFinancialOccurrence\` بحيث لا يضيع أي ظهور متكرر للبند.
 
-**Source-evidence gap:** upstream SQLite archives only parsed reports/issues, not original PDF bytes; the independent auditor must preserve source bytes with SHA-256 and version, type/period/source page/cell mapping to reproduce findings.
+## فروق المصطلحات
+- **نجاح القراءة:** أمكن استخراج بنية PDF بقرائن.
+- **مطابقة المستندات ماليًا:** توافقت الأرقام والأطراف داخل نطاق فحص محدد.
+- **استحقاق قانوني:** يلزمه سند مستقل وواقعة موظف معتمدة وقرار مراجع.
+- **إثبات الدفع:** يحتاج دليل تسوية منفصل عن ظهور الرقم في كشف الصرف.
 
-**Trust gap:** matching net/aggregate figures does NOT prove that gross, deduction line items, informational employer contributions, identities, groups, taxes or legal entitlements are correct. Preserve quality and reconciled-dimensions separately.
-
-**Operational gap:** upstream API is local-first without production RBAC/SQL Server enterprise audit; do not reuse unauthenticated API design for payroll data.
-
-**Report limitation:** PDFium+PdfPig approach is text-layer based. Image-only or unknown-layout PDFs need an explicit unsupported/review workflow; OCR cannot be assumed correct.
-
-**License/dependency gap:** before copying upstream code, review current code/dependency licenses, native PDFium packaging, security update strategy and portability.
-
-## Minimum local verification matrix
-Use independently controlled private originals and **synthetic fixtures committed to CI**, across varied months, groups and layouts:
-1. All three report kinds and mixed input ordering; unknown document rejected.
-2. Employee/payer unique stable identification; missing/duplicate/mismatched national/payment codes.
-3. All monetary signs, comma/Arabic separators, thousands separators, Decimal precision.
-4. No net-only approval: printed gross, deductions, net and report-specific employer-share equation checked.
-5. Distinct physical-pane earning/deduction items and government contribution as informational, never cash.
-6. Continuation across page, unexpected pages per employee, unknown account codes and same code/multiple labels.
-7. Cross-file mismatching bank group / branch, group count, period and employee count.
-8. Missing printed values leave null/ReviewRequired, not invented zeros.
-9. Source page/row/cell evidence for each item, report hash and reimport idempotency.
-10. Corrected report imports as distinct version, never updates earlier snapshots.
-
-## Recommended adoption
-1. Do **not** create a completely new regex-only parser without studying upstream.
-2. Derive an adapter contract from existing `IPdfTextSource`, `IPayrollImportService`, `PayrollBatchReconciler` but **extend** it for physical layout information, original bytes/hashes and granularity of evidence.
-3. Evaluate PDFium text adapter + structured table adapter (based on PDF-EXTRACTOR techniques) over an independent fixture suite.
-4. Prefer a single validated output domain contract and explicitly preserve original/normalized text and confidence.
-5. Authorize a narrow parser technical spike and test plan before any production implementation; no automatic dependency or code port is authorized by this documentation.
-
-## Important distinctions
-- "Parsed successfully": source was readable and data extraction passed a parser's structural tests.
-- "Financially reconciled": expected cross-source arithmetic and groups match in the verified scope.
-- "Legally entitled": requires independent approved employee facts and legal rule; not proven by PDF.
-- "Paid": requires accepted payment/settlement evidence, not a payslip alone.
+راجع [التصميم العملي بالأمثلة](../examples/01-ERD-INPUT-OUTPUT.md).
