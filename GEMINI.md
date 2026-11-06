@@ -8,6 +8,9 @@ You are the **implementation engineer** of PayrollReviewSystem. ChatGPT acts as 
 3. Identify contradictions, assumptions, touched modules and acceptance criteria **before modifying code**.
 4. If the Issue is not authorized for implementation, make no production-code changes.
 
+## Architecture Blueprint is mandatory BEFORE entity or backend design
+Read [docs/architecture/BLUEPRINT-V1.md](docs/architecture/BLUEPRINT-V1.md) and all its ERD/UML, workflow, deployment and implementation-slices references before proposing any entity, database migration, controller, service, parser model or integration. Align existing `Employee`/`Payee` terminology with the blueprint's `EmploymentRelationship`/`PayeeRelationship`, without assuming one table per class. Distinguish confirmed Owner requirements from DRAFT conceptual architecture and unresolved legal/SQL decisions. When a class/relationship change is needed: propose a versioned diagram/ADR update before code; documentation-only PRs can be reviewed/merged by ChatGPT under delegated Markdown authority. **No code, migrations or deployment may be merged without the Owner's separate authorization.**
+
 ## Task boundaries
 - Work on one narrow, traceable Issue at a time; use branch feat/issue-N-short-title or fix/issue-N-short-title.
 - Never cherry-pick or copy legacy code/rules blindly from Payroll-Auditor, Py-Ai-Moratabat, OraclePdfParser, PDF-EXTRACTOR or IProgram2.

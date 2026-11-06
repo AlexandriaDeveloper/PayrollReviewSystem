@@ -41,6 +41,9 @@ For any importer/parser work, first read docs/reference/ORACLEPDFPARSER-CODE-STU
 ## Markdown-only merge delegation
 The Owner authorized the ChatGPT architect to merge **reviewed Markdown-only changes** without seeking separate merge approval; see docs/governance/COLLABORATION.md. This does **not** authorize Gemini to self-merge, or any application code/configuration/schema/deployment changes.
 
+## Architecture blueprint reference
+Before coding any data access, financial engine, review service or imported PDF model, read docs/architecture/BLUEPRINT-V1.md and its Mermaid ERDs, UML classes, sequences and constraints. These diagrams are draft concepts, not implementation permission. Data and class decisions require an approved physical schema/ADR and a traceable authorized GitHub Issue.
+
 ## Before doing any change
 - Read docs/README.md and only the relevant domain specs; inspect main HEAD, current branch and authorized Issue.
 - State what exists, what is planned, exact change scope, acceptance cases and any open legal/business questions.
