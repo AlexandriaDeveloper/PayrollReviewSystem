@@ -53,12 +53,12 @@
 - [قرارات ADR](decisions/ADR-001-separate-independent-review.md) و[الفصل المالي الزمني](decisions/ADR-002-separate-temporal-cash-and-reference-facts.md).
 
 ## حالات توثيق المعلومات
-- \`REQUIREMENT CONFIRMED\`: أكدها المالك صراحة.
-- \`DESIGN PROPOSAL\`: اقتراح هندسي لم يعتمد تفاصيله بعد.
-- \`LEGAL SOURCE UNVERIFIED\`: لم يُراجع النص الأصلي والصفحة أو السريان بعد.
-- \`IMPLEMENTATION AUTHORIZED\`: مهمة تنفيذ مرخصة مستقلة.
-- \`VERIFIED IN CODE\`: كود واختبارات فعلية راجعناها وثبتت.
+- `REQUIREMENT CONFIRMED`: أكدها المالك صراحة.
+- `DESIGN PROPOSAL`: اقتراح هندسي لم يعتمد تفاصيله بعد.
+- `LEGAL SOURCE UNVERIFIED`: لم يُراجع النص الأصلي والصفحة أو السريان بعد.
+- `IMPLEMENTATION AUTHORIZED`: مهمة تنفيذ مرخصة مستقلة.
+- `VERIFIED IN CODE`: كود واختبارات فعلية راجعناها وثبتت.
 
-المشاريع السابقة \`Payroll-Auditor\` و\`Py-Ai-Moratabat\` و\`OraclePdfParser\` و\`PDF-EXTRACTOR\` و\`IProgram2\` مصادر دراسة لا تنقل قوانين أو جداول إلى هنا تلقائيًا. والمذكرات المرفوعة سابقًا ليست بديلًا عن أصول القوانين.
+المشاريع السابقة `Payroll-Auditor` و`Py-Ai-Moratabat` و`OraclePdfParser` و`PDF-EXTRACTOR` و`IProgram2` مصادر دراسة لا تنقل قوانين أو جداول إلى هنا تلقائيًا. والمذكرات المرفوعة سابقًا ليست بديلًا عن أصول القوانين.
 
 **كل قرار برمجي أو قاعدة مالية جديدة يجب أن تحافظ على السجلات المصدرية والاعتماد التاريخي، وأن تعود للمراجع والمالك عند وجود غموض.**
