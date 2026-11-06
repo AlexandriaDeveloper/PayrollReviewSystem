@@ -56,6 +56,9 @@
 - حالة العمل **جزءًا من الوقت** تستلزم رقابة خاصة على وعاء المعاش المعتمد عند وجود مستندات وسند قانوني؛ ليست إذنًا بمحرك تأمينات عام.
 - راجع `docs/domain/CENTRAL-CALCULATED-ITEMS.md` و`docs/domain/PART-TIME-INSURANCE-CONTROL.md`.
 
+## بوابة قواعد الاستحقاق عند التداخل
+قبل أي تنفيذ لـ`IFinancialRuleResolver` أو `FinancialRuleVersion` أو حدث غياب/ترقية/جزء وقت، **يلزم** قراءة `docs/specs/TEMPORAL-RULE-RESOLUTION-AND-CONFLICTS.md` و`docs/specs/RULE-INTERACTION-AND-VALIDATION.md` و`docs/examples/03-TEMPORAL-RULE-CONFLICT-EXAMPLE.md`. شروط الانطباق ثلاثية `TRUE/FALSE/UNKNOWN`؛ المجهول ليس خطأ ولا سببًا لاختيار قاعدة أخرى. منع تلقائي لاختيار أحدث قرار أو أعلى رقم أولوية؛ حل التداخل فقط بعلاقة موثقة المصدر والنطاق. افصل درجات كل علاقة عمل، وفترات السريان عن تاريخ العلم، واحفظ `SnapshotHash` و`RuleTrace` ونسخ الاعتماد. لا تركّب أثر الترقية أو الغياب أو جزء الوقت على بند واحد إلا بخطة تركيب معتمدة. أضف اختبارات `TR-001..TR-030` قبل أي محرك حقيقي، ولا تُدخل صيغة قانونية من الأمثلة الاصطناعية.
+
 ## حدود الحساب المالي
 - افصل `SourceAmount` و`ExpectedAmount` و`ReviewedAmount` و`OfficialCorrectionAmount` و`VerifiedPaidAmount`.
 - لا تستنتج نوع البند من أول رقم في كود Oracle وحده.
