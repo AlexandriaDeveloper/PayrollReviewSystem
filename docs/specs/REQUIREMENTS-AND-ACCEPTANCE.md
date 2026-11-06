@@ -1,94 +1,111 @@
-# Requirements baseline and acceptance scenarios
+# المتطلبات الوظيفية ومعايير القبول — PayrollReviewSystem
 
-**Status:** requirements/design proposed from Owner discussion. Any specific implementation task needs separate approved Issue. **No legal numerical constants authorized here.**
+**الحالة:** متطلبات مؤكدة أو مقترحات محددة بحسب مصدرها. لا تمثل هذه القائمة تفويضًا تلقائيًا بتطوير كل ميزة، ولا إثباتًا لقانون أو قيمة مالية. أمثلة المبالغ والموظفين افتراضية.
 
-## User roles
-Intake operator; auditor; senior reviewer; legal/rule approver; payroll/central-entitlements respondent; system administrator; read-only oversight. Permission matrix needs Owner approval before production.
+## أدوار المستخدمين
+- **مسؤول الاستيراد:** يرفع ملفات Oracle ويراجع جودة المستندات دون اعتماد الحق المالي.
+- **المراجع المختص:** يراجع المجموعة المكلف بها، ويثبت البيانات والملاحظات والقرارات ضمن صلاحياته.
+- **مراجع أعلى / معتمد:** يعتمد نتائج المراجعة وفق مصفوفة صلاحيات لم تُحسم تفاصيلها بعد.
+- **مسؤول القواعد القانونية:** يراجع أصول النصوص والإصدارات والانطباق؛ لا يعتمد أثر القاعدة وحده إن كان هو مؤلفها.
+- **مسؤول التطبيق:** حسابات المستخدمين والنسخ الاحتياطية والأمان؛ لا يفترض أنه يملك حقًا ماليًا.
+- **مالك النظام:** يعتمد نطاقات العمل والقرارات الجوهرية والكود والهجرات والنشر.
 
-## Functional requirement groups
-| ID | Requirement |
+## المتطلبات الوظيفية
+
+| المعرف | الوظيفة المطلوبة |
 | --- | --- |
-| FR-001 | Import multiple genuine Oracle report forms as immutable, versioned evidence. |
-| FR-002 | Parse Arabic RTL and preserve source page/line as reviewer evidence. |
-| FR-003 | Resolve identity safely; person != employee != outside recipient. |
-| FR-004 | Model historical grades, legal status, affiliations and orders by effect period. |
-| FR-005 | Catalogue payable, deductible, employer, informational, historical-base and aggregate financial data distinctly. |
-| FR-006 | Store multiple approved legal rule versions with sources, date conditions and traceable inputs. |
-| FR-007 | Recompute expected earnings by employee/component/period, with dependency ordering. |
-| FR-008 | Calculate promotion/periodic allowance effect, reference-date conditions, and partial-period cases if verified. |
-| FR-009 | Compute retroactive entitlements by component/original month independently of anticipated payment month. |
-| FR-010 | Compare expected/Oracle/reviewed/official-correction and payment evidence without overwriting originals. |
-| FR-011 | Record findings, request documents, verify decisions, defer, approve, reopen and follow up, using proper review gates. |
-| FR-012 | Allocate later demonstrated retroactive payments to original claims; track unsettled or overpaid balances. |
-| FR-013 | Standard social-insurance/pension calculation review is OUT OF SCOPE for the accounting-unit reviewer; pass through central values as external source observations, with a narrow part-time insured-base exception after rule/source verification. Separate tax treatment remains to be scoped. |
-| FR-014 | Provide Arabic RTL employee workpapers, dashboards and audit report exports. |
-| FR-015 | Log all material actions, rule changes, imports and official corrections with tamper-evident references. |
-| FR-016 | RBAC, confidentiality and non-destructive corrections; no central payroll edit/payment. |
-| FR-017 | Handle incomplete evidence as open review issues without invented amounts. |
-| FR-018 | Support source-trusted central-calculated financial items (including صندوق دعم المعاقين and صندوق الشهداء) with no local recomputation, while preserving source-quality controls and the approved pension part-time exception. |
+| FR-001 | استيراد أنواع Oracle الأصلية المتعددة وحفظها أدلة غير قابلة للتعديل وبإصدارات. |
+| FR-002 | قراءة العربية RTL ومكان كل سطر وصفحة والاسم الخام. |
+| FR-003 | ربط الهوية بأمان مع الفصل بين الشخص والموظف والمستفيد الخارجي. |
+| FR-004 | إدارة الدرجات والحالات والجهات والقرارات تاريخيًا حسب تواريخ الأثر. |
+| FR-005 | فصل الاستحقاق والاستقطاع وحصة الجهة والبند المعلوماتي والوعاء المرجعي والإجمالي. |
+| FR-006 | حفظ نسخ قانونية متحققة وتواريخ سريانها وفئاتها ومراجعها ومدخلاتها. |
+| FR-007 | حساب الاستحقاقات المتوقعة استقلالًا لكل مستفيد وبند وفترة وفق التبعيات. |
+| FR-008 | اقتراح أثر الترقية والعلاوة وجزء الشهر والمرجع التاريخي عند ثبوت القاعدة. |
+| FR-009 | حساب المتجمدات لكل بند وشهر أصلي دون افتراض موعد دفعها. |
+| FR-010 | مقارنة المصدر والمتوقع والمراجع والتصحيح الرسمي وإثبات الدفع دون تغيير الأصل. |
+| FR-011 | ملاحظات وطلب مستندات واعتماد وإعادة فتح وتأجيل ومتابعة عبر بوابات صلاحية. |
+| FR-012 | تخصيص المدفوعات المتجمدة المثبتة إلى أصل المطالبات وتتبع ما تبقى أو زاد. |
+| FR-013 | حساب التأمينات والمعاشات **العادي خارج نطاق إعادة حساب المراجع**؛ المبلغ الوارد مصدر مقبول، مع رقابة استثنائية لوعاء جزء الوقت بعد إثبات النص والمصدر. الضرائب تحتاج تحديد نطاق منفصل. |
+| FR-014 | شاشة عربية RTL وتقارير ورقية ولوحة متابعة وتصدير بيانات رقابية. |
+| FR-015 | سجل لكل استيراد وقرار وتعديل قاعدة وتصحيح رسمي، مع أدلة تمنع التلاعب. |
+| FR-016 | صلاحيات وأمان ونسخ مستقلة للتصحيح؛ لا تعديل Oracle ولا تنفيذ دفع. |
+| FR-017 | نقص البيانات يبقى ملاحظة مفتوحة، ولا ينقلب إلى صفر مخترع أو قبول. |
+| FR-018 | صندوق دعم المعاقين وصندوق الشهداء والبنود المركزية المحددة تأخذ أرقامها من Oracle دون إعادة حساب مع الاحتفاظ برقابة جودة المصدر والاستثناء التأميني. |
 
-## Acceptance scenario matrix (non-exhaustive)
-| ID | Input / event | Expected behavior |
+## مصفوفة سيناريوهات القبول — الهوية والتاريخ والحساب
+
+| الاختبار | الحالة المدخلة | السلوك المتوقع |
 | --- | --- | --- |
-| AC-001 | One person has two concurrent financial relationships | No false duplicate employee/payment entitlement; each relation tracked separately. |
-| AC-002 | Foreign payee has passport and no national ID | Supports identity review without fabricated 14-digit ID. |
-| AC-003 | Oracle grade differs from approved promotion grade | Source conflict raised; canonical grade not overwritten. |
-| AC-004 | Salary month historical and current grade changed | Calculates historic entitlement from grade effective in old month. |
-| AC-005 | Frozen basic 30-06-2015 = 500, used to compute allowance | Basic recorded as calculation-only; never added to net as separate earning. |
-| AC-006 | 2015 basic unknown | No default derived fictitious amount or "zero"; needs evidence. |
-| AC-007 | Ruling revises historic 2015 figure | Recompute affected items in new run, preserve old decision/source and old base. |
-| AC-008 | Periodic allowance increases job wage but not all other components | Only dependencies specified by approved rule change. |
-| AC-009 | Special allowance independent of job wage | Do not automatically incorporate or recalculate dependent incentives. |
-| AC-010 | Promotion affects different grade-based allowances differently | Component-by-component results and legal source references. |
-| AC-011 | Decision issued September, financial effect July, applied in October | July–September retro entitlement calculated; October payment not assumed. |
-| AC-012 | Some arrears reported in December, remainder later | Allocated partial settlement, no duplicate claim. |
-| AC-013 | Later lump-sum arrears have no component/period breakdown | Remain Unallocated; no heuristic distribution. |
-| AC-014 | Two promotions and allowance across yearly boundary | Segment by intervals and correct grade/rule per period. |
-| AC-015 | Underpayment/overpayment with a negative adjustment | Preserves sign; no implicit employee deduction. |
-| AC-016 | Employee shows in cover but not individual payment sheet | ReviewRequired missing evidence, not Verified. |
-| AC-017 | Net matches but earnings/deductions disagree | Financial mismatch flagged. |
-| AC-018 | Bank group mismatches despite net match | Group discrepancy flagged. |
-| AC-019 | Mirrored Arabic amount loses negative sign | Import blocked or corrected with evidence and test. |
-| AC-020 | One Oracle code appears with two different labels | Distinct mapping decisions, no code-only classification. |
-| AC-021 | Financial source has missing value | Unknown/null, not assumed zero. |
-| AC-022 | Same PDF imported twice | Idempotent detection; do not duplicate approved events or claims. |
-| AC-023 | Reviewer enters corrected amount | Overlay with reason; original Oracle amount immutable. |
-| AC-024 | Official central correction received | Separate version verified and linked, source original retained. |
-| AC-025 | Review completed but official correction pending | Review completion independent from finding resolution/payment settlement. |
-| AC-026 | Money reported in payroll sheet but bank evidence absent | State "reported", not "paid". |
-| AC-027 | Payment confirmed for part of an arrears claim | Outstanding amount reflects only supported allocations. |
-| AC-028 | Rule source version superseded after historical approval | Old snapshot untouched; new review run generated if needed. |
-| AC-029 | Unknown legal applicability | Rule cannot auto-approve monetary amount. |
-| AC-030 | Unauthorized user tries rule/approval mutation | Access denied and audit event recorded. |
-| AC-031 | Personal ID or bank detail included in exported diagnostic | Redacted or export denied; no data published to GitHub. |
-| AC-032 | Actual report has unexpected RTL physical table layout | Parser adapter produces evidence/review issues, not guessed verified values. |
+| AC-001 | شخص واحد له علاقتان ماليتان متزامنتان | لا ازدواج وهمي ولا دمج استحقاقين؛ كل علاقة مستقلة |
+| AC-002 | مستفيد أجنبي بجواز سفر دون رقم قومي | مراجعة هوية بلا اختراع رقم من 14 خانة |
+| AC-003 | درجة Oracle تختلف عن درجة الترقية المعتمدة | اختلاف مصدر دون تغيير الدرجة المرجعية تلقائيًا |
+| AC-004 | مراجعة شهر قديم بعد تغير الدرجة الحالية | استعمال الدرجة السارية في الشهر القديم |
+| AC-005 | أساسي مرجعي 30 يونيو 2015 = 500 واستخدامه لحساب علاوة | تخزينه مرجعًا فقط لا إضافته لصافي الراتب |
+| AC-006 | أساسي 2015 غير معلوم | طلب مستند، لا صفر ولا قيمة افتراضية |
+| AC-007 | حكم يغير المرجع التاريخي | نسخة حساب جديدة مع حفظ المرجع والقرار السابقين |
+| AC-008 | علاوة دورية تغير الأجر الوظيفي ولا تغير كل البنود | إعادة حساب التبعيات التي يحددها السند فقط |
+| AC-009 | علاوة خاصة مستقلة عن الأجر الوظيفي | لا دمج آلي ولا تغيير حوافز لا تتأثر بها |
+| AC-010 | الترقية تؤثر بشكل مختلف في عدة بدلات | نتيجة مستقلة لكل بند مع مرجع القاعدة |
+| AC-011 | قرار سبتمبر بأثر مالي يوليو وتطبيق مركزي أكتوبر | فروق يوليو–سبتمبر، ولا افتراض أنها صُرفت في أكتوبر |
+| AC-012 | جزء من المتجمد ظهر في ديسمبر والباقي لاحقًا | تتبع تسوية جزئية دون تكرار مطالبة |
+| AC-013 | مبلغ متجمد مجمع دون شهر أو بند محدد | \`Unallocated\`، لا توزيع تقديري |
+| AC-014 | ترقيتان وعلاوة عبر حدود السنة | تقسيم المدد حسب الدرجة والقاعدة السارية |
+| AC-015 | فرق مستحق سالب أو زيادة صرف | حفظ الإشارة ومنع أي خصم تلقائي من المرتب |
 
+## مصفوفة سيناريوهات القبول — Oracle والمراجعة والأمان
 
-## Owner-confirmed exceptional scenarios (2026-11-06)
-
-| ID | Input / event | Required system response |
+| الاختبار | الحالة المدخلة | السلوك المتوقع |
 | --- | --- | --- |
-| AC-033 | Unit code 30200105 spans three colleges with mixed staff/faculty/contractor/payees | Scope by correct employing/paying relation; no accidental conflation. |
-| AC-034 | A death/secondment decision arrives after payroll review approval | New controlled amendment/version with evidence; no rewriting original approval or automatic bank block. |
-| AC-035 | Reviewer supplies approved financial data conflicting with Oracle | Stage independent difference; Oracle cannot update canonical amount without reviewer action. |
-| AC-036 | Program calculates promotion/allowance impact | Proposal only until reviewer confirms/adjusts/rejects. |
-| AC-037 | Four expected items totaling 1,000 appear aggregated as one central item | Show component discrepancy; allow documented within-bab exception only after reviewer validation. |
-| AC-038 | Standard pension deduction received from central payroll, no part-time exception | Preserve/display/source-reconcile amount; no general insurance entitlement recalc or finance reviewer approval judgment. |
-| AC-039 | Part-time approved: full insured base 1,000; cash due 650; central insured base 650 | Pension assessment base error flagged for reviewer objection/correction; don't compute employee premium from an assumed rate. |
-| AC-040 | Part-time approved: full insured base 1,000; cash due 650; central insured base 1,000 | No pension-base discrepancy due to cash reduction alone. |
-| AC-041 | Central PDF shows only premium amount, not insured base | Do not claim base wrong/known; request evidence if exception is relevant. |
-| AC-042 | Part-time insured base not legally evidenced for employee category | RuleNotVerified; no automatic legal finding. |
-| AC-043 | Salary reviewer assigned group X, outside reviewer attempts modification | Enforce assigned group rights and record denied access; other authorized payroll types remain shared. |
-| AC-044 | Two reviewers edit same payroll observation | Optimistic concurrency conflict, identity/time/action in audit trail, no silent last-write-wins. |
+| AC-016 | موظف موجود في الكافر وغير موجود بكشف صرف فردي | نقص إثبات و\`ReviewRequired\` لا \`Verified\` |
+| AC-017 | الصافي متطابق لكن الاستحقاقات أو الاستقطاعات تختلف | إظهار اختلاف مالي رغم الصافي |
+| AC-018 | مجموعة بنك مختلفة رغم تطابق الصافي | فرق مجموعة وهوية، لا مطابقة بالترتيب |
+| AC-019 | مبلغ عربي مقلوب أدى لفقد السالب | منع اعتماد الاستيراد أو إصلاحه بدليل واختبار |
+| AC-020 | نفس كود Oracle باسمين مختلفين | سطران وقرارا ربط، لا تصنيف بالكود فقط |
+| AC-021 | قيمة مالية غير مقروءة | \`null/Unknown\` لا صفر |
+| AC-022 | استيراد PDF نفسه مرتين | كشف البصمة وعدم تكرار الحقوق والقرارات |
+| AC-023 | المراجع يثبت قيمة مراجعة مختلفة | حفظ \`ReviewedAmount\` منفصلًا مع السبب، والأصل ثابت |
+| AC-024 | وصول مستند رسمي مصحح | نسخة جديدة مرتبطة بالأصل دون استبداله |
+| AC-025 | انتهى الفحص وما زال تصحيح رسمي معلقًا | انتهاء المراجعة مستقل عن إغلاق الملاحظة أو التسوية |
+| AC-026 | مبلغ ظهر بكشف صرف بلا إثبات بنك | \`ReportedInPayroll\` وليس \`PaidVerified\` |
+| AC-027 | ثبت صرف جزء من مطالبة متجمدات | المتبقي يخص المبالغ المثبت تخصيصها فقط |
+| AC-028 | تغير إصدار قاعدة بعد اعتماد تاريخي | حفظ النسخة القديمة وإنشاء حساب جديد عند اللزوم |
+| AC-029 | سريان القاعدة القانونية غير معروف | عدم الاعتماد المالي تلقائيًا |
+| AC-030 | مستخدم غير مصرح يغير قاعدة أو اعتمادًا | رفض من الخادم مع سجل تدقيق |
+| AC-031 | ملف تصدير يحتوي رقمًا قوميًا أو بنكًا غير مخوّل | إخفاء أو منع التصدير، لا نشره إلى GitHub |
+| AC-032 | جدول PDF عربي RTL غير متوقع | Adapter يقدّم دليلًا وتحذيرًا بدل رقم متخيل |
 
-| AC-045 | Correctly extracted central صندوق دعم المعاقين deduction | Accept reported amount without independent legal rate calculation, but keep totals checks. |
-| AC-046 | Correctly extracted central صندوق الشهداء item | Same source-trusted treatment; preserve exact official label and context. |
-| AC-047 | Central-calculated item has no local ExpectedAmount | Mark not calculated by design, not 0 or discrepancy. |
-| AC-048 | Central-calculated fund amount is repeated in PDF extraction | Show duplicate/total inconsistency, not automatically trusted twice. |
-| AC-049 | Official fund item code is unknown or ambiguous | Ask for reviewer mapping/evidence; do not invent an 8-digit code. |
+## مصفوفة السيناريوهات المؤكدة من المالك — الوحدة الحسابية
 
-## Nonfunctional
-- Currency arithmetic precision, period determinism, repeatable runs, latency targets measured from sanitized realistic-sized fixtures.
-- Persistence and audit integrity; role-limited access to PII; recoverable encrypted backups; no uncontrolled file uploads.
-- Arabic RTL display including mixed English codes/numbers; leading zeros retained in external identifiers; Excel formula injection prevention.
-- Test coverage on independently established total/identity/bank-group control figures. A green CI does not validate private report accuracy.
+| الاختبار | الحالة المدخلة | السلوك المتوقع |
+| --- | --- | --- |
+| AC-033 | الوحدة \`30200105\` فيها ثلاث كليات وفئات وظيفية ومستفيدون مختلفون | اختيار علاقة التعيين/الصرف الصحيحة، بلا دمج أشخاص أو فئات |
+| AC-034 | وفاة أو إعارة بعد اعتماد مراجعة المرتب | طلب تعديل وإصدار اعتماد جديد بدليل، دون محو السابق أو إيقاف بنك تلقائي |
+| AC-035 | المرجع المالي الذي أدخله المراجع يختلف عن Oracle | عرض فرق مستقل؛ Oracle لا يعدّل المرجع تلقائيًا |
+| AC-036 | النظام يقترح أثر ترقية أو علاوة | مقترح لحين موافقة المراجع أو تعديله أو رفضه |
+| AC-037 | أربعة بنود متوقعة مجموعها 1000 ظهرت تحت بند مركزي واحد | فرق توزيع؛ يمكن قبول استثناء موثق ضمن باب الصرف بعد التحقق |
+| AC-038 | قيمة معاش عادية من المركزية دون استثناء جزء وقت | عرضها ومطابقة مصدرها دون محرك حساب تأمينات مستقل |
+| AC-039 | قرار جزء وقت: وعاء معتمد 1000 ونقد 650 ووعاء مركزي 650 | إثبات احتمال خطأ وعاء عند اكتمال السند، وطلب اعتراض/تصحيح؛ دون حساب قيمة الخصم من نسبة مخترعة |
+| AC-040 | قرار جزء وقت: وعاء معتمد 1000 ونقد 650 ووعاء مركزي 1000 | لا فرق وعاء بسبب انخفاض النقد وحده |
+| AC-041 | PDF يوضح قيمة الخصم فقط ولا يوضح الوعاء | طلب مصدر إضافي وعدم الجزم بأن الوعاء خاطئ |
+| AC-042 | لا سند قانوني مؤكد للوعاء في فئة معينة | \`RuleNotVerified\`، لا تقرير مخالفة تلقائي |
+| AC-043 | مراجع مرتبات المجموعة X يحاول تعديل موظف خارج مجموعته | رفض الوصول، مع السماح بالصرفيات الأخرى للمخولين بها |
+| AC-044 | مراجعان يعدلان الحالة نفسها بتوقيت متقارب | \`OptimisticConcurrencyConflict\` وسجل تفصيلي لا حفظ آخر تعديل بصمت |
+| AC-045 | استقطاع صندوق دعم المعاقين مقروء بصورة صحيحة | أخذ القيمة من المركزية دون إعادة حساب النسبة، مع مطابقة المجاميع |
+| AC-046 | صندوق الشهداء يظهر في مصدر صحيح | حفظ الاسم والسياق والقيمة دون احتساب مستقل |
+| AC-047 | بند مركزي لا يملك \`ExpectedAmount\` محليًا | «غير محسوب تصميميًا» لا صفر ولا اختلاف |
+| AC-048 | صندوق مركزي تكرر أثناء استخراج PDF | تنبيه ازدواج وفحص المجموع، لا خصم مرتين |
+| AC-049 | كود الصندوق الرسمي مجهول أو الاسم العربي ملتبس | طلب ربط معتمد ودليل، دون اختراع كود من ثمانية أرقام |
+
+## متطلبات غير وظيفية
+- أرقام نقدية ثابتة الدقة؛ حتمية نتائج الحساب والتقريب بحسب القاعدة والزمن؛ قياس الأداء بعينات كبيرة **اصطناعية**.
+- حفظ الأصل والمراجعات بإصدارات غير قابلة للتغيير بصمت، ونسخ احتياطية مشفرة واختبارات استعادة.
+- صلاحيات بحسب الكلية والمجموعة والدورة ونوع الصرف، وسجل من غيّر ومتى ولماذا، وحماية البيانات الشخصية.
+- عرض عربي \`RTL\` مع الأكواد الإنجليزية والأرقام دون انقلاب أو فقد الأصفار الأولى، وتصدير Excel آمن من المعادلات النصية الخطرة.
+- اختبارات مفصلة لحفظ سطور Oracle المتكررة والجانب والكافر والمجاميع والهوية؛ **CI أخضر لا يثبت صحة PDF حقيقي واحد فضلًا عن جميع الملفات**.
+- وضع \`ReviewRequired\` و\`Rejected\` و\`Approved\` و\`PaidVerified\` حالات منفصلة لا تُستبدل ببعضها.
+- لا اعتماد لقاعدة قانونية أو نشر للبرنامج إلا بقرار واضح من المالك ومصادر واختبارات مناسبة.
+
+## أمثلة تطبيقية مرتبطة بمعايير القبول
+- [مثال ERD وجداول Oracle والنتائج](../examples/01-ERD-INPUT-OUTPUT.md): يغطي \`AC-020\` و\`AC-021\` و\`AC-045\`.
+- [مثال UML وسلوك المراجع](../examples/02-UML-REVIEW-EXAMPLES.md): يغطي \`AC-034\` و\`AC-037\` و\`AC-039\` و\`AC-044\` بصورة توضيحية.
