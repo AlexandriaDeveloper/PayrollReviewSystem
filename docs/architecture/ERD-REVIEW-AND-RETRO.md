@@ -1,7 +1,8 @@
-# Conceptual ERD 3 — Expected payroll, audit workflow, retroactive entitlement and verified settlement
+# ERD رقم 3 — محرك الحساب والمراجعة والاعتماد والمتجمدات
 
-> Draft, non-executable. Keep historical revisions. `SourceFinancialOccurrence`, `PayeeRelationship` and `AdministrativeDecision` are logical references to [ERD 1](ERD-CORE.md) and [ERD 2](ERD-IMPORT-AND-AUDIT.md).
+**مخطط تصوري.** يحفظ الفرق بين المبلغ الوارد من Oracle، والحساب المقترح، وقرار المراجع، والتصحيح الرسمي، وما ظهر في كشف الصرف، وما ثبت صرفه.
 
+## العلاقات المرسومة
 ```mermaid
 erDiagram
   PAYROLL_CYCLE ||--o{ EXPECTED_CALCULATION_RUN : receives
@@ -165,22 +166,25 @@ erDiagram
   }
 ```
 
-## Critical financial and procedural semantics
-- One reported line can represent **several expected financial lines**, and one expected component can be represented by several reported occurrences. `LINE_ALLOCATION` is an **explicit, reviewer-reviewed many-to-many bridge**, never an implicit code join. The same-expenditure-chapter exception is not automatic matching.
-- Expected lines are **proposals** when the underlying formula is independent and verified. If the audit policy is `CENTRAL_SOURCE_AMOUNT`, `ExpectedAmount` is absent **by design**; it must not be defaulted to zero or falsely declared a separately verified match.
-- Not every `AuditFinding` needs one numeric difference: source ambiguity, wrong identity, missing legal decision or wrong funding chapter are valid findings without precise `Difference`.
-- A `REVIEWED_AMOUNT_OVERLAY` is a decision **about** a reported value and never modifies the imported source line.
-- `REVIEW_APPROVAL` signs a fixed review revision/snapshot. A later event creates `POST_APPROVAL_AMENDMENT` and a new review revision instead of editing earlier approval in place.
-- `RETRO_ENTITLEMENT`: one logical claim per payee relationship + component + original period + cause + approved calculation revision. Subsequent recalculations use new revisions with supersession links; do not duplicate active logical claims.
-- `REPORTED_RETRO_MOVEMENT` means the amount appeared in central payroll. It does **not** prove bank settlement. `RETRO_PAYMENT_ALLOCATION` requires separately acceptable `PAYMENT_EVIDENCE`. A lump sum with uncertain month/item mapping remains unallocated and ReviewRequired.
-- Overpayment does not authorize automatic recovery; a separate human-controlled correction/follow-up is needed.
-- External payment evidence may be absent in the first MVP. Record `ReportedInPayroll` without claiming `PaidVerified`.
-- Audit log captures import, calculations, review changes, rule changes, assignment changes and access decisions; the full authoritative audit ledger must be append-only or otherwise tamper-evident under chosen infrastructure.
+## مسؤولية كل مجموعة
+- \`ExpectedCalculationRun\` و\`ExpectedCalculationLine\`: نتيجة حساب مستقلة **مقترحة** لكل بند وشهر ونسخة قاعدة، مع الأثر الحسابي.
+- \`AuditCase\` يجمع مراجعة علاقة صرف في دورة محددة، و\`AuditFinding\` يسجل الفرق أو نقص الهوية/المستند حتى لو لم نستطع وضع مبلغ له.
+- \`ReviewAction\` يسجل ما فعله المراجع وسببه. \`ReviewedAmountOverlay\` نتيجة مراجعة منفصلة لا تعدّل \`SourceFinancialOccurrence\`.
+- \`ReviewApproval\` يعتمد **نسخة ثابتة** من البيانات والقواعد والحسابات، و\`PostApprovalAmendment\` يفتح إصدارًا جديدًا لقرار لاحق مثل وفاة أو إعارة أو عمل بجزء الشهر.
+- \`LineAllocation\` جسر ربط محتمل **متعدد لمتعدد** بين السطور المستوردة والمتوقعة؛ يحتاج مراجعة قبل اعتماد التجميع.
+- \`RetroEntitlement\` فرق عن شهر أصلي وبند وسبب وإصدار. \`ReportedRetroMovement\` ظهور مبلغ لاحقًا في كشف الصرف، لا يعني تسوية.
+- \`PaymentEvidence\` إثبات فعلي مستقل؛ \`RetroPaymentAllocation\` يوزع مبلغًا مثبتًا على مستحقات أصلية إن تسمح الأدلة.
+- \`AuditEvent\` يربط المستخدم والوقت والمصدر والقرار والقيمة السابقة واللاحقة.
 
-## Referential integrity and unresolved physical choices
-1. An `AUDIT_CASE` represents a reviewed **payee relationship in a specific payroll cycle**, not necessarily a single PDF recipient row. Case details can include several source recipient occurrences/official files.
-2. `LINE_ALLOCATION` needs explicit cap checks: allocations by source/expected side must not exceed the confirmed available amount and must avoid double allocation across report reimports. Signed negative movements require an approved treatment rather than an unsigned total.
-3. `REVIEW_APPROVAL` must bind all approved inputs: import versions, mappings, facts, rules, financial run and findings, rather than a mutable screen or current employee profile.
-4. User permission to create a review action is not proof of permission to approve the same action. Define segregation of duties with the Owner.
-5. Timing and identity of real disbursement evidence require a separate source study before final schema/matching.
-6. Put immutable originals, immutable calculation versions and audit actions into separate storage/transaction boundaries from mutable work-in-progress projections.
+## قواعد عدم التلاعب والازدواج
+1. بند يُؤخذ من المركزية وفق \`CentralSourceAmount\` قد لا يكون له \`ExpectedAmount\` مستقل. لا تملأه بصفر ولا تدّع حسابه.
+2. إذا جمعت المركزية عدة بنود في سطر واحد، اعرض كل المتوقع وكل المصدر، واسمح بقبول استثنائي موثق فقط إذا تحققت شروط باب الصرف والصلاحية.
+3. المبلغ المتجمد يرتبط بالمستفيد والبند والشهر الأصلي والقرار وإصدار الحساب؛ لا تكرر المطالبة عند تشغيل الحساب مرة أخرى.
+4. صرف مبلغ متجمد مجمع لا يعني معرفة توزيعه على الأشهر تلقائيًا؛ يبقى \`Unallocated\` حتى يثبت الربط.
+5. اعتماد المراجعة ليس إثباتًا للسداد، وانتهاء الفحص لا يغلق طلب التصحيح أو متابعة التسوية.
+6. بعد الاعتماد، يحتفظ النظام بالنسخة السابقة، ولا يغيرها القرار الجديد.
+7. لا يسمح بإجمالي تخصيص أكبر من المبلغ المثبت، مع مراعاة إشارة الفروق السالبة وضوابطها.
+8. الفصل بين من يقترح قاعدة ومن يعتمد أثرها يتم بالخادم وليس واجهة المستخدم فقط.
+
+## مثال لمقارنة المصدر والمتوقع
+راجع [المثال العملي للـERD](../examples/01-ERD-INPUT-OUTPUT.md) و[سيناريوهات المراجعة في UML](../examples/02-UML-REVIEW-EXAMPLES.md).

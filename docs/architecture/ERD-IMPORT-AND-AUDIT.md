@@ -1,7 +1,8 @@
-# Conceptual ERD 2 — Immutable Oracle evidence, import quality, repeated financial lines and reviewer assignments
+# ERD رقم 2 — مستندات Oracle والسطور الأصلية وأعمال المراجعين
 
-**Draft, non-executable**. This view is source-focused: import values and labels are **observations**, not approved entitlements or canonical employee facts.
+**كل قيمة مستوردة هي دليل خارجي لا حقيقة موظف معتمدة.** يختلف استيراد صرفية فردية عن الكافر وكشوف الصرف، وقد تكون بعض النماذج إجمالية بلا أسماء مستفيدين.
 
+## العلاقات المرسومة
 ```mermaid
 erDiagram
   ORGANIZATION_UNIT ||--o{ PAYROLL_CYCLE : owns
@@ -146,20 +147,27 @@ erDiagram
   }
 ```
 
-## Non-negotiable parser and source rules
-- **No unique constraint on `RawCode`, `RawArabicLabel`, their concatenation, or amount**. Even identical code/label/amount can denote two physical occurrences, or double extraction; validate with source coordinates and official totals before deciding.
-- `SourceLineId` identifies a **specific extraction occurrence**. Re-parsing the same original with another adapter/version generates separately traceable candidates, then comparison/staging decides accepted interpretation. Do not double-post their amounts.
-- Persist the **original immutable PDF** securely with hash; never commit real files to GitHub. The parsed text, glyph order, normalized display candidates, coordinates and source page form a chain of evidence.
-- Some report types display no employee detail and only source bank groups/summary. The `SOURCE_RECIPIENT_OCCURRENCE` relation is optional.
-- No mapping decision can silently mutate PERSON/EMPLOYMENT/APPROVED_FINANCIAL_FACT or the imported original string.
-- Work assignment is by **payroll cycle and group**, with recorded reassignment dates. Other disbursement types use authorized access rules; shared access does not imply concurrent writes without optimistic concurrency.
-- Name conflicts and duplicate employee identity are review cases; a payslip with `ReviewRequired` cannot overwrite a verified source's name.
-- Group matching depends on period, institutional scope, bank and branch and verified group identifier, **not array index**.
-- Partial reports (missing cover/payment sheet) cannot be called fully cross-reconciled. A `Rejected` classification cannot be downgraded by subsequent review.
-- `COMPONENT_MAPPING_DECISION` may be one-to-many over time as proposed/approved/rejected **decisions**; only one currently authoritative mapping may be active for an occurrence at a given decision revision.
+## دورة البيانات
+1. \`PayrollCycle\` تحدد دورة الصرف والفترة، و\`PayrollGroup\` مجموعات العمل والرقابة.
+2. \`ImportBatch\` مجموعة ملفات مرفوعة؛ قد يحتوي أكثر من ملف من النوع نفسه وفق حالات واقعية معتمدة.
+3. \`SourceDocument\` يحتفظ ببصمة الأصل ومكان تخزينه الآمن ورقم نسخته. النسخة الرسمية المصححة ترتبط بالأقدم ولا تمحوها.
+4. \`DocumentParseAttempt\` يحدد إصدار المحلل وAdapter المستخدم، ويمكن إعادة تحليل المستند دون خلط النتائج السابقة.
+5. \`SourceRecipientOccurrence\` هو ظهور المستفيد داخل مستند محدد، وليس \`Person\` الداخلي.
+6. \`SourceFinancialOccurrence\` **كل صف مالي مستقل** مع الصفحة والجدول والجانب والكود والاسم الخام والمبلغ وعلامته.
+7. \`SourceReportedTotal\` تحفظ الإجماليات المطبوعة، و\`SourceGroupSummary\` مجموعات البنك والكافر، و\`ParseValidationIssue\` الأخطاء.
+8. \`RecipientMatchDecision\` و\`ComponentMappingDecision\` قرارات ربط المراجع بهوية وبند داخلي، مع سجل الحسم والوثيقة.
+9. \`ReviewerAssignment\` يسجل إسناد مجموعة مرتب لمراجع خلال دورة، مع التغيير والتاريخ.
 
-## Trust statuses are separate
-`ParseStatus` = structural readable/rejected/review; `SourceLine.QualityStatus` = item extraction confidence; `MatchDecision` = verified person/component match; `AuditReviewStatus` = financial review by a human; `PaidStatus` = proof of financial settlement.
+## قيود مهمة
+- **ممنوع مفتاح فريد للكود أو للاسم أو للكود+الاسم** داخل الأسطر الأصلية؛ التكرار قد يكون صحيحًا أو ازدواجًا يحتاج فحصًا.
+- اختلاف نتيجة قارئ PDFium وقارئ الخلايا الفيزيائية يجب أن يُعرض ولا يؤخذ أحدهما سرًا.
+- احتفظ بالنص العربي الخام حتى لو كان مقلوبًا؛ الاسم الطبيعي تفسير ثانٍ وليس بديلًا يمسح الأصل.
+- لا تُساوي بين \`ParseStatus\` و\`MappingStatus\` و\`ReviewStatus\` و\`PaymentStatus\`.
+- مطابقة مجموعات الكافر تستخدم البنك والفرع والمجموعة والشهر، لا \`Groups[i]\`.
+- لمجرد نجاح الصافي لا يجوز تجاهل خطأ الاستحقاقات أو الاستقطاعات أو معلومات جهة العمل.
+- لا تنسخ اسمًا أو كودًا غير مؤكد من ملف إلى معلومات موظف معتمد.
+- قد تحتاج الصفحة أو الصف أو التكرار لمراجعة بدلاً من اختراع صفر أو إرجاع \`Verified\`.
+- عند اختيار تصدير موظف واحد، لا تُسرب تحذيرات أو أسماء موظفين آخرين.
 
-## Interfaces to detailed audit ERD
-`PayeeRelationshipId` and `SourceLineId` are referenced from reconciliation and follow-up design. The diagrams are separated to remain readable.
+## مثال للصفوف المخزنة
+في [مثال المدخلات والمخرجات](../examples/01-ERD-INPUT-OUTPUT.md) يظهر الكود \`21110505\` مرتين كعلاوتين لسنتين مختلفتين، مع \`SourceLineId\` مستقل لكل سطر. هذا **مثال اصطناعي** وليس اعتمادًا لأكواد أو مبالغ قانونية.
