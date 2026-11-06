@@ -34,6 +34,11 @@
 
 كل الأسماء والمبالغ في الأمثلة **افتراضية**، والمخططات في GitHub تُعرض باستخدام Mermaid.
 
+## تصميم محرك القواعد وتداخل القرارات والأمثلة
+- [محرك القواعد الزمنية: اختيار الحكم حسب الكادر والدرجة والبند والفترة، وحسم تضارب القرارات](specs/TEMPORAL-RULE-RESOLUTION-AND-CONFLICTS.md).
+- [مثال عملي ERD/UML: غياب + ترقية + إجازة وتعديل بأثر رجعي](examples/03-TEMPORAL-RULE-CONFLICT-EXAMPLE.md).
+- **مهم:** كل هذه مخططات/اختبارات تصميم وليست قواعد غياب معتمدة أو كودًا موجودًا.
+
 ## ملفات دراسة Oracle
 - [دراسة النسخة الحالية من OraclePdfParser](reference/ORACLEPDFPARSER-CODE-STUDY.md).
 - [تقرير 25 مشكلة ومخاطرة](reference/ORACLE-PARSER-FAILURE-AUDIT.md).
