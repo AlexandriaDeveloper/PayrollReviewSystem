@@ -40,6 +40,11 @@
 - [سياسة تركيب آثار القواعد ومنع التداخل غير المحسوم، واختبارات TR-021 إلى TR-030](specs/RULE-INTERACTION-AND-VALIDATION.md).
 - **مهم:** كل هذه مخططات/اختبارات تصميم وليست قواعد غياب معتمدة أو كودًا موجودًا.
 
+## ثلاث حالات إضافية للمراجعة المالية الدقيقة
+- [المواصفة: إجازة بدرجة تاريخية، تغيير/إضافة/استبعاد بند، وترحيل فرق خصم وتسويته تحت بند آخر](specs/HISTORICAL-LEAVE-REVIEW-ADJUSTMENTS-AND-DEDUCTION-CARRY.md).
+- [أمثلة ERD وUML ومدخلات ومخرجات JSON بالأرقام الافتراضية](examples/04-HISTORICAL-LEAVE-ADJUSTMENT-DEDUCTION-CARRY.md).
+- **تنبيه:** الترجيح القانوني لتاريخ الدرجة، وجواز الترحيل أو التسوية من بند بديل، وقواعد تعديل المراجع تحتاج سندًا وصلاحيات معتمدة. لا تنفيذ خصم آلي.
+
 ## ملفات دراسة Oracle
 - [دراسة النسخة الحالية من OraclePdfParser](reference/ORACLEPDFPARSER-CODE-STUDY.md).
 - [تقرير 25 مشكلة ومخاطرة](reference/ORACLE-PARSER-FAILURE-AUDIT.md).

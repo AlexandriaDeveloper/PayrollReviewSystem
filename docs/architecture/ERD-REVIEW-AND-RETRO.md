@@ -186,5 +186,8 @@ erDiagram
 7. لا يسمح بإجمالي تخصيص أكبر من المبلغ المثبت، مع مراعاة إشارة الفروق السالبة وضوابطها.
 8. الفصل بين من يقترح قاعدة ومن يعتمد أثرها يتم بالخادم وليس واجهة المستخدم فقط.
 
+## توسعات مقترحة خارج هذا الرسم الأساسي
+تحتاج التعديلات التي يتخذها المراجع `ReviewAdjustment` بإصدارات بديلًا عن تعديل المصدر/الحساب؛ وتحتاج فروق الخصومات مرحلة متابعة `DeductionObligation` و`DeductionAllocation` مستقلة عن متجمدات **لصالح** الموظف. راجع [مخطط ERD/UML المخصص بالأرقام والمدخلات](../examples/04-HISTORICAL-LEAVE-ADJUSTMENT-DEDUCTION-CARRY.md) و[المواصفة](../specs/HISTORICAL-LEAVE-REVIEW-ADJUSTMENTS-AND-DEDUCTION-CARRY.md). كل الجداول مقترحة إلى حين ADR الفيزيائي.
+
 ## مثال لمقارنة المصدر والمتوقع
 راجع [المثال العملي للـERD](../examples/01-ERD-INPUT-OUTPUT.md) و[سيناريوهات المراجعة في UML](../examples/02-UML-REVIEW-EXAMPLES.md).
