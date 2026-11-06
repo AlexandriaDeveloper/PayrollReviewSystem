@@ -1,82 +1,88 @@
-# DESIGN — Oracle PDF adapter for PayrollReviewSystem
+# تصميم واجهة قراءة Oracle PDF في PayrollReviewSystem
 
-**Status: DESIGN PROPOSAL ONLY / NO IMPLEMENTATION AUTHORIZED**
-**Upstream reference:** [code study](../reference/ORACLEPDFPARSER-CODE-STUDY.md), current OraclePdfParser, and PDF-EXTRACTOR (physical PDF layout approach).
+**الحالة: مواصفات تصميم فقط؛ لا تصريح بنقل كود أو عمل Migration أو تعديل Oracle.**  
+المراجع الإلزامية: [دراسة النسخة القديمة](../reference/ORACLEPDFPARSER-CODE-STUDY.md)، [25 مشكلة](../reference/ORACLE-PARSER-FAILURE-AUDIT.md)، [هوية السطر المالي](ORACLE-FINANCIAL-LINE-IDENTITY.md).
 
-**Required before implementation:** [upstream failure catalogue](../reference/ORACLE-PARSER-FAILURE-AUDIT.md) and [line occurrence and Arabic mapping spec](ORACLE-FINANCIAL-LINE-IDENTITY.md). No code-only account mapping or source-line collapse is allowed.
+## الهدف
+قراءة تقارير Oracle/GFMIS الصادرة للوحدة الحسابية قراءة قابلة للإثبات، مع حفظ بيانات المستفيد والبند والمبلغ الأصلي والصفحة والخلية، وليس ضبط المحلل على ملف خاص واحد فقط. الملفات الخارجية لا تحدد بمفردها الاستحقاق القانوني الصحيح.
 
-## Goal
-Parse **genuine government Oracle/GFMIS reports** with independently verifiable identity, financial values and evidence, not just documents tuned to one private sample. Source files are not the expected lawful payroll and no reviewer action changes them.
+## خطوات وحدود الهندسة
+\`أرشيف أصل PDF\` ← \`تحديد نوع التقرير\` ← \`Adapter نص/خلايا\` ← \`SourceObservations\` ← \`فحص مفصل\` ← \`مطابقة بين التقارير\` ← \`منطقة مراجعة\` ← \`نسخة مصدرية مؤكدة\` ← \`حساب مستحق مستقل\` ← \`فروق وقرارات\`.
 
-## Architecture boundaries
-Document archive -> content classifier -> parser adapter(s) -> normalized source observations -> structural/financial validators -> cross-report reconciler -> reviewer staging -> accepted immutable observations -> expected payroll/reconciliation engine.
+لا تدمج Parser بجدول الموظف أو بمحرك القانون أو بالمدفوعات. كل طبقة تُرجع بياناتها وآثار الإثبات فقط.
 
-Do not couple the parser to Employees canonical schema, approved rules or future payment engine.
+## الواجهات المقترحة — ليست API منفذة
 
-## Candidate contracts (conceptual, not executable API)
-- `IOriginalSourceStore`: `StoreImmutable(stream,metadata)` -> DocumentId, SHA-256, storage URL, captured date, size/page metadata.
-- `IPdfExtractionAdapter`: `Extract(document,classificationHint?)` -> page text, raw segments, coordinates/cells **if supported**, typed diagnostics.
-- `IOracleDocumentClassifier`: document kind(s), confidence, ambiguity reasons, period/entity evidence.
-- `IOracleReportParser`: parse extracted page/cell evidence into typed source observations; no implicit employee updates.
-- `IReportFinancialValidator`: per-kind totals, individual amounts, formulas only from verified report structure, missing-field flags.
-- `ICrossReportReconciler`: match verified identities, period, bank/branch/group IDs, count and amount; no positional group join without validated identity.
-- `IImportReviewWorkflow`: preview/import decisions, final source snapshot and separate reviewer overrides.
-- `IParserQualityGate`: per-file, per-employee and per-item statuses, plus failure reasons and approval blocker.
+| العقد | مسؤوليته |
+| --- | --- |
+| \`IOriginalSourceStore\` | حفظ بايتات الأصل دون تغيير، وبصمة SHA-256 والمكان والتاريخ ونوع الملف |
+| \`IPdfExtractionAdapter\` | قراءة النص الخام وقطع الكلمات وإحداثيات الخلايا إذا دعمها المحرك، وأخطاء الاستخراج |
+| \`IOracleDocumentClassifier\` | اقتراح نوع التقرير وفترته والجهة وسبب الثقة أو الغموض |
+| \`IOracleReportParser\` | تحويل قطع النص والخلايا إلى سطور ملاحظات مصدرية بأنواعها |
+| \`IReportFinancialValidator\` | فحص البنود والإجماليات وحصة الجهة وفق نوع التقرير وحقوله المثبتة |
+| \`ICrossReportReconciler\` | مطابقة المستفيد والرقم والفترة ومجموعة البنك والفرع والأعداد والمبالغ |
+| \`IImportReviewWorkflow\` | شاشة معاينة وقرار ربط المراجع وقبول النسخة المصدرية دون تغيير PDF |
+| \`IParserQualityGate\` | حالات دقيقة لكل ملف وشخص وبند مع أسباب المنع |
 
-Adapters must expose version/strategy, page span, original raw text, normalized label, account, section, money value or null, confidence/evidence and parser issues. The output contract remains provider-agnostic and stable across PDFium/text versus physical-table/cell adapters.
+يجب أن يذكر كل Adapter اسمه وإصداره، ويُخرج النص الخام والمطبع والصفحات والخلايا إن وجدت، والكود والاسم والجانب والمبلغ أو \`null\`، والتعليقات والسبب.
 
-## Data distinctions
-Use distinct models and statuses:
-- `SourceDocument` and `SourceDocumentVersion`: immutable original source and hash.
-- `ParsedDocument`: parser version, checksum, attempt, report period, kind and quality.
-- `SourceEmployeeObservation`: report-visible identity, bank and payment code, **not** canonical Employee.
-- `SourceFinancialLine`: raw row reference + code + full label + sign + amount + financial side + page/cell.
-- `SourceAggregate`: printed totals, not a payable item.
-- `ImportValidationIssue`: severity, evidence location and deterministic check ID.
-- `ImportReviewerDecision`: explicit person and item mapping, override reason, approval time.
-Unknown fields are nullable; do not persist missing numeric amounts as zero.
+## تقسيم البيانات
+| الكيان | وظيفته |
+| --- | --- |
+| \`SourceDocument\` و\`SourceDocumentVersion\` | أصل وإصدار وبصمة |
+| \`ParsedDocument\` | محاولة قراءة بإصدار المحرك والنوع والشهر والجودة |
+| \`SourceRecipientObservation\` | هوية ظاهرة في المستند، **ليست Person** |
+| \`SourceFinancialLine\` / \`SourceFinancialOccurrence\` | سطر مالي مستقل بكود واسم وإشارة ومبلغ وصفحة وجانب |
+| \`SourceAggregate\` | مجموع مطبوع، **ليس بندًا جديدًا يستحق الصرف** |
+| \`ImportValidationIssue\` | التحذير ودرجته وموقعه وكود الفحص |
+| \`ImportReviewerDecision\` | ربط الشخص والبند وتصحيح تفسير المصدر مع المراجع والتاريخ |
 
-## Import and review lifecycle
-1. Upload accepts only allowed formats and safe size/page limits; malware/file-signature checks, storage permissions.
-2. Deduplicate exact source bytes by hash without destroying legitimate reimport history.
-3. Identify/report kind and period from **report text** and context, not file name.
-4. PDF text extraction; if confidence poor, try structured table/cell extraction in designated safe adapter.
-5. Validate per-row code/label/amount context; classify gross/deduction/employer info/summary.
-6. Check individually printed totals, employee boundaries and source arithmetic.
-7. Cross-check compatible files for exact entity/period/identity and bank group, report missing types without fabricating them.
-8. Present preview: source PDF on one side, extracted rows and warnings on the other.
-9. Reviewer fixes mappings and explicitly approves staged observations; original remains immutable.
-10. Reconciler compares accepted observations to independently calculated expected payroll. No legal review approval based solely on parsing.
+القيم المفقودة \`null\`، لا تُملأ بصفر. أي اسم طبيعي أو ربط داخلي لا يمحو الاسم الخام.
 
-## Hard validation cases for first technical spike
-| Test ID | Scenario | Pass condition |
+## دورة الاستيراد والمراجعة
+1. اقبل الملفات الرسمية المسموح بها مع قيود الحجم والتوقيع والصلاحية.
+2. احفظ بصمة الأصل، واكشف تكرار نسخة الملف دون محو مرات الاستيراد المشروعة.
+3. تعرف نوع التقرير والشهر **من المحتوى** وليس اسم الملف.
+4. اقرأ النص؛ إذا فقد ترتيب العمودين أو المكان جرب قراءة الجدول والخلايا الفيزيائية باستراتيجية منفصلة.
+5. استخرج الكود والاسم والمبلغ من الصف الصحيح وصنّف استحقاق/استقطاع/حصة جهة/مجموع/مجهول.
+6. طابق الإجماليات المطبوعة وعدد المستفيدين وحدود الصفحات والهوية.
+7. طابق الكافر وكشوف الصرف وصرفية الموظف بهوية جهة/فترة/بنك/فرع لا بترتيب البيانات.
+8. اعرض ملف PDF والنتيجة جنبًا لجنب، مع كل سطر غير مؤكد وأصل موضعه.
+9. يقرر المراجع الربط الصحيح وتُحفظ نسخة قراراته، والأصل غير قابل للتغيير.
+10. تُقارن الملاحظات المقبولة بالحسابات المقترحة المعتمدة؛ **نجاح قراءة PDF ليس قرارًا بصحة المستحق قانونيًا**.
+
+## اختبارات قبول تقنية — مرحلة الاستكشاف الأولى
+
+| الاختبار | المدخل | المخرج الصحيح |
 | --- | --- | --- |
-| PDF-001 | Valid genuine text PDF, two-page payslip | One employee, complete items/pages, report-scoped totals. |
-| PDF-002 | Arabic presentation forms, normal Arabic, Persian/Arabic digits | Correct logical labels and Decimal amounts, raw text retained. |
-| PDF-003 | Negative amount and sign mirrored in RTL extraction | Exact sign preserved, or flagged/block; NEVER silently positive. |
-| PDF-004 | Two side-by-side earning/deduction panes | No cross-pane amount reassignment; physical-cell evidence. |
-| PDF-005 | Government/employer contribution between sections | Informational employer side, no employee gross double-count. |
-| PDF-006 | Same 8-digit account code, different labels | Distinct rows and mapping decisions. |
-| PDF-007 | Unknown account code or moved column order | No guessed code-classification; explicit review. |
-| PDF-008 | Payslip net correct but gross/individual deductions incorrect | ReviewRequired even if net matches. |
-| PDF-009 | Cover/payment group ordering shuffled | Match group identity, not array index. |
-| PDF-010 | Wrong/missing month in one of 3 reports | ReviewRequired or reject; never clean verification. |
-| PDF-011 | Missing national ID / mismatched payment code | No automatic person merge or master update. |
-| PDF-012 | 1/2/3 uploaded report types | Appropriate partial coverage, no claim absent report was verified. |
-| PDF-013 | Missing printed total / unknown layout / scan | Null and ReviewRequired or rejected, no invented amount. |
-| PDF-014 | Same file imported twice | Exact hash tracked, no duplicated financial facts. |
-| PDF-015 | Official corrected report following earlier wrong source | Both immutable versions remain and link to correction. |
-| PDF-016 | RTL Excel export with missing item | Missing remains blank unless explicit absence under approved complete-source scope. |
-| PDF-017 | Unexpected employee page count / merged/continued row | Identity and source page correctness preserved. |
-| PDF-018 | Distinct bank and actual payment evidence | Source reported payment does not equal bank-confirmed paid. |
+| PDF-001 | صرفية PDF نصية لموظف على صفحتين | موظف واحد وكل البنود والصفحات والإجماليات |
+| PDF-002 | حروف عربية طبيعية أو معكوسة وأرقام عربية/فارسية | أسماء مقروءة وقيم \`decimal\`، والأصل محفوظ |
+| PDF-003 | مبلغ سالب أو سالب معكوس RTL | الإشارة السليمة أو مراجعة مانعة؛ لا تحويل لموجب |
+| PDF-004 | عمود استحقاقات وعمود استقطاعات متجاوران | لا نقل مبلغ بين العمودين مع دليل خلية |
+| PDF-005 | حصة الحكومة بين بنود مالية | تُصنّف معلوماتية ولا تضاعف إجمالي الموظف النقدي |
+| PDF-006 | كود حساب ثماني يتكرر مع اسمين | سطران وقرارات ربط مستقلة |
+| PDF-007 | كود غير معروف أو ترتيب عمود جديد | مراجعة ولا تخمين للتصنيف |
+| PDF-008 | الصافي صحيح لكن الاستحقاقات أو الاستقطاعات خطأ | \`ReviewRequired\` رغم الصافي |
+| PDF-009 | الكافر وكشف الصرف بمجموعات معكوسة الترتيب | مطابقة بالهوية لا بالفهرس |
+| PDF-010 | شهر مفقود أو مختلف بين ثلاثة تقارير | تنبيه أو رفض، لا اعتماد سليم |
+| PDF-011 | رقم قومي ناقص أو رقم صرف مخالف | لا دمج شخص أو تحديث ملف موظف تلقائيًا |
+| PDF-012 | استيراد نوع واحد أو نوعين أو الثلاثة | إبراز حدود التغطية دون ادعاء مطابقة ملف غائب |
+| PDF-013 | مجموع مطبوع غير موجود أو PDF غير معروف أو Scan | قيمة \`null\` مع مراجعة أو رفض دون اختراع |
+| PDF-014 | رفع نفس الملف مرتين | حفظ بصمة المصدر وعدم تكرار الوقائع المالية |
+| PDF-015 | وصول مستند رسمي مصحح | حفظ الإصدارين وربط التصحيح |
+| PDF-016 | تصدير Excel RTL وبند غير متاح | خلية فارغة لا صفر افتراضي إلا إذا ثبت الغياب بمصدر مكتمل وبسياسة معتمدة |
+| PDF-017 | صفحات موظف غير متوقعة أو صف ممتد | حفظ الهوية وحدود الصفحات والموضع |
+| PDF-018 | مبلغ ظهر بكشف وبنك لم يثبت صرفه | \`ReportedInPayroll\` وليس \`PaidVerified\` |
 
-## Exit criteria for implementation authorization
-- Owner-approved scope of first PDF formats.
-- Source status and protected fixture strategy.
-- Documented source model + schema/ADR + threat model.
-- Prior upstream test families reviewed, existing implementation bugs recorded.
-- Verified controls on more than a single source layout, privately.
-- Architectural review and **separate** owner-approved coding Issue.
+## شروط الانتقال إلى التنفيذ البرمجي
+- تحديد أشكال PDF المستهدفة ونطاق الجزء الأول بموافقة المالك.
+- استراتيجية حفظ الملفات الأصلية الخاصة والاختبارات الاصطناعية.
+- تصميم Model المصدر وSchema وADR والخصوصية والقيود.
+- فحص مشاكل النسخة القديمة وتحديد اختبار يفشل قبل إصلاحها.
+- تجربة أكثر من شكل مصدر أصلي محمي والتحقق من الأعداد والبنود والمجاميع.
+- فتح Issue تنفيذ **مستقلة** وموافقة المالك عليها؛ لا إذن مفتوح بكل المخطط.
 
-## Not in first parser slice
-Calculating salaries/allowances/tax/insurance; direct payroll edits; person legal master overwrite; actual payment verification; legal entitlement decisions; production hosting or wider rewrite.
+## خارج الجزء الأول
+محرك حساب المرتبات والضرائب والتأمينات العامة، تعديل Oracle، تحويل هوية مستورد إلى موظف رسمي، تنفيذ الدفع أو استرداده، وإطلاق التطبيق على الإنتاج. كل ذلك مراحل منفصلة.
+
+[مثال JSON ومدخلات وأرقام ومخرجات](../examples/01-ERD-INPUT-OUTPUT.md).
