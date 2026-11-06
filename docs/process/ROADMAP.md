@@ -1,35 +1,24 @@
-# Suggested delivery roadmap — NOT automatic authorization
+# خارطة طريق تطوير PayrollReviewSystem
 
-## Phase 0 — design/governance (this PR)
-- Agent and GitHub handoff rules, domain glossary, requirements/acceptance, reference status.
-- Owner reviews key open questions in decision register and accepts or requests changes.
-- No application code or database changes.
+**هذه خطة مراحل وليست تصريحًا تلقائيًا بتنفيذها أو دمج الكود.** المخططات الموجودة في [Blueprint](../architecture/BLUEPRINT-V1.md) و[خطة Gemini](../architecture/IMPLEMENTATION-SLICES.md) هي مراجع التنفيذ.
 
-## Phase 1 — data & evidence correctness
-- Define canonical identity and temporal schema via ADR.
-- Define source import contracts and financial component classifications.
-- Read-only Oracle adapter(s) and staging, page evidence, report classification. Start from concrete OraclePdfParser code-map and integration design in docs/reference/ORACLEPDFPARSER-CODE-STUDY.md and docs/specs/ORACLE-PDF-ADAPTER-DESIGN.md; do not begin a greenfield regex parser without reviewing that baseline.
-- Synthetic tests; privately validate diverse actual report layouts (never commit private originals).
-- Arabic reviewer import preview and blocking issue list.
+## المرحلة صفر — التوثيق والحوكمة
+تحديد دور المالك وChatGPT وGemini وآلية GitHub، ودليل المصطلحات والمتطلبات وحالة المراجع القانونية، وإجراء مراجعة القرارات المفتوحة. **لا كود ولا قاعدة بيانات فعلية**.
 
-## Phase 2 — review workbench
-- Expected versus source line comparison, document requests, reviewer overlays and immutable audit trail.
-- Approval gate at employee and case levels; no central source modifications.
-- Cross-file reconciliation including groups/periods/bank evidence.
+## المرحلة الأولى — سلامة المصادر والهوية
+اعتماد ERD الفيزيائي وتواريخ السريان وتفريق الشخص عن علاقة العمل والصرف. وضع عقود استيراد Oracle وبنوده. الاستفادة من \`OraclePdfParser\` و\`PDF-EXTRACTOR\`، وحفظ PDF الأصلي وصفحاته وأسطره وقراءة العربية دون دمج الأكواد المتكررة. اختبارات اصطناعية وتجارب خصوصية على تنسيقات واقعية متنوعة دون رفع ملفات سرية، وشاشة معاينة للمراجع.
 
-## Phase 3 — rule-based expected payroll
-- Approved legal rule catalogue and explicit effective dates; calculation input snapshots.
-- Grade, periodic allowance, fixed/historical reference cases and dependency graph.
-- No active rule until legal basis and tests verified.
+## المرحلة الثانية — شاشة المراجعة
+مقارنة المصدر بالمتوقع لكل بند ومجموعة، وطلب المستندات وتسجيل قرار المراجع والفروق والتعديلات مستقلة عن Oracle. اعتماد الحالة بحسب الصلاحيات، وفحص الكافر وكشوف الصرف والبنوك والفترات.
 
-## Phase 4 — promotion/retroactive
-- Promotion event dates, re-run of affected historical component periods.
-- Retro-claim ledger, partial/unallocated future reports, independently evidenced settlement.
-- Tax/insurance impacts where rules and documents support them.
+## المرحلة الثالثة — محرك الحساب المستقل
+قواعد قانونية متحققة بإصداراتها وتواريخها، وحسابات بكل مدخلاتها وآثارها ودرجاتها وأساسياتها التاريخية، ثم عرض النتائج المقترحة لاعتماد المراجع. لا تفعيل لأي نسبة دون نص وسريان واختبارات.
 
-## Phase 5 — controls and analytics
-- Review risk flags, trends, reconciliation to remittances/budget lines, reports and audit dashboards.
-- Broader legal categories, integrations only when authorized.
+## المرحلة الرابعة — الترقيات والمتجمدات
+فصل التواريخ الإدارية والمالية وبدء تطبيق Oracle؛ إعادة حساب البنود عن شهورها الأصلية، وتسجيل حق المتجمدات وما ظهر في مستند لاحق وما ثبت صرفه. معالجة الضريبة أو التأمين فقط في الحدود التي يعتمدها المالك والسند؛ **لا إعادة حساب عامة للتأمينات**.
 
-## Every phase: delivery requirements
-Issue scope -> tests/acceptance -> documented PR -> independent architect review -> Owner approval -> merge. No silent refactor of earlier phases. Nothing is 'production ready' without representative and authorized UAT.
+## المرحلة الخامسة — الرقابة والتقارير
+علامات مخاطر، ومقارنة اتجاهات الصرف، وتقارير فروق الموظفين والمجموعات وأبواب الصرف، وواجهة عربية Excel، ولوحات متابعة وسجل مراجعات. التوسعات والتكاملات القانونية تُعتمد منفصلة.
+
+## شروط تسليم كل مرحلة
+\`Issue\` محددة ← اختبارات قبول ← تنفيذ على فرع ← PR بتغييرات واختبارات فعلية ← مراجعة معمارية ← موافقة المالك للكود ← دمج. لا تعلن جاهزية الإنتاج قبل اختبار قبول عملي مخول على مصادر متنوعة، ولا تكسر الوظائف القديمة بصمت.
