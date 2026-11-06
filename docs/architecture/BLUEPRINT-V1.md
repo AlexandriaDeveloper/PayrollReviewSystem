@@ -25,21 +25,21 @@
 ## المكونات المنطقية الرئيسية
 ```mermaid
 flowchart LR
-  U[Arabic RTL reviewer UI] --> API[Audit Application API]
-  API --> ID[People and Payee]
-  API --> SI[Import and Original Evidence]
-  API --> CR[Calculation and Rule Proposal]
-  API --> AU[Review Cases and Approvals]
-  API --> RA[Retro and Settlement]
-  SI --> SRC[Immutable Source Observations]
-  ID --> BASE[Approved Financial Facts]
+  U["واجهة المراجع العربية RTL"] --> API["واجهة خدمات المراجعة API"]
+  API --> ID["الأشخاص وعلاقات الصرف"]
+  API --> SI["استيراد المستندات الأصلية"]
+  API --> CR["الحساب المقترح والقواعد"]
+  API --> AU["حالات المراجعة والاعتماد"]
+  API --> RA["المتجمدات والتسويات"]
+  SI --> SRC["سطور Oracle المصدرية"]
+  ID --> BASE["الوقائع المالية المعتمدة"]
   BASE --> CR
   CR --> AU
   SRC --> AU
   AU --> RA
-  API --> AUTH[RBAC and Audit Events]
-  EXT[Oracle PDF exported externally] --> SI
-  RA -.-> PROOF[Externally verified payment evidence]
+  API --> AUTH["صلاحيات المستخدمين وسجل التعديلات"]
+  EXT["ملف Oracle PDF خارجي"] --> SI
+  RA -.-> PROOF["دليل تسوية مستقل"]
 ```
 
 هذا تنظيم منطقي وليس مجموعة Microservices مستقلة. تعتمد البنية التحتية على واجهات التطبيق، ويعتمد التطبيق على الدومين؛ لا يعرف الدومين شيئًا عن PDFium أو SQL Server أو Angular.

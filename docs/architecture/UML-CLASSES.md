@@ -87,10 +87,10 @@ classDiagram
   }
   Person "1" --> "0..*" EmploymentRelationship
   Person "1" --> "0..*" PayeeRelationship
-  EmploymentRelationship "0..1" <-- "0..*" PayeeRelationship : optional
+  EmploymentRelationship "0..1" <-- "0..*" PayeeRelationship : ارتباط_اختياري
   PayrollCycle "1" --> "0..*" AuditCase
   PayeeRelationship "1" --> "0..*" AuditCase
-  SourceDocument "1" --> "0..*" SourceFinancialOccurrence : parser outputs
+  SourceDocument "1" --> "0..*" SourceFinancialOccurrence : يولد_سطورا
   FinancialComponent "1" --> "0..*" ComponentAuditPolicy
   FinancialComponent "1" --> "0..*" FinancialRuleVersion
   FinancialComponent "1" --> "0..*" ExpectedLine
