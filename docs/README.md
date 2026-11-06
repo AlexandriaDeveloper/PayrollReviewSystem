@@ -31,3 +31,8 @@
 Historical reference repos: Payroll-Auditor, Py-Ai-Moratabat, OraclePdfParser, PDF-EXTRACTOR, IProgram2. They do not set this project's architecture or legal policy.
 
 **Caution:** Prior research included user-supplied Markdown summaries of regulations and a larger source inventory. Summaries and source counts are not substitutes for original text, page-level evidence and up-to-date applicability. No confidential source files are copied into this public repository.
+
+## Owner-confirmed operational clarifications — 2026-11-06
+- [Owner workflow and 30200105 unit scope](governance/OWNER-OPERATING-REQUIREMENTS.md)
+- [Part-time cash entitlement versus pension assessment base control](domain/PART-TIME-INSURANCE-CONTROL.md)
+These clarify workflow and bounded insurance exception. They are not authority to implement general insurance recalculation or activate an unverified legal rule.

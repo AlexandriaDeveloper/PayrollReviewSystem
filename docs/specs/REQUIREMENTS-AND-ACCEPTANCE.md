@@ -20,7 +20,7 @@ Intake operator; auditor; senior reviewer; legal/rule approver; payroll/central-
 | FR-010 | Compare expected/Oracle/reviewed/official-correction and payment evidence without overwriting originals. |
 | FR-011 | Record findings, request documents, verify decisions, defer, approve, reopen and follow up, using proper review gates. |
 | FR-012 | Allocate later demonstrated retroactive payments to original claims; track unsettled or overpaid balances. |
-| FR-013 | Review tax/insurance bases and remittances when source/approved rules permit. |
+| FR-013 | Standard social-insurance/pension calculation review is OUT OF SCOPE for the accounting-unit reviewer; pass through central values as external source observations, with a narrow part-time insured-base exception after rule/source verification. Separate tax treatment remains to be scoped. |
 | FR-014 | Provide Arabic RTL employee workpapers, dashboards and audit report exports. |
 | FR-015 | Log all material actions, rule changes, imports and official corrections with tamper-evident references. |
 | FR-016 | RBAC, confidentiality and non-destructive corrections; no central payroll edit/payment. |
@@ -61,6 +61,24 @@ Intake operator; auditor; senior reviewer; legal/rule approver; payroll/central-
 | AC-030 | Unauthorized user tries rule/approval mutation | Access denied and audit event recorded. |
 | AC-031 | Personal ID or bank detail included in exported diagnostic | Redacted or export denied; no data published to GitHub. |
 | AC-032 | Actual report has unexpected RTL physical table layout | Parser adapter produces evidence/review issues, not guessed verified values. |
+
+
+## Owner-confirmed exceptional scenarios (2026-11-06)
+
+| ID | Input / event | Required system response |
+| --- | --- | --- |
+| AC-033 | Unit code 30200105 spans three colleges with mixed staff/faculty/contractor/payees | Scope by correct employing/paying relation; no accidental conflation. |
+| AC-034 | A death/secondment decision arrives after payroll review approval | New controlled amendment/version with evidence; no rewriting original approval or automatic bank block. |
+| AC-035 | Reviewer supplies approved financial data conflicting with Oracle | Stage independent difference; Oracle cannot update canonical amount without reviewer action. |
+| AC-036 | Program calculates promotion/allowance impact | Proposal only until reviewer confirms/adjusts/rejects. |
+| AC-037 | Four expected items totaling 1,000 appear aggregated as one central item | Show component discrepancy; allow documented within-bab exception only after reviewer validation. |
+| AC-038 | Standard pension deduction received from central payroll, no part-time exception | Preserve/display/source-reconcile amount; no general insurance entitlement recalc or finance reviewer approval judgment. |
+| AC-039 | Part-time approved: full insured base 1,000; cash due 650; central insured base 650 | Pension assessment base error flagged for reviewer objection/correction; don't compute employee premium from an assumed rate. |
+| AC-040 | Part-time approved: full insured base 1,000; cash due 650; central insured base 1,000 | No pension-base discrepancy due to cash reduction alone. |
+| AC-041 | Central PDF shows only premium amount, not insured base | Do not claim base wrong/known; request evidence if exception is relevant. |
+| AC-042 | Part-time insured base not legally evidenced for employee category | RuleNotVerified; no automatic legal finding. |
+| AC-043 | Salary reviewer assigned group X, outside reviewer attempts modification | Enforce assigned group rights and record denied access; other authorized payroll types remain shared. |
+| AC-044 | Two reviewers edit same payroll observation | Optimistic concurrency conflict, identity/time/action in audit trail, no silent last-write-wins. |
 
 ## Nonfunctional
 - Currency arithmetic precision, period determinism, repeatable runs, latency targets measured from sanitized realistic-sized fixtures.
