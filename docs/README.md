@@ -16,10 +16,12 @@
 | 10 | domain/ORACLE-IMPORT-AND-RECONCILIATION.md | PDF quality, matching, source evidence |
 | 11 | domain/LEGAL-AND-RULE-GOVERNANCE.md | How to verify legal rules |
 | 12 | specs/REQUIREMENTS-AND-ACCEPTANCE.md | MVP and testable requirements |
-| 13 | process/ROADMAP.md | Proposed implementation sequence |
-| 14 | reference/RESEARCH-INVENTORY-STATUS.md | What is / is not evidenced |
-| 15 | security/SECURITY-AND-PRIVACY.md | Personal data and audit security |
-| 16 | ui/REVIEWER-UX.md | Arabic RTL reviewer workflow |
+| 13 | reference/ORACLEPDFPARSER-CODE-STUDY.md | Concrete OraclePdfParser code map, local run, limitations and reuse criteria |
+| 14 | specs/ORACLE-PDF-ADAPTER-DESIGN.md | New-system reader contract, staged implementation and acceptance |
+| 15 | process/ROADMAP.md | Proposed implementation sequence |
+| 16 | reference/RESEARCH-INVENTORY-STATUS.md | What is / is not evidenced |
+| 17 | security/SECURITY-AND-PRIVACY.md | Personal data and audit security |
+| 18 | ui/REVIEWER-UX.md | Arabic RTL reviewer workflow |
 
 ## Document states
 - **REQUIREMENT CONFIRMED** — explicitly agreed goal or invariant in Owner conversation.
@@ -32,8 +34,15 @@ Historical reference repos: Payroll-Auditor, Py-Ai-Moratabat, OraclePdfParser, P
 
 **Caution:** Prior research included user-supplied Markdown summaries of regulations and a larger source inventory. Summaries and source counts are not substitutes for original text, page-level evidence and up-to-date applicability. No confidential source files are copied into this public repository.
 
+## OraclePdfParser risk and mapping review
+- [Deep audit of actual OraclePdfParser code, earlier PR findings and known unresolved risks](reference/ORACLE-PARSER-FAILURE-AUDIT.md)
+- [Source financial line occurrence identity, repeated codes and Arabic label normalization](specs/ORACLE-FINANCIAL-LINE-IDENTITY.md)
+These files are mandatory for the Gemini PDF implementation handoff; no OraclePdfParser source has been copied to this repository.
+
 ## Owner-confirmed operational clarifications — 2026-11-06
 - [Owner workflow and 30200105 unit scope](governance/OWNER-OPERATING-REQUIREMENTS.md)
 - [Part-time cash entitlement versus pension assessment base control](domain/PART-TIME-INSURANCE-CONTROL.md)
 - [Centrally calculated items: disability-support and martyrs funds](domain/CENTRAL-CALCULATED-ITEMS.md)
 These clarify workflow and bounded insurance exception. They are not authority to implement general insurance recalculation or activate an unverified legal rule.
+
+- [Documentation-only merge delegation policy](governance/COLLABORATION.md)

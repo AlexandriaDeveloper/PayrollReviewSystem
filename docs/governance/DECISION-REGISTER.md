@@ -45,6 +45,7 @@ Do not turn a proposal into an approved business decision through implementation
 | D-013 | Multiple reviewers, salary group assignments per cycle and shared authorization for other payrolls; every change attributed and historic. |
 | D-014 | System to run on internal network with protected access; Owner intends repository private. |
 | D-015 | Amounts for **صندوق دعم المعاقين** and **صندوق الشهداء** received from central entitlements are accepted as centrally calculated and **not recomputed** by the reviewer; still validate extraction and aggregates. Exact account mappings pending. |
+| D-016 | Owner explicitly delegated **Markdown-only PR merge authority** to ChatGPT architect without repeated confirmation, subject to documentation review and protection of sensitive data. No code/config/deployment changes authorized. |
 
 **Source:** owner's direct workflow clarifications; not a determination of what Egyptian law authorizes for every employee class. See ../domain/PART-TIME-INSURANCE-CONTROL.md and OWNER-OPERATING-REQUIREMENTS.md.
 
