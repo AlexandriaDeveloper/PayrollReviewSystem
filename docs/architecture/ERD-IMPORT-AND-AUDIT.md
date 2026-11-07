@@ -188,3 +188,18 @@ erDiagram
 
 ## مثال للصفوف المخزنة
 في [مثال المدخلات والمخرجات](../examples/01-ERD-INPUT-OUTPUT.md) يظهر الكود `21110505` مرتين كعلاوتين لسنتين مختلفتين، مع `SourceLineId` مستقل لكل سطر. هذا **مثال اصطناعي** وليس اعتمادًا لأكواد أو مبالغ قانونية.
+
+## امتداد ERD: المرتب الرئيسي والصرفيات المنفصلة
+```mermaid
+erDiagram
+ PAYROLL_CYCLE ||--o{ PAYROLL_RUN : "تشغيلات الشهر"
+ PAYROLL_CYCLE ||--o{ PAYROLL_GROUP : "مجموعات المراجعين"
+ PAYROLL_GROUP ||--o{ MONTHLY_GROUP_MEMBERSHIP : "عضوية شهرية"
+ PAYROLL_RUN ||--o{ PAYROLL_DISBURSEMENT : "صرفيات مصدر"
+ PAYROLL_DISBURSEMENT ||--o{ DISBURSEMENT_RECIPIENT : "مستفيدون"
+ EMPLOYMENT_RELATIONSHIP ||--o{ MONTHLY_MAIN_SALARY_SLOT : "مرتب رئيسي فريد"
+ MONTHLY_MAIN_SALARY_SLOT ||--o{ MAIN_SALARY_REVISION : "نسخ وتصحيحات"
+ SOURCE_DOCUMENT ||--o{ DISBURSEMENT_SOURCE_LINK : "يحفظ الأدلة"
+ PAYROLL_DISBURSEMENT ||--o{ DISBURSEMENT_SOURCE_LINK : "مصادر متعددة"
+```
+`MAIN_SALARY`: مرتب واحد منطقيًا لكل علاقة وظيفية/وحدة وشهر، حتى لو تعددت التشغيلات والملفات والمجموعات؛ التصحيحات تحت `MainSalaryRevision`. `SEPARATE`: صرفيات مستقلة متعددة لنفس الموظف في الشهر. مجموعة المراجعين `PayrollGroup` مختلفة عن `SourceGroupSummary` البنكية. هذه **توسعة مقترحة** للـERD القائم، وليست Schema جديدًا جاهزًا للتنفيذ. [المواصفة](../specs/MONTHLY-PAYROLL-GROUPS-AND-DISBURSEMENT-TYPES.md).

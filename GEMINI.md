@@ -92,3 +92,6 @@
 استخدم قيم الحالة البرمجية الدقيقة عند الكتابة للكود، مع تفسير عربي: `PROPOSED` مقترح، `DESIGN-REVIEW` قيد مراجعة التصميم، `APPROVED-FOR-IMPLEMENTATION` مصرح بالتنفيذ، `IN-PROGRESS` قيد التنفيذ، `PR-READY-FOR-REVIEW` جاهز للمراجعة، `BLOCKED` متوقف، `CHANGES-REQUESTED` تعديلات مطلوبة، `VERIFIED` تم التحقق، `OWNER-APPROVED` معتمد من المالك، `MERGED` تم الدمج.
 
 لا تدعِ الدمج أو نجاح الاختبارات دون التحقق من GitHub ونتائج التشغيل.
+
+## ضابط إلزامي: المرتب الرئيسي الواحد والصرفيات المنفصلة
+اقرأ `docs/specs/MONTHLY-PAYROLL-GROUPS-AND-DISBURSEMENT-TYPES.md` و`docs/examples/06-MONTHLY-PAYROLL-GROUPS-AND-DISBURSEMENTS.md` قبل تنفيذ أي جداول أو API للمرتبات. القاعدة المؤكدة: **MAIN_SALARY واحدة منطقيًا لكل موظف وشهر مرتب** في نطاق علاقة العمل/الوحدة، و**SEPARATE متعددة** حتى لو كان الصرف في الشهر نفسه. افصل `PayrollCycle/PayrollRun/PayrollDisbursement/SourceDocument/MonthlyMainSalarySlot/MainSalaryRevision`، ولا تضع `UNIQUE(PersonId,Month)` على كل الصرفيات. مجموعة مراجعة الموظف تتغير حسب الدورة وتاريخ الإسناد، ولا تخلطها بمجموعات بنك الكافر. التصحيح الرسمي نسخة من نفس الرئيسي، والتكرار الظني يُحفظ في أدلة المصدر ويُراجع بدل محو السطور. لا يجوز اعتماد مصدرين منفصلين كمرتبين رئيسيين عبر مجموعتين أو تشغيلتين. نفذ لاحقًا `PG-001..PG-022` عند تفويض كود مستقل؛ هذا توثيق فقط.
