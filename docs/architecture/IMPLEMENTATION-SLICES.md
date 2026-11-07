@@ -59,3 +59,10 @@ Excel عربي، وتقارير مصدر ومراجعة، واختبارات أ�
 **قرار النهج المعماري مقبول** وفق `ADR-003`؛ لكن تفاصيل `Bounded Contexts` و`Aggregate Roots` و`Context Map` في [التصميم المقترح](DDD-BOUNDED-CONTEXTS-AND-AGGREGATES.md) تتطلب مراجعة Goldfish منفصلة وقرارًا يحدد حدود الاتساق وملكية القراءة/الكتابة لكل Context. بعد مراجعة الحزم الأصلية، راجع هذا المستند الجديد بمراجع Fresh Context، ثم حل `BLOCKER/MAJOR` وأكمل ADR تخطيط SQL الفيزيائي قبل الكود.
 
 **مطلوب في كل مهمة Gemini لاحقة:** إعلان `Bounded Context` و`Aggregate Root` و`Invariant` و`Application Use Case` و`Contract` و`Transaction Boundary` واختبارات التصميم المرتبطة قبل البرمجة؛ لا تجعل ORM يمحو ملكية البيانات، ولا تجعل ملف Oracle مصدر حقيقة الموظف. أي تنفيذ أو ترحيل يحتاج Issue مصرحًا بها منفصلة.
+
+## متطلب OOP وSOLID قبل أي كتابة كود
+المبادئ المعتمدة في [ADR-004](../decisions/ADR-004-object-oriented-and-solid-principles.md) و[دليل التصميم](OOP-AND-SOLID-DESIGN-STANDARDS.md) إلزامية على المهام البرمجية بعد اعتماد المالك:
+- عرّف المسؤولية الواحدة لكل `Domain Entity/Aggregate/Application Service`، والـInvariant الذي تحميه، والعقود التي تحتاجها حالات الاستخدام فعلًا.
+- وثّق لماذا استخدمت `Inheritance` أو `Composition` أو `Polymorphism`، وأن بدائل المصدر تلتزم `LSP` ولا تخلط درجات الإثبات.
+- أثبت اتجاه التبعية الصحيح `Domain → no Infrastructure`، وحدود `Ports` والـ`Adapters` والفصل بين ORM وFinancial Rules.
+- اكتب اختبارات نجاح/فشل وحالات التزامن لكل ثابت مالي، واربط `SOLID-001..018` بما يخص المهمة. **لا كود أو SQL الآن**؛ التفاصيل تُراجع Goldfish مع خريطة DDD قبل التصريح.

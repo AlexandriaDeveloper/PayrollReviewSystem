@@ -74,3 +74,8 @@
 - **P-015 (تفصيل يحتاج مراجعة):** [خريطة Bounded Contexts والـAggregate Roots](../architecture/DDD-BOUNDED-CONTEXTS-AND-AGGREGATES.md) بما فيها `Personnel/Payroll/FinancialFacts/Rules/SourceIntake/Audit/Retro/AccessGovernance` **مقترحة** إلى أن تُراجع Goldfish وتُحسم حدودها. ليست إنشاء جداول.
 - **توضيح P-001:** `Modular Monolith` أصبح معتمدًا كأسلوب **تنظيم منطقي وتشغيل مبدئي**، لكن اعتماد `ASP.NET Core / Angular / SQL Server` أو نسخ التقنيات وSQL Schema وملفات النشر لا يزال منفصلًا ومعلّقًا.
 - **توثيق مسار EGM:** مراجعة الحزمة الأولى الجارية بدأت من ملفات سابقة؛ لا يجوز إسناد نتيجتها إلى هذا الـADR الجديد دون مراجعة إضافية. لا صلاحية كود/SQL/نشر ناشئة عن D-024.
+
+## اعتماد المالك لمبادئ OOP وSOLID (7 نوفمبر 2026)
+- **D-025 (قرار مالك معتمد):** تُطبق مبادئ `Object-Oriented Programming (OOP)` و`SOLID (SRP/OCP/LSP/ISP/DIP)` في تصميم وتنفيذ `PayrollReviewSystem`، **مكملةً** لقرار `DDD + Modular Monolith + Clean Architecture`. [ADR-004](../decisions/ADR-004-object-oriented-and-solid-principles.md).
+- **P-016 (تفصيل قابل للمراجعة):** [دليل المعايير والأمثلة والاختبارات المقترحة](../architecture/OOP-AND-SOLID-DESIGN-STANDARDS.md)، مع تجنب `God Classes` والاعتماد المباشر على SQL/PDF في الـDomain أو خلق `interfaces` بلا داعٍ. اختيار تفاصيل كود وPorts وAggregates قيد المراجعة قبل التنفيذ، لا أوامر تنفيذ مستقلة.
+- **فصل الحالة:** منهجية OOP/SOLID **معتمدة**، لكن مرور Goldfish على حزمة DDD/الـOOP التفصيلية **لم يحدث بعد**؛ ملف Goldfish الأول قيد التشغيل من جانب المستخدم ولا ينطبق على القرار الجديد بأثر رجعي. لا تغيير في حالات التقارير حتى وصول Artifact وتثبته.
