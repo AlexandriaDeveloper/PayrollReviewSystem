@@ -47,3 +47,6 @@
 - [Bounded Contexts / Aggregate Roots المقترحة والاختبارات](DDD-BOUNDED-CONTEXTS-AND-AGGREGATES.md).
 - **قيد التفسير:** جملة «التقنية المقترحة — غير معتمدة» أعلاه تخص منتجات وإصدارات `.NET/Angular/SQL Server`؛ **لا** تلغي قرار المالك الحالي باعتماد أسلوب Modular Monolith.
 - لا اعتماد SQL/هجرات أو إعادة تصميم صامتة قبل مراجعة Goldfish والمالك.
+
+## معيار تصميم الكائنات داخل الوحدات
+اعتمد المالك `OOP + SOLID` مكملًا لـDDD في [ADR-004](../decisions/ADR-004-object-oriented-and-solid-principles.md). منطق المرتبات الغني بالثوابت يعتمد كائنات دومين تحمي انتقالات الحالات وتواريخها، وخدمات صغيرة وعقودًا تحترم `SRP/OCP/LSP/ISP/DIP`. `Composition` أولى من وراثة غير مستقرة، ولا يتصل `Domain` بمكتبة PDF أو DB أو UI. لا تُنشئ واجهة لكل كلاس دون داعٍ. تفاصيل الأمثلة في [معايير OOP وSOLID](OOP-AND-SOLID-DESIGN-STANDARDS.md).

@@ -111,3 +111,10 @@
 - [خريطة مبدئية لـBounded Contexts وAggregate Roots وحدود التكامل واختبارات التصميم](architecture/DDD-BOUNDED-CONTEXTS-AND-AGGREGATES.md).
 - [Issue #28](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/28) لتتبع إعداد قرار التصميم، وليست إذن برمجة.
 - **مهم:** ملف `docs/egm/01-DOMAIN-AND-PAYROLL-DESIGN-DRAFT.md` ومراجعه الثمانية **لم تتغير** أثناء الجولة الحالية؛ نتيجة المراجعة الحالية لا تصادق تلقائيًا على هذا التفصيل الجديد.
+
+## اعتماد OOP وSOLID كمعايير جودة التصميم والتنفيذ (7 نوفمبر 2026)
+وافق المالك على **OOP + SOLID Principles** لتكملة `DDD + Modular Monolith + Clean Architecture`؛ اعتماد المبادئ لا يعني إقرار كود أو SQL أو جميع الكلاسات المقترحة.
+- [ADR-004 — قرار اعتماد OOP وSOLID](decisions/ADR-004-object-oriented-and-solid-principles.md).
+- [الدليل التطبيقي لـEncapsulation/Polymorphism وSRP/OCP/LSP/ISP/DIP في نظام المرتبات](architecture/OOP-AND-SOLID-DESIGN-STANDARDS.md).
+- [Issue #31](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/31) لتوثيق هذا القرار فقط.
+- اختبارات تصميم `SOLID-001..018` **لم تنفذ بعد**؛ تُستخدم عند مراجعة أكواد Gemini المصرح بها لاحقًا. لم تتغير ملفات ومراجع Goldfish الجاري في هذا PR.

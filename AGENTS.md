@@ -89,3 +89,11 @@
 - لا تعدل وحدة الاستيراد حقائق الموظف المعتمدة، ولا يصل الـDomain إلى ORM أو PDFium أو Angular، ولا تحوّل Microservices أو CQRS/Event Sourcing كامل إلى متطلبات بلا قرار.
 - لا تبدل قاعدة فرادة مرتب الشهر المنطقية أو فصل المصدر/المتوقع/قرار المراجع/التسوية. تنفيذها يحتاج حماية معاملات وقيود قاعدة بيانات معتمدة.
 - **لا تعطل مراجعة Goldfish الجارية** للنسخة الأصلية من `docs/egm/01-DOMAIN-AND-PAYROLL-DESIGN-DRAFT.md`؛ الـDDD المستجد يتطلب مراجعة مستقلة لحدود السياقات ولا يصبح جزءًا من تقرير الجولة السابقة بأثر رجعي.
+
+## معيار معتمد لتصميم الكود — OOP + SOLID
+**القرار D-025 / ADR-004:** يلتزم تصميم الكائنات والمنطق عند التنفيذ بـ`OOP` و`SOLID` إلى جانب `DDD + Modular Monolith + Clean Architecture`. قبل إقرار أي تغيير في كود النظام اقرأ `docs/decisions/ADR-004-object-oriented-and-solid-principles.md` و`docs/architecture/OOP-AND-SOLID-DESIGN-STANDARDS.md`.
+- `Encapsulation` يحمي قرارات المراجعة ونسخ المرتب والحسابات دون فتح `public setters` للثوابت؛ `Composition` أولى من وراثة لا تحافظ على العقود.
+- يراجع `SRP/OCP/LSP/ISP/DIP` من حيث **سلوك حسابات المصدر/الاستحقاق/التسوية**، لا مجرد وجود Interfaces. الإضافات إلى القواعد تشترط سندًا قانونيًا معتمدًا.
+- لا يعتمد `Domain` على PDFium أو Excel أو DbContext أو Angular، ولا تجبر واجهة موحدة الإدخال اليدوي على تزييف إثبات Oracle.
+- ابتعد عن `God Classes` و`anemic model` الذي يسمح بتغيير مبالغ وقرارات حساسة من خارج Aggregate، وعن الإفراط في `interfaces` والوراثة والمصانع دون داعٍ.
+- معايير `SOLID-001..018` **مقترحات اختبارات تصميم** وليست نتائج تشغيل، ولا تصريح Gemini بالكود أو SQL ولا شهادة Goldfish.
