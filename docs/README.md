@@ -45,6 +45,12 @@
 - [أمثلة ERD وUML ومدخلات ومخرجات JSON بالأرقام الافتراضية](examples/04-HISTORICAL-LEAVE-ADJUSTMENT-DEDUCTION-CARRY.md).
 - **تنبيه:** الترجيح القانوني لتاريخ الدرجة، وجواز الترحيل أو التسوية من بند بديل، وقواعد تعديل المراجع تحتاج سندًا وصلاحيات معتمدة. لا تنفيذ خصم آلي.
 
+## رعاية الطفل وإدخال الاستحقاقات المركزية من صورة أو يدويًا
+- [إجازة رعاية الطفل: طلب الجامعة، قرار الإجازة، تسوية Oracle، واستمارة 132](specs/CHILD-CARE-LEAVE-AND-CENTRAL-SETTLEMENT.md).
+- [مسار PDF أو صورة أو إدخال يدوي مع أدلة المصدر ومراجعة دقة النقل](specs/MULTI-CHANNEL-CENTRAL-INTAKE.md).
+- [مثال عملي لقرار رعاية الطفل والاستمارتين وصورة وبيانات يدوية، مع ERD/UML/JSON](examples/05-CHILDCARE-AND-MANUAL-INTAKE.md).
+هذه **تصميمات مقترحة** وليست تصريحًا بإصدار استمارة Oracle الرسمية، أو اعتماد نسبة قانونية أو إدخال بيانات مركزية دون إثبات.
+
 ## ملفات دراسة Oracle
 - [دراسة النسخة الحالية من OraclePdfParser](reference/ORACLEPDFPARSER-CODE-STUDY.md).
 - [تقرير 25 مشكلة ومخاطرة](reference/ORACLE-PARSER-FAILURE-AUDIT.md).
