@@ -33,6 +33,12 @@
 - [أمثلة جديدة ERD/UML وJSON للثلاثة سيناريوهات](../examples/04-HISTORICAL-LEAVE-ADJUSTMENT-DEDUCTION-CARRY.md).
 - تحفظ سطور Oracle ونتائج الحساب الأساسية بإصدارات؛ تنشأ `ReviewAdjustment` مستقلة، ولا يساوي فرق الخصم دينًا أو ترحيله خصمًا آليًا. الربط ببند مختلف يحتاج دليلًا رسميًا وجوازًا محددًا، وليس تجميعًا على أساس المبلغ وحده.
 
+## رعاية الطفل والمدخلات البديلة عن PDF
+- [التمييز بين طلب رعاية الطفل وتسوية Oracle واستمارة الصرف 132](../specs/CHILD-CARE-LEAVE-AND-CENTRAL-SETTLEMENT.md).
+- [توحيد PDF والصورة والإدخال اليدوي تحت سجل مصدر ذي جودة وإثبات منفصلين](../specs/MULTI-CHANNEL-CENTRAL-INTAKE.md).
+- [مثال ERD/UML بالصورة والتسوية اليدوية](../examples/05-CHILDCARE-AND-MANUAL-INTAKE.md).
+يظل `SourceObservation` مستقلًا عن `ApprovedFinancialFact`، وتظل ورقة المراجعة الداخلية مختلفة عن الاستمارة المالية الرسمية الصادرة خارجيًا.
+
 ## المكونات المنطقية الرئيسية
 ```mermaid
 flowchart LR
