@@ -201,6 +201,41 @@ classDiagram
 | `IPaymentEvidenceService` | التحقق من دليل التسوية وتخصيص المدفوعات | الخلط بين كشف الصرف والدفع المؤكد |
 | `IAuditTrail` | تسجيل الفاعل والوقت والسبب وقيمة الحالة قبل وبعد | السماح بمحو تاريخ القرار |
 
+## واجهات الإدخال البديل المقترحة (Excel أو شاشة مباشرة)
+
+```mermaid
+classDiagram
+  class ICentralPayrollSourceIntake {
+    +ImportEmployeeExcel(workbook, context) CaptureDraft
+    +CreateManualEmployeeDraft(context) CaptureDraftId
+    +SaveManualLines(draftId, lines, version) DraftResult
+    +ValidateDraft(draftId) ValidationReport
+    +SubmitForSourceReview(draftId) SourceSnapshotId
+    +MatchLaterOfficialSource(snapshotId, documentId) ComparisonReport
+  }
+  class SourceCaptureSession {
+    +CaptureMethod
+    +SourceReference
+    +PayrollPeriod
+    +Status
+  }
+  class SourceFinancialOccurrence {
+    +SourceLineId
+    +AccountCodeText
+    +RawLabel
+    +FinancialSide
+    +Amount
+  }
+  class CaptureValidationReport
+  class CapturedSourceSnapshot
+  ICentralPayrollSourceIntake --> SourceCaptureSession : "ينشئ المسودة"
+  SourceCaptureSession "1" *-- "many" SourceFinancialOccurrence : "يحتوي بنودا"
+  ICentralPayrollSourceIntake --> CaptureValidationReport : "يتحقق"
+  ICentralPayrollSourceIntake --> CapturedSourceSnapshot : "يقدم للمراجعة"
+```
+
+**الدوال عقود تصميمية وليست كودًا متاحًا الآن.** ملف XLSX وشاشة الإدخال تنتجان نفس `SourceFinancialOccurrence`؛ `EXCEL_IMPORT` و`DIRECT_FORM` هما قناة الإدخال، ولا حاجة إلى OCR. راجع [المواصفة والـERD والأمثلة](../specs/EXCEL-AND-DIRECT-EMPLOYEE-PAYROLL-INTAKE.md).
+
 ## أنواع القيمة المقترحة
 `Money(decimal Amount,Currency)`، `Period(Year,Month)`، `EffectiveInterval`، `EvidenceRef(DocumentId,Page,Row,Cell)`، `ExternalAccountCode`، `SourceLineId`، `ComponentId`، `RuleTraceRef`.
 

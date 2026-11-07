@@ -63,6 +63,10 @@
 ## رعاية الطفل وبدائل إدخال المصدر المركزي
 اقرأ `docs/specs/CHILD-CARE-LEAVE-AND-CENTRAL-SETTLEMENT.md` و`docs/specs/MULTI-CHANNEL-CENTRAL-INTAKE.md` و`docs/examples/05-CHILDCARE-AND-MANUAL-INTAKE.md` قبل تصميم إجازة رعاية الطفل أو تغيير Parser أو واجهة الاستيراد. استمارة طلب الإجازة **إدارية**؛ استمارة رعاية الطفل في Oracle **تسوية مالية** لا أمر دفع؛ وإذا بدأت الإجازة أو انتهت أثناء الشهر قد يوجد تقرير 132 منفصل لأيام العمل. يحظر تطبيق خيار تعويض 25% من دليل قديم على فترات أو كوادر أخرى بلا مصدر قانوني معتمد. المدخلات من صورة أو يدويًا تُستخدم في نفس `SourceFinancialOccurrence` مع إثبات `CaptureMethod` و`EvidenceAuthenticity` و`TranscriptionAccuracy` مستقلين؛ لا تحول غياب PDF إلى بيانات مركزية رسمية مثبتة، ولا تنشئ PDF رسميًا مزيفًا. اختبارات التصميم `CC-001..CC-012` و`MI-001..MI-016`. لا كود ولا SQL بلا مهمة تنفيذ معتمدة.
 
+## تعليمات صريحة: مصدر Excel أو شاشة مباشرة بدل PDF
+
+**المتطلب الأحدث المؤكد من المالك:** إدخال بيانات موظف ومجموعة بنود الاستحقاقات المركزية بواسطة ملف `XLSX` أو مباشرة من شاشة عربية RTL دون رفع أي ملف. **الصور وOCR ليست شرطًا، فلا تبنِ مسارًا يعتمد عليها**. اقرأ `docs/specs/EXCEL-AND-DIRECT-EMPLOYEE-PAYROLL-INTAKE.md` وERD/UML المرتبطة قبل اقتراح أي كود. صمّم `ICentralPayrollSourceIntake.ImportEmployeeExcel` و`CreateManualEmployeeDraft` و`SaveManualLines` و`ValidateDraft` كعقود **مقترحة لا منفذة**. كلا المسارين يصدر `SourceFinancialOccurrence` مستقلة للسطر حتى مع تكرر الكود أو الاسم؛ لا يوهم البرنامج أن البديل مستند Oracle رسمي. تأكد من رموز البنود النصية والأرقام والإشارات والجانب وحصص الحكومة، وفرق `ReportedTotals` عن `CalculatedTotals`، وفحص الصلاحية والتدقيق، ومطابقة PDF الرسمي لاحقًا بلا ازدواج. تتطلب البرمجة مهمة مصرحًا بها منفصلة؛ لا تنفذ الآن.
+
 ## حدود الحساب المالي
 - افصل `SourceAmount` و`ExpectedAmount` و`ReviewedAmount` و`OfficialCorrectionAmount` و`VerifiedPaidAmount`.
 - لا تستنتج نوع البند من أول رقم في كود Oracle وحده.

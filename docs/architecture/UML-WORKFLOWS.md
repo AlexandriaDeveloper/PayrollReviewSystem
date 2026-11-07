@@ -2,6 +2,34 @@
 
 **مخططات مقترحة لا تعني وجود كود منفذ.** تُظهر الحركة بين المراجع والتطبيق وطبقة الدومين ومصدر Oracle، دون تنفيذ صرف أو استرداد.
 
+## مسار بديل لاستيراد استحقاقات موظف من Excel أو إدخال مباشر
+
+```mermaid
+sequenceDiagram
+  actor Reviewer as "المراجع"
+  participant UI as "واجهة الاستحقاقات"
+  participant Intake as "ICentralPayrollSourceIntake"
+  participant Validate as "SourceValidation"
+  participant Audit as "AuditCase"
+  alt Excel
+    Reviewer->>UI: رفع XLSX لموظف وبنوده
+    UI->>Intake: ImportEmployeeExcel(file, context)
+  else شاشة مباشرة
+    Reviewer->>UI: فتح الموظف وإضافة سطور البنود
+    UI->>Intake: CreateManualEmployeeDraft(context)
+    UI->>Intake: SaveManualLines(draftId, lines, version)
+  end
+  Intake-->>UI: CaptureDraft مع سطور مصدرية مستقلة
+  UI->>Validate: ValidateDraft(draftId)
+  Validate-->>UI: أخطاء الصفوف والمجاميع وحالة الإثبات
+  Reviewer->>UI: تصحيح المسودة ثم إرسالها للمراجعة
+  UI->>Intake: SubmitForSourceReview(draftId)
+  Intake-->>Audit: CapturedSourceSnapshot
+  Audit-->>Reviewer: مقارنة الاستحقاق المتوقع بالمصدر البديل
+```
+
+ملحوظة: لا يتطلب المسار صورة أو OCR، ولا يؤدي إدخال Excel أو الشاشة إلى اعتماد صرف أو تعديل بيانات Oracle. [تفاصيل ERD واختبارات EX وDF](../specs/EXCEL-AND-DIRECT-EMPLOYEE-PAYROLL-INTAKE.md).
+
 ## 1. تسلسل استيراد PDF والتحقق من البنود
 ```mermaid
 sequenceDiagram

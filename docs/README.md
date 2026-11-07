@@ -51,6 +51,12 @@
 - [مثال عملي لقرار رعاية الطفل والاستمارتين وصورة وبيانات يدوية، مع ERD/UML/JSON](examples/05-CHILDCARE-AND-MANUAL-INTAKE.md).
 هذه **تصميمات مقترحة** وليست تصريحًا بإصدار استمارة Oracle الرسمية، أو اعتماد نسبة قانونية أو إدخال بيانات مركزية دون إثبات.
 
+## البدائل المطلوبة لإدخال الاستحقاقات المركزية بدون PDF
+
+- [مواصفة Excel لبيانات موظف ومجموعة البنود أو إدخال مباشر من الشاشة، مع دوال وERD وUML](specs/EXCEL-AND-DIRECT-EMPLOYEE-PAYROLL-INTAKE.md).
+- [ERD الاستيراد](architecture/ERD-IMPORT-AND-AUDIT.md) و[UML الكلاسات](architecture/UML-CLASSES.md) و[UML سير البيانات](architecture/UML-WORKFLOWS.md).
+- الأولوية هي **Excel / الشاشة المباشرة**، وليست الصور أو OCR؛ الملفات السابقة التي عرضت مثال الصورة تبقى للتوثيق التاريخي ولا تُعتبر شرطًا للتنفيذ.
+
 ## ملفات دراسة Oracle
 - [دراسة النسخة الحالية من OraclePdfParser](reference/ORACLEPDFPARSER-CODE-STUDY.md).
 - [تقرير 25 مشكلة ومخاطرة](reference/ORACLE-PARSER-FAILURE-AUDIT.md).

@@ -39,6 +39,13 @@
 - [مثال ERD/UML بالصورة والتسوية اليدوية](../examples/05-CHILDCARE-AND-MANUAL-INTAKE.md).
 يظل `SourceObservation` مستقلًا عن `ApprovedFinancialFact`، وتظل ورقة المراجعة الداخلية مختلفة عن الاستمارة المالية الرسمية الصادرة خارجيًا.
 
+## مدخل الاستحقاقات المركزية من Excel أو شاشة المراجع (متطلب مؤكد)
+
+- [مواصفة Excel لبيانات موظف وبنود متعددة، والإدخال المباشر من الشاشة](../specs/EXCEL-AND-DIRECT-EMPLOYEE-PAYROLL-INTAKE.md).
+- `ImportEmployeeExcel` و`SaveManualLines` يتجهان إلى نفس `SourceCaptureSession / SourceFinancialOccurrence` ثم إلى بوابة المصدر والمقارنة.
+- `Excel` و`DIRECT_FORM` هما البديلان المطلوبان عن PDF؛ **لا اعتماد على صورة أو OCR**، ولا إنشاء مستند Oracle وهمي.
+- التصميم التفصيلي في [ERD الاستيراد](ERD-IMPORT-AND-AUDIT.md) و[UML الكلاسات](UML-CLASSES.md) و[UML سير الإدخال](UML-WORKFLOWS.md).
+
 ## المكونات المنطقية الرئيسية
 ```mermaid
 flowchart LR
