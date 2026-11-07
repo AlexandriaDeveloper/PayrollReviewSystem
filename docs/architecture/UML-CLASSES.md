@@ -276,3 +276,35 @@ classDiagram
 
 ## مثال قابل للفهم
 [الطلب والاستجابة والمخطط المبسط في مثال UML](../examples/02-UML-REVIEW-EXAMPLES.md) يعرض الكلاسات أثناء استيراد صرفية فيها نفس الكود لبدلين مختلفين.
+
+## UML — فرادة المرتب والعديد من الصرفيات المنفصلة
+```mermaid
+classDiagram
+ class IMainSalaryRegistry {
+   +GetOrCreateMainSlot(unit, employment, month) MainSlotResult
+   +AttachCorrection(mainSlot, evidence) RevisionResult
+ }
+ class ISeparateDisbursementService {
+   +RegisterSeparate(disbursement, source) SeparateResult
+ }
+ class IMonthlyGroupService {
+   +AssignEmployee(month, employment, group) AssignmentResult
+ }
+ class MonthlyMainSalarySlot {
+   +UnitId
+   +EmploymentRelationshipId
+   +SalaryEntitlementMonth
+ }
+ class MainSalaryRevision
+ class PayrollDisbursement {
+   +DisbursementKind
+   +ProcessingMonth
+   +PurposeCode
+ }
+ class MonthlyGroupMembership
+ IMainSalaryRegistry --> MonthlyMainSalarySlot : "المرتب الوحيد"
+ MonthlyMainSalarySlot "1" --> "many" MainSalaryRevision : "نسخ"
+ ISeparateDisbursementService --> PayrollDisbursement : "المنفصلة"
+ IMonthlyGroupService --> MonthlyGroupMembership : "إسناد شهري"
+```
+كل الدوال **تصميمية**؛ لا تعمل حتى الآن. فرادة `MonthlyMainSalarySlot` لا تُفرض على `SEPARATE`. [الأمثلة](../examples/06-MONTHLY-PAYROLL-GROUPS-AND-DISBURSEMENTS.md).

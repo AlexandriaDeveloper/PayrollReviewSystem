@@ -91,3 +91,8 @@ flowchart LR
 
 ## شرح الرموز
 `||` واحد لازم، `o|` صفر أو واحد، `o{` صفر أو أكثر، `|{` واحد أو أكثر. `ValidFrom/ValidTo` تعني فترة سريان بنهاية غير مشمولة؛ `RecordedAt` يعبّر عن وقت تسجيل المعرفة. أسماء الكيانات بالإنجليزية معرفات تقنية وليست لغة الشرح.
+
+## دورة الشهر ومجموعات الموظفين ونوع الصرفية
+- [المواصفة: مرتب رئيسي واحد وصرفيات منفصلة متعددة وتشغيلات الشهر](../specs/MONTHLY-PAYROLL-GROUPS-AND-DISBURSEMENT-TYPES.md).
+- [مثال ERD/UML وJSON: مرتب رئيسي واحد وثلاث صرفيات منفصلة وتصحيح](../examples/06-MONTHLY-PAYROLL-GROUPS-AND-DISBURSEMENTS.md).
+- `PayrollCycle` دورة الشهر، `PayrollRun` عملية تشغيل، `PayrollDisbursement` صرفية ذات نوع، `MonthlyMainSalarySlot` السجل الوحيد للمرتب، `MainSalaryRevision` تصحيح دون تكرار، و`MonthlyGroupMembership` إسناد المراجع الشهري.

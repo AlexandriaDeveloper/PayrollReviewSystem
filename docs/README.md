@@ -89,3 +89,8 @@
 المشاريع السابقة `Payroll-Auditor` و`Py-Ai-Moratabat` و`OraclePdfParser` و`PDF-EXTRACTOR` و`IProgram2` مصادر دراسة لا تنقل قوانين أو جداول إلى هنا تلقائيًا. والمذكرات المرفوعة سابقًا ليست بديلًا عن أصول القوانين.
 
 **كل قرار برمجي أو قاعدة مالية جديدة يجب أن تحافظ على السجلات المصدرية والاعتماد التاريخي، وأن تعود للمراجع والمالك عند وجود غموض.**
+
+## مجموعات الموظفين وتشغيلات الشهر ونوع الصرفية
+- [صرفية المرتب الرئيسية الواحدة والصرفيات المنفصلة المتعددة: ERD وسياسة فرادة السجل](specs/MONTHLY-PAYROLL-GROUPS-AND-DISBURSEMENT-TYPES.md).
+- [أمثلة ERD/UML وInput/Output لمرتب واحد و3 صرفيات منفصلة وتصحيح](examples/06-MONTHLY-PAYROLL-GROUPS-AND-DISBURSEMENTS.md).
+- [ERD الاستيراد والمجموعات](architecture/ERD-IMPORT-AND-AUDIT.md)، [UML الكلاسات](architecture/UML-CLASSES.md)، [UML سير العمل](architecture/UML-WORKFLOWS.md). الصرفيات المنفصلة ليست خاضعة لقيد `MainSalarySlot`.

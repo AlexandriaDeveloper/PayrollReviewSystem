@@ -212,3 +212,29 @@ stateDiagram-v2
 
 ## مدخلات ومخرجات ملموسة
 راجع [مثال UML التدريبي](../examples/02-UML-REVIEW-EXAMPLES.md) الذي يحتوي على طلب JSON ونتيجة تحليل PDF ومراجعة وتعديل بعد اعتماد.
+
+## UML — استقبال صرفية رئيسية ثانية في نفس الشهر
+```mermaid
+sequenceDiagram
+ actor Reviewer as "المراجع"
+ participant Intake as "الاستيراد PDF/Excel/شاشة"
+ participant Classifier as "DisbursementClassifier"
+ participant Main as "MainSalaryRegistry"
+ participant Separate as "SeparateDisbursementService"
+ Intake->>Classifier: ما نوع الصرفية؟
+ alt MAIN_SALARY
+  Classifier->>Main: GetOrCreateMainSlot(unit,employee,month)
+  alt أول مرتب رئيسي
+   Main-->>Reviewer: سجل رئيسي للمراجعة
+  else رئيسية موجودة
+   Main-->>Reviewer: DUPLICATE_MAIN_CANDIDATE
+   Reviewer->>Main: اربط التصحيح بنفس السجل إذا ثبت مصدره
+  end
+ else SEPARATE
+  Classifier->>Separate: RegisterSeparate
+  Separate-->>Reviewer: صرفية منفصلة إضافية
+ else UNKNOWN
+  Classifier-->>Reviewer: لا اعتماد قبل تحديد النوع
+ end
+```
+تعدد الملفات أو التشغيلات أو نقل الموظف بين المجموعات لا يجيز مرتبًا رئيسيًا ثانيًا. [المواصفة](../specs/MONTHLY-PAYROLL-GROUPS-AND-DISBURSEMENT-TYPES.md).
