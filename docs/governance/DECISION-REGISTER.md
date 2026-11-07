@@ -68,3 +68,9 @@
 - **D-023 (مؤكد):** وافق المالك على منهجية `Elephant` للتصميم لدى ChatGPT، و`Goldfish` لمراجعة مستقلة بسياق جديد، وGitHub لحفظ التصميم والنتائج، وGemini لتنفيذ المهام المعتمدة.
 - **P-014 (مسار تطبيق):** ثلاث حزم Goldfish داخل `docs/egm/` لمجالات الهوية والصرفيات، القواعد المالية الزمنية، ومصادر Oracle/Excel/الإدخال. **حالة المراجعات الفعلية `NOT_RUN`** حتى تقرير مستقل يمكن التحقق منه.
 - **حدود التفويض:** اعتماد التعاون لا يفوض تثبيت Plugin في بيئة المستخدم أو تشغيل محرك كود أو اعتماد قانون أو دمج ملفات غير Markdown. لا يكفي وجود تقرير «لا مشاكل» وحده لترخيص التنفيذ.
+
+## القرار المعماري الجديد — DDD (7 نوفمبر 2026)
+- **D-024 (قرار مالك معتمد):** تطوير `PayrollReviewSystem` وفق `Domain-Driven Design (DDD)` مع `Modular Monolith` و`Clean Architecture` لحماية قواعد المرتبات وفصل المنطق عن الاستيراد والتخزين والعرض. [ADR-003](../decisions/ADR-003-ddd-modular-monolith-clean-architecture.md).
+- **P-015 (تفصيل يحتاج مراجعة):** [خريطة Bounded Contexts والـAggregate Roots](../architecture/DDD-BOUNDED-CONTEXTS-AND-AGGREGATES.md) بما فيها `Personnel/Payroll/FinancialFacts/Rules/SourceIntake/Audit/Retro/AccessGovernance` **مقترحة** إلى أن تُراجع Goldfish وتُحسم حدودها. ليست إنشاء جداول.
+- **توضيح P-001:** `Modular Monolith` أصبح معتمدًا كأسلوب **تنظيم منطقي وتشغيل مبدئي**، لكن اعتماد `ASP.NET Core / Angular / SQL Server` أو نسخ التقنيات وSQL Schema وملفات النشر لا يزال منفصلًا ومعلّقًا.
+- **توثيق مسار EGM:** مراجعة الحزمة الأولى الجارية بدأت من ملفات سابقة؛ لا يجوز إسناد نتيجتها إلى هذا الـADR الجديد دون مراجعة إضافية. لا صلاحية كود/SQL/نشر ناشئة عن D-024.

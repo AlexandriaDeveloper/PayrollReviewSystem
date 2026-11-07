@@ -102,3 +102,12 @@
 - `docs/egm/02-TEMPORAL-FINANCIAL-RULES-DESIGN-DRAFT.md` للمحرك القانوني الزمني والتسويات.
 - `docs/egm/03-ORACLE-INTAKE-AND-EVIDENCE-DESIGN-DRAFT.md` للاستيراد وإدخال Excel والشاشة ورعاية الطفل.
 لا تعتبر كتابة ChatGPT للمواصفات مراجعة Goldfish، ولا تدّعِ أن `NOT_RUN` تعني نجاحًا. إذا كانت البيئة لا تدعم Fresh Subagent، اكتب `BLOCKED_ENVIRONMENT` وأوقف **بوابة المراجعة**، لا تخترع تقريرًا. يمكن إصلاح عيوب بسيطة بعيدة عن تغييرات التصميم عبر PR واختبارات الصيانة المعتمدة. لا تدمج Gemini PR أو تنشر.
+
+## عقد معماري جديد — DDD / Modular Monolith / Clean Architecture
+اعتمد المالك في `ADR-003` و`D-024` النهج `DDD + Modular Monolith + Clean Architecture`. قبل أي Issue برمجية:
+1. اقرأ `docs/decisions/ADR-003-ddd-modular-monolith-clean-architecture.md` وخريطة `docs/architecture/DDD-BOUNDED-CONTEXTS-AND-AGGREGATES.md`.
+2. حدد `Bounded Context` مالكًا لكل Entity/Use Case، واختبر ثوابت الـAggregate ونسخ مصدره وزمنه، وسمِّ التبعيات العابرة للوحدات بعقود صريحة.
+3. اجعل `Domain` مستقلًا عن `Infrastructure` و`Presentation`؛ لا `DbContext`, `PDFium`, `HttpClient` داخل نماذج الاستحقاق. `Application` ينسق حالات الاستخدام والـPorts، و`Infrastructure` تحقق الـAdapters؛ لا كتابة مباشرة في جداول Context آخر.
+4. لا تعتمد تقسيم الـContexts والـAggregates المبدئي كما لو كان SQL نهائيًا؛ يلزمه Goldfish مستقل وADR/تصميم فيزيائي وإذن المالك لكل Issue تنفيذ.
+5. لا تنقل قاعدة حساب أو قرار مراجعة تلقائيًا بين الوحدات بسبب Event؛ لا `Microservices` أو `CQRS`/Event Sourcing شامل إلا بمبرر وADR.
+الوثائق الحالية المستهدفة بمراجعة EGM سابقة لا تُعد محدّثة أو مجازة لهذا القرار بأثر رجعي.

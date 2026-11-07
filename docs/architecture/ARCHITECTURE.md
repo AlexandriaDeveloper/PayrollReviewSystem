@@ -39,3 +39,11 @@
 
 ## التقنية المقترحة — غير معتمدة
 `ASP.NET Core/.NET` مع `Angular RTL` و`SQL Server` داخل `Modular Monolith`. يُحسم ذلك في ADR قبل التنفيذ. لا يوجد اعتماد تلقائي على مشاريع قديمة.
+
+## الإطار المعماري المعتمد منذ 7 نوفمبر 2026
+وافق المالك على **`DDD + Modular Monolith + Clean Architecture`** كمنهجية معمارية؛ لذلك تُعامل قائمة الوحدات المنطقية أعلاه كنطاقات عمل أولية ذات ملكية، لا كجداول مشتركة أو خدمات منفصلة. كل Context له قواعده وعقود القراءة والكتابة، ويظل الـDomain مستقلًا عن أدوات PDF/Excel وقاعدة البيانات والواجهة.
+
+- [ADR-003 — القرار المعتمد](../decisions/ADR-003-ddd-modular-monolith-clean-architecture.md).
+- [Bounded Contexts / Aggregate Roots المقترحة والاختبارات](DDD-BOUNDED-CONTEXTS-AND-AGGREGATES.md).
+- **قيد التفسير:** جملة «التقنية المقترحة — غير معتمدة» أعلاه تخص منتجات وإصدارات `.NET/Angular/SQL Server`؛ **لا** تلغي قرار المالك الحالي باعتماد أسلوب Modular Monolith.
+- لا اعتماد SQL/هجرات أو إعادة تصميم صامتة قبل مراجعة Goldfish والمالك.
