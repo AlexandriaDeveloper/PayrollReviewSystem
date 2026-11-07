@@ -66,3 +66,10 @@ Excel عربي، وتقارير مصدر ومراجعة، واختبارات أ�
 - وثّق لماذا استخدمت `Inheritance` أو `Composition` أو `Polymorphism`، وأن بدائل المصدر تلتزم `LSP` ولا تخلط درجات الإثبات.
 - أثبت اتجاه التبعية الصحيح `Domain → no Infrastructure`، وحدود `Ports` والـ`Adapters` والفصل بين ORM وFinancial Rules.
 - اكتب اختبارات نجاح/فشل وحالات التزامن لكل ثابت مالي، واربط `SOLID-001..018` بما يخص المهمة. **لا كود أو SQL الآن**؛ التفاصيل تُراجع Goldfish مع خريطة DDD قبل التصريح.
+
+## مرحلة جودة التنفيذ — معايير Gemini وDefinition of Done
+بعد انتهاء التصميم المعتمد وصدور موافقة مالك لكل Issue تنفيذ، يستخدم Gemini [Engineering Standards](../engineering/ENGINEERING-STANDARDS.md) و[Definition of Done](../engineering/DEFINITION-OF-DONE.md) و`ADR-005`، بالإضافة إلى `OOP/SOLID` و`DDD`.
+- اختبارات Regression/Contract/Integration/Security اللازمة بحسب خطر التغيير، و`PASS/FAIL/NOT_RUN/N/A` بأدلة فعلية.
+- حساب `decimal` حتمي ومصادر قوانين سليمة، تزامن وإنشاء MAIN واحد، SEPARATE متعددة، مصدر متكرر غير ممسوح.
+- توافق عقود API، وضوح الأخطاء، RBAC في الخادم، Observability دون PII، واستيراد بكفاءة مقاسة على عينات اصطناعية.
+- لا يُنشأ CI جديد ولا Migration إلا بتفويض منفصل، ولا يُعلن نجاح اختبار لم يتم تشغيله. لا يدمج Gemini كوده.

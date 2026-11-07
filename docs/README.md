@@ -118,3 +118,12 @@
 - [الدليل التطبيقي لـEncapsulation/Polymorphism وSRP/OCP/LSP/ISP/DIP في نظام المرتبات](architecture/OOP-AND-SOLID-DESIGN-STANDARDS.md).
 - [Issue #31](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/31) لتوثيق هذا القرار فقط.
 - اختبارات تصميم `SOLID-001..018` **لم تنفذ بعد**؛ تُستخدم عند مراجعة أكواد Gemini المصرح بها لاحقًا. لم تتغير ملفات ومراجع Goldfish الجاري في هذا PR.
+
+## المهارات الهندسية الموجهة إلى Gemini/Antigravity
+اعتمد المالك المعايير العشرة للهندسة البرمجية و`Definition of Done`، وأضفنا **مهارتين فعليتين `SKILL.md`** على مستوى المشروع في `.agents/skills/` لبيئات Gemini/Antigravity المتوافقة. **لا يُفهم من وجود الملفات أن الوكيل الحالي فعّلها؛ على المستخدم سحب تحديث المستودع ثم إعادة تحميل/بدء جلسة مهارات.**
+- [ADR-005 — قرار معايير جودة البرمجيات وAgent Skills](decisions/ADR-005-engineering-quality-and-agent-skills.md).
+- [Engineering Standards — التفاصيل العشرة والحالات الاصطناعية](engineering/ENGINEERING-STANDARDS.md).
+- [Definition of Done — معايير مراجعة الأدلة لكل PR](engineering/DEFINITION-OF-DONE.md).
+- [Skill التطوير المالي: payroll-engineering-quality](../.agents/skills/payroll-engineering-quality/SKILL.md).
+- [Skill التحقق: payroll-pr-quality-gate](../.agents/skills/payroll-pr-quality-gate/SKILL.md).
+- [Issue #33](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/33) لتتبع التوثيق، وليس تصريح Gemini بالبرمجة.

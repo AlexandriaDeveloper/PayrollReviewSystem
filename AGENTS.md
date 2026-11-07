@@ -97,3 +97,13 @@
 - لا يعتمد `Domain` على PDFium أو Excel أو DbContext أو Angular، ولا تجبر واجهة موحدة الإدخال اليدوي على تزييف إثبات Oracle.
 - ابتعد عن `God Classes` و`anemic model` الذي يسمح بتغيير مبالغ وقرارات حساسة من خارج Aggregate، وعن الإفراط في `interfaces` والوراثة والمصانع دون داعٍ.
 - معايير `SOLID-001..018` **مقترحات اختبارات تصميم** وليست نتائج تشغيل، ولا تصريح Gemini بالكود أو SQL ولا شهادة Goldfish.
+
+## معايير هندسة البرمجيات ومهارات الوكيل — D-026 / ADR-005
+اعتمد المالك `TDD/Regression`, `KISS/DRY/YAGNI`, `ACID/Concurrency`, `Deterministic Money`, `Idempotency/Retry`, `API Contracts`, `Security/Auditability`, `Observability`, `Performance by Measurement` و`CI/Safe Delivery` مع `Definition of Done` واضحة. المراجع الأساسية:
+- `docs/decisions/ADR-005-engineering-quality-and-agent-skills.md`
+- `docs/engineering/ENGINEERING-STANDARDS.md`
+- `docs/engineering/DEFINITION-OF-DONE.md`
+- `.agents/skills/payroll-engineering-quality/SKILL.md`
+- `.agents/skills/payroll-pr-quality-gate/SKILL.md`
+
+الـ`SKILL.md` مكتوبة بصيغة Agent Skills قابلة للاكتشاف في بيئات Gemini/Antigravity المتوافقة، **لكن اكتشافها/تفعيلها في جلسة المستخدم ليس نتيجة مضمونة بمجرد Commit في GitHub**. واجب Gemini الرجوع إليها عند انطباق المهمة. `PASS/FAIL/NOT_RUN/N/A` تصف أدلة فعلية فقط؛ `CI` أخضر لا يثبت قانونية حسابات المرتبات، وليس لأداة AI حق اعتماد قواعد قانونية أو دمج كود/نشر بلا تصريح.

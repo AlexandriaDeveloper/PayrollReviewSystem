@@ -49,3 +49,13 @@
 - **اختبارات:** ربط `SOLID-001..018` وفق [الدليل](../architecture/OOP-AND-SOLID-DESIGN-STANDARDS.md)، والتحقق من الاختبارات الفعلية ومنع التزامن المكرر. لا يُقبل تقرير تشغيلي مستنتج من وثيقة فقط.
 
 هذه البوابة لا تعفي من مراجعة `EGM` المستقلة للتغييرات الجوهرية، ولا تعتمد الـDDL/SQL أو خدمة أمان أو تفعيل خصم بلا قرار مالك.
+
+## بوابة Engineering Standards + Definition of Done — ADR-005
+بعد تصريح مهمة برمجية، وقبل اعتبار PR جاهزًا للمراجعة أو الدمج، اطلب جدول `Gate / PASS|FAIL|NOT_RUN|N/A / Evidence / Risk` وفق [Definition of Done](../engineering/DEFINITION-OF-DONE.md) و[المعايير العشرة](../engineering/ENGINEERING-STANDARDS.md).
+- `TDD/Regression` للقواعد المالية وتغييرات الأخطاء القابلة للإعادة، مع اختبارات تاريخ وتقريب و`UNKNOWN`.
+- `DB/ACID/Concurrency` و`Idempotency` على القيود المناسبة، مع DB Provider المختار فعليًا إذا تأثر التخزين؛ اختبار `InMemory` وحده غير كافٍ للفرادة المتزامنة.
+- `API Contract` و`Security/RBAC/IDOR` و`Structured Logging` بلا PII، و`Performance` المقاس عند تغيير مسارات الحمل.
+- `Build/Lint/Static Analysis/Dependency/Secrets` والـCI حسب المهمة والأدوات المتاحة، مع نتائج حقيقية وSHA، وليس أرقامًا مخترعة.
+- `N/A` مسموح مع سبب واضح (مثل عدم الحاجة إلى DB عند تعديل CSS)؛ `NOT_RUN` في Gate جوهرية مانع لوصف PR بأنه `READY`.
+- لا تغيّر Workflows أو قواعد حماية الفرع أو تنفذ SQL/Migrations/Deploy بدون إذن مستقل. لا يدمج Gemini PR البرمجي بنفسه.
+استخدم [مهارة مراجعة PR](../../.agents/skills/payroll-pr-quality-gate/SKILL.md) وفحص Diff ومصادر المخاطر فعلًا. لا يلغي هذا مراجعة EGM/Goldfish للتصميم الجوهري.

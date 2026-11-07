@@ -32,3 +32,22 @@
 
 ## حالة المراجعة
 لا تدمج التغييرات البرمجية بنفسك. ملفات Markdown فقط تخضع لتفويض ChatGPT بالمراجعة والدمج.
+
+## Engineering Quality Evidence Matrix — ADR-005
+املأ الجدول عند PR برمجي. **لا تكتب PASS دون أمر تشغيل/رابط نتيجة وSHA**؛ `N/A` يحتاج سببًا. في PR توثيق، ضع `N/A` للفحوص غير المناسبة.
+
+| Gate | Status: PASS/FAIL/NOT_RUN/N/A | Evidence: Command/Run/SHA | Risk/Reason |
+| --- | --- | --- | --- |
+| Scope + Owner Authorization | | | |
+| DDD/OOP/SOLID + KISS/DRY/YAGNI | | | |
+| Financial Unit/Regression/Determinism | | | |
+| DB Integrity/Concurrency/Idempotency | | | |
+| API/Adapter Contract + Error Handling | | | |
+| Security/RBAC/IDOR/PII | | | |
+| Structured Logging/Observability | | | |
+| Performance/Load (if relevant) | | | |
+| Build/Lint/CI/Dependency/Secrets | | | |
+| Migration/Backup/Restore (if relevant) | | | |
+| Goldfish evidence for major design change | | | |
+
+راجع `docs/engineering/DEFINITION-OF-DONE.md`، واستخدم `.agents/skills/payroll-pr-quality-gate/SKILL.md` لتجهيز الفحص. Gemini لا يدمج كوده ولا ينشره.

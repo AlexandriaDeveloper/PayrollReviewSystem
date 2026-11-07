@@ -123,3 +123,16 @@
 7. فضّل `Composition over Inheritance` عند اختلاف سياسات القواعد أو المصادر؛ OOP لا يمنع records/DTOs/pure functions المناسبة، ولا يفرض Event Sourcing أو Microservices.
 8. اربط كل PR بعد إذن الكود بمعايير `SOLID-001..SOLID-018` ذات الصلة مع اختبار فعلي/نتيجة وسلوك فشل وتزامن. لا تدّعِ تشغيلًا قبل وجود التنفيذ.
 9. يجب أن يمر أي تغيير معماري جوهري بـGoldfish مستقل وقرار مالك قبل البرمجة؛ تفاصيل واجهات وكلاسات المعيار مقترحات حتى ذلك.
+
+## المهارات العملية الملزمة لجودة التنفيذ — Agent Skills
+**قرار المالك D-026 / ADR-005:** استعمل مهارتَي Workspace عند كل مهمة تنطبق عليهما:
+- [`payroll-engineering-quality`](.agents/skills/payroll-engineering-quality/SKILL.md) لتخطيط وكتابة الاختبارات وتنفيذ كود مُصرح به مع حماية قواعد المرتبات.
+- [`payroll-pr-quality-gate`](.agents/skills/payroll-pr-quality-gate/SKILL.md) عند فحص Diff/PR وإعداد تقرير الأدلة قبل طلب الدمج.
+
+اقرأ دائمًا `docs/engineering/ENGINEERING-STANDARDS.md` و`docs/engineering/DEFINITION-OF-DONE.md` و`docs/decisions/ADR-005-engineering-quality-and-agent-skills.md`. إن دعمت بيئتك Agent Skills، فعِّل المهارة ذات الصلة بعد موافقة المستخدم على التفعيل حسب النظام؛ **إذا لم تدعم تفعيلها، التزم بالتعليمات المكتوبة يدويًا، ولا تدّعِ أن Skill شُغلت**.
+
+**المعايير العشرة الملزمة:** `TDD/Regression` عند ملاءمة السلوك، `KISS/DRY/YAGNI`، `Database Integrity/ACID/Concurrency`، `Deterministic Financial Calculations`، `Idempotency/Safe Retry`، `API Contracts/Error Handling`، `Security by Design/Auditability`، `Structured Logging/Observability`، `Measured Performance`، و`CI Quality Gates/Safe Delivery`. طبّقها تناسبًا مع نطاق المهمة مع بيان `N/A` المسبب.
+
+**منع إعلان النجاح بلا دليل:** لكل PR برمجي جدول `Gate/Status/Evidence/Risk`؛ الحالات `PASS/FAIL/NOT_RUN/N/A`؛ أرفق الأوامر الفعلية والنتائج و`Commit SHA`، واختبارات Regression والـContracts والتزامن وRBAC حسب المخاطر. لا تُحوّل `NOT_RUN` إلى `PASS` ولا تُعلن `DONE` مع فشل مانع. لا تدعي تشغيل CI أو اختبار DB على Provider فعلي ما لم يحدث فعلًا.
+
+**حدود صارمة:** وجود هذه المهارات أو قبول `ADR-005` لا يمنح تصريحًا جديدًا بالبرمجة أو SQL أو CI أو نشر، ولا يتجاوز بوابة EGM المستقلة. احتفظ بمراجعة Goldfish الأولى مستقلة عن التغييرات المستجدة.
