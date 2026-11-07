@@ -57,6 +57,10 @@
 - [ERD الاستيراد](architecture/ERD-IMPORT-AND-AUDIT.md) و[UML الكلاسات](architecture/UML-CLASSES.md) و[UML سير البيانات](architecture/UML-WORKFLOWS.md).
 - الأولوية هي **Excel / الشاشة المباشرة**، وليست الصور أو OCR؛ الملفات السابقة التي عرضت مثال الصورة تبقى للتوثيق التاريخي ولا تُعتبر شرطًا للتنفيذ.
 
+## نموذج عملي: ثلاثة استقطاعات لإجازة اعتيادية لعضو هيئة تدريس
+- [تصميم قاعدة متعددة الآثار: 156% و91% وثالث 48%/60%/200% حسب الدرجة، وأيام الإجازة/أيام الشهر، ERD وUML وJSON](specs/FACULTY-ANNUAL-LEAVE-MULTI-DEDUCTION-RULE.md).
+- 18 اختبارًا تصميميًا `FL-001..FL-018`. النسب وأسماء الأوعية وفئة 200% تحتاج توثيقًا واعتمادًا قبل تفعيل قاعدة حقيقية.
+
 ## ملفات دراسة Oracle
 - [دراسة النسخة الحالية من OraclePdfParser](reference/ORACLEPDFPARSER-CODE-STUDY.md).
 - [تقرير 25 مشكلة ومخاطرة](reference/ORACLE-PARSER-FAILURE-AUDIT.md).
