@@ -236,6 +236,36 @@ classDiagram
 
 **الدوال عقود تصميمية وليست كودًا متاحًا الآن.** ملف XLSX وشاشة الإدخال تنتجان نفس `SourceFinancialOccurrence`؛ `EXCEL_IMPORT` و`DIRECT_FORM` هما قناة الإدخال، ولا حاجة إلى OCR. راجع [المواصفة والـERD والأمثلة](../specs/EXCEL-AND-DIRECT-EMPLOYEE-PAYROLL-INTAKE.md).
 
+## UML — أداة تكوين قاعدة متعددة الاستقطاعات
+
+```mermaid
+classDiagram
+ class FacultyAnnualLeaveRuleSet {
+   +RuleVersionId
+   +DayCountBasis
+   +GradeReferenceDatePolicy
+ }
+ class RuleEffect {
+   +BaseComponentId
+   +TargetDeductionComponentId
+   +RateMode
+   +RoundingPolicy
+ }
+ class GradeRateTableVersion {
+   +FacultyRankCategory
+   +Rate
+   +Validity
+ }
+ class IFinancialRuleResolver
+ class IExpectedPayrollCalculator
+ FacultyAnnualLeaveRuleSet "1" *-- "3" RuleEffect : "مثال ثلاث آثار"
+ RuleEffect --> GradeRateTableVersion : "للأثر الثالث"
+ IFinancialRuleResolver --> FacultyAnnualLeaveRuleSet : "يحل الانطباق"
+ IExpectedPayrollCalculator --> RuleEffect : "يحسب كل أثر"
+```
+
+العدد 3 يخص هذا القرار فقط؛ المحرك العام قابل لتكوين عدد متغير من الآثار من القواعد المعتمدة. [المواصفة والحساب والأمثلة](../specs/FACULTY-ANNUAL-LEAVE-MULTI-DEDUCTION-RULE.md).
+
 ## أنواع القيمة المقترحة
 `Money(decimal Amount,Currency)`، `Period(Year,Month)`، `EffectiveInterval`، `EvidenceRef(DocumentId,Page,Row,Cell)`، `ExternalAccountCode`، `SourceLineId`، `ComponentId`، `RuleTraceRef`.
 

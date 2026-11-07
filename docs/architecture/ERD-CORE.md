@@ -187,5 +187,20 @@ erDiagram
 ## توسيع مقترح لدعم القواعد المتداخلة
 توسعة `FinancialRuleVersion` و`AdministrativeDecision` في [مخطط تداخل القواعد والدرجات](../examples/03-TEMPORAL-RULE-CONFLICT-EXAMPLE.md) تعرض `RuleApplicability` و`RuleEffect` و`RuleInteraction` و`RuleResolutionSegment` دون تكرار كيان أساسي أو تنفيذ SQL. شاهد [خوارزمية اختيار الحكم](../specs/TEMPORAL-RULE-RESOLUTION-AND-CONFLICTS.md).
 
+## ERD — قاعدة واحدة بثلاثة تأثيرات استقطاع
+ربط `FinancialRuleVersion` بعدة `RuleEffect`، لكل منها `BaseComponentId` و`TargetDeductionComponentId` ونسبة ثابتة أو `GradeRateTableVersion`، مع تاريخ مرجع الدرجة والوعاء وسياسة أيام الشهر والتقريب. هذه كيانات منطقية يُفضّل إعادة استخدام الموجود منها بدل إنشاء جدول مكرر.
+
+```mermaid
+erDiagram
+ FINANCIAL_RULE_VERSION ||--o{ RULE_EFFECT : "ثلاثة آثار"
+ RULE_EFFECT o|--o{ GRADE_RATE_TABLE_VERSION : "جدول نسب اختياري"
+ GRADE_RATE_TABLE_VERSION ||--o{ GRADE_RATE_ROW : "ربط فئات الدرجة"
+ FINANCIAL_RULE_VERSION ||--o{ CALCULATION_RUN : "إصدارات حساب"
+ CALCULATION_RUN ||--o{ CALCULATION_EFFECT_RESULT : "نتيجة كل بند"
+ RULE_EFFECT ||--o{ CALCULATION_EFFECT_RESULT : "تفاصيل الأثر"
+```
+
+[مثال ثلاثة استقطاعات 156% و91% وثالث حسب الدرجة](../specs/FACULTY-ANNUAL-LEAVE-MULTI-DEDUCTION-RULE.md).
+
 ## مثال بيانات ومخرجات
 راجع [مثال ERD للبيانات الفعلية الافتراضية](../examples/01-ERD-INPUT-OUTPUT.md) الذي يوضح Person وعلاقة العمل والصرف والمبالغ المعتمدة والأسطر المستخرجة.

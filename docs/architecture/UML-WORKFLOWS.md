@@ -60,6 +60,31 @@ sequenceDiagram
   Note over Store: لا يغيّر الاستيراد بيانات الموظف المعتمدة
 ```
 
+## UML — قرار إجازة يخرج 3 استقطاعات
+
+```mermaid
+sequenceDiagram
+ actor Reviewer as المراجع
+ participant Event as قرار الإجازة
+ participant Rules as IFinancialRuleResolver
+ participant Grade as GradeHistory
+ participant Facts as ApprovedFinancialFacts
+ participant Engine as IExpectedPayrollCalculator
+ Reviewer->>Event: إدخال فترة الإجازة المعتمدة
+ Event->>Rules: حل القواعد والفترات
+ Rules->>Grade: اختيار فئة الدرجة التاريخية
+ Grade-->>Rules: النسبة الخاصة بالفئة أو تعارض
+ Rules-->>Engine: ثلاثة RuleEffect
+ loop لكل شهر ولكل أثر
+  Engine->>Facts: قراءة وعاء البند بتاريخ القاعدة
+  Facts-->>Engine: مبلغ أو INPUT_MISSING
+  Engine->>Engine: نسبة ثابتة أو جدول درجة × أيام الإجازة/أيام الشهر
+ end
+ Engine-->>Reviewer: ثلاثة مقترحات مستقلة وسجل شرح حساب
+```
+
+[مثال 6 أيام/30 يومًا وأربعة فحوص للتداخل والدرجة والوعاء](../specs/FACULTY-ANNUAL-LEAVE-MULTI-DEDUCTION-RULE.md). الحساب مقترح ولا ينفذ خصمًا.
+
 ## 2. الحساب المستقل وقرار المراجع
 ```mermaid
 sequenceDiagram
