@@ -95,3 +95,10 @@
 
 ## ضابط إلزامي: المرتب الرئيسي الواحد والصرفيات المنفصلة
 اقرأ `docs/specs/MONTHLY-PAYROLL-GROUPS-AND-DISBURSEMENT-TYPES.md` و`docs/examples/06-MONTHLY-PAYROLL-GROUPS-AND-DISBURSEMENTS.md` قبل تنفيذ أي جداول أو API للمرتبات. القاعدة المؤكدة: **MAIN_SALARY واحدة منطقيًا لكل موظف وشهر مرتب** في نطاق علاقة العمل/الوحدة، و**SEPARATE متعددة** حتى لو كان الصرف في الشهر نفسه. افصل `PayrollCycle/PayrollRun/PayrollDisbursement/SourceDocument/MonthlyMainSalarySlot/MainSalaryRevision`، ولا تضع `UNIQUE(PersonId,Month)` على كل الصرفيات. مجموعة مراجعة الموظف تتغير حسب الدورة وتاريخ الإسناد، ولا تخلطها بمجموعات بنك الكافر. التصحيح الرسمي نسخة من نفس الرئيسي، والتكرار الظني يُحفظ في أدلة المصدر ويُراجع بدل محو السطور. لا يجوز اعتماد مصدرين منفصلين كمرتبين رئيسيين عبر مجموعتين أو تشغيلتين. نفذ لاحقًا `PG-001..PG-022` عند تفويض كود مستقل؛ هذا توثيق فقط.
+
+## بوابة EGM الملزمة لأي تغيير مالي أو معماري جوهري
+لدى المشروع بروتوكول `docs/egm/REVIEW-PROTOCOL.md` و3 حزم أهداف `design_draft` في `docs/egm/`. لا تبدأ تنفيذ Issue لتغيير القواعد المالية أو الجداول أو نموذج الصرفيات أو استيراد Oracle/Excel أو صلاحيات المراجعين حتى توجد **نتيجة Goldfish مستقلة فعلًا** للحزمة المرتبطة، وتُحل القضايا المانعة، ويوافق المالك صراحة على نطاق التنفيذ. 
+- `docs/egm/01-DOMAIN-AND-PAYROLL-DESIGN-DRAFT.md` للهويات والمجموعات والصرفيات.
+- `docs/egm/02-TEMPORAL-FINANCIAL-RULES-DESIGN-DRAFT.md` للمحرك القانوني الزمني والتسويات.
+- `docs/egm/03-ORACLE-INTAKE-AND-EVIDENCE-DESIGN-DRAFT.md` للاستيراد وإدخال Excel والشاشة ورعاية الطفل.
+لا تعتبر كتابة ChatGPT للمواصفات مراجعة Goldfish، ولا تدّعِ أن `NOT_RUN` تعني نجاحًا. إذا كانت البيئة لا تدعم Fresh Subagent، اكتب `BLOCKED_ENVIRONMENT` وأوقف **بوابة المراجعة**، لا تخترع تقريرًا. يمكن إصلاح عيوب بسيطة بعيدة عن تغييرات التصميم عبر PR واختبارات الصيانة المعتمدة. لا تدمج Gemini PR أو تنشر.

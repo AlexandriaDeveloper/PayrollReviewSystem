@@ -94,3 +94,13 @@
 - [صرفية المرتب الرئيسية الواحدة والصرفيات المنفصلة المتعددة: ERD وسياسة فرادة السجل](specs/MONTHLY-PAYROLL-GROUPS-AND-DISBURSEMENT-TYPES.md).
 - [أمثلة ERD/UML وInput/Output لمرتب واحد و3 صرفيات منفصلة وتصحيح](examples/06-MONTHLY-PAYROLL-GROUPS-AND-DISBURSEMENTS.md).
 - [ERD الاستيراد والمجموعات](architecture/ERD-IMPORT-AND-AUDIT.md)، [UML الكلاسات](architecture/UML-CLASSES.md)، [UML سير العمل](architecture/UML-WORKFLOWS.md). الصرفيات المنفصلة ليست خاضعة لقيد `MainSalarySlot`.
+
+## بوابة المراجعة المستقلة EGM / Goldfish
+اعتمد المالك مسار مراجعة معماري مستقل **قبل تنفيذ التغييرات الجوهرية**: ChatGPT يصمم، وGoldfish يراجع في سياق جديد، والمالك يحسم ويعتمد، وGemini ينفذ. **الحالة الآن: `NOT_RUN`؛ تم تجهيز الملفات ولم تُشغّل مراجعة Goldfish بعد.**
+- [فهرس الحزم الثلاث وحالتها](egm/README.md)
+- [بروتوكول التثبيت والتحقق من Fresh Context والتشغيل](egm/REVIEW-PROTOCOL.md)
+- [حزمة نطاق الموظفين والصرفيات الرئيسية والمنفصلة](egm/01-DOMAIN-AND-PAYROLL-DESIGN-DRAFT.md)
+- [حزمة القواعد الزمنية والتسويات](egm/02-TEMPORAL-FINANCIAL-RULES-DESIGN-DRAFT.md)
+- [حزمة Oracle وExcel والشاشة ورعاية الطفل](egm/03-ORACLE-INTAKE-AND-EVIDENCE-DESIGN-DRAFT.md)
+- [قالب توثيق نتائج المراجع المستقل](egm/GOLDFISH-FINDINGS-TEMPLATE.md)
+تُعتمد القواعد القانونية والقرارات التجارية لدى أصحاب صلاحياتها؛ ولا يحوّل EGM مقترحات التصميم إلى SQL أو كود معتمد تلقائيًا.
