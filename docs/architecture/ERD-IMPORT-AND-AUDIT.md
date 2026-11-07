@@ -147,6 +147,20 @@ erDiagram
   }
 ```
 
+## امتداد ERD لمسار Excel والإدخال المباشر
+
+```mermaid
+erDiagram
+  PAYROLL_CYCLE ||--o{ SOURCE_CAPTURE_SESSION : "له إدخالات"
+  SOURCE_CAPTURE_SESSION ||--o{ SOURCE_RECIPIENT_OCCURRENCE : "يحتوي موظفا"
+  SOURCE_RECIPIENT_OCCURRENCE ||--o{ SOURCE_FINANCIAL_OCCURRENCE : "يحوي عدة بنود"
+  SOURCE_CAPTURE_SESSION ||--o{ CAPTURE_VALIDATION_REPORT : "يخضع لفحص"
+  SOURCE_CAPTURE_SESSION ||--o{ CAPTURE_REVIEW_DECISION : "له مراجعات"
+  SOURCE_CAPTURE_SESSION o|--o{ SOURCE_EVIDENCE_ATTACHMENT : "ملف اختياري"
+```
+
+`SOURCE_CAPTURE_SESSION.Method` يكون `NATIVE_PDF` أو `EXCEL_IMPORT` أو `DIRECT_FORM`. ملف XLSX يضيف مرجع ملف وتحقق قالب، أما الشاشة المباشرة فلا تحتاج أي `SOURCE_EVIDENCE_ATTACHMENT`. الاثنين يستخدمان الأسطر الأصلية المنطقية ذاتها، بما فيها تكرار كود البند، لكنهما **ليسا PDF رسميًا من Oracle**. المصطلحات هنا امتداد منطقي يحتاج توحيدًا مع جدول المصدر الموجود قبل تنفيذ Schema. [المثال التفصيلي](../specs/EXCEL-AND-DIRECT-EMPLOYEE-PAYROLL-INTAKE.md).
+
 ## دورة البيانات
 1. `PayrollCycle` تحدد دورة الصرف والفترة، و`PayrollGroup` مجموعات العمل والرقابة.
 2. `ImportBatch` مجموعة ملفات مرفوعة؛ قد يحتوي أكثر من ملف من النوع نفسه وفق حالات واقعية معتمدة.

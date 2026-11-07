@@ -28,6 +28,9 @@
 - **P-009:** نموذج `ChildCareLeaveEpisode` مع `ChildCareSettlement` و`SalaryForm132` للجزء من الشهر، بعد توثيق النص لكل كادر.
 - **P-010:** استيراد متعدد القنوات عبر `SourceCaptureSession` و`CaptureVerification` مع فصل `EvidenceAuthenticity` عن `TranscriptionAccuracy`، ومصدر جزئي من دون PDF وهمي.
 
+- **D-020 (تحديث توضيحي):** المالك حدد البديل المطلوب عندما يتعذر PDF: **Excel فيه بيانات موظف ومجموعة بنود**، أو **شاشة إدخال مباشرة دون Excel أو صورة**. لا يُعتمد OCR أو قراءة الصور كشرط لهذا المسار. ويظل إدخال القيم بديل بيانات للمراجعة لا استمارة Oracle رسمية.
+- **P-011:** عقد `ICentralPayrollSourceIntake` المقترح ومسارات `EXCEL_IMPORT / DIRECT_FORM` تتوحد عند `SourceFinancialOccurrence`، بمراجعة نقل ونسخ ومصدر وأكواد مكررة ومطابقة رسمية لاحقة.
+
 ## اقتراحات تصميم تحتاج اعتمادًا رسميًا
 
 | المعرف | المقترح | السبب |

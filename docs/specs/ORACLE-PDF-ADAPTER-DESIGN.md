@@ -77,6 +77,10 @@
 ## توسيع مستقبلي: قنوات مصدر بخلاف PDF
 طلب المالك دعم الصور ولقطات الشاشة والإدخال اليدوي عند تعذر PDF، من غير فقد أدلة المصدر. المواصفة [MULTI-CHANNEL-CENTRAL-INTAKE.md](MULTI-CHANNEL-CENTRAL-INTAKE.md) توسع واجهة المصدر عبر `SourceCaptureSession` وليس محاولة تحويل كل صورة أو إدخال يدوي إلى PDF وهمي. تظل قنوات `NATIVE_PDF` و`SCANNED_PDF` و`IMAGE_UPLOAD` و`MANUAL_FROM_OFFICIAL_SOURCE` و`MANUAL_WITHOUT_DOCUMENT` منفصلة في معلومات الإثبات، وبوابة الجودة واحدة. استمارة `ChildCareSettlement` نوع تقرير مالي جديد **كتسوية لا أمر دفع**، ويراجع معه `132` عند وجود أيام عمل فعلية. لا تستخدم `Verified` لمجرد نجاح OCR أو نسخ يدوي.
 
+## الفصل بين قراءة PDF وقنوات البيانات البديلة
+
+`IPdfExtractionAdapter` مسؤول فقط عن PDF ولا يجب تكليفه بقراءة Excel أو التحكم بشاشة الإدخال. عقد `ICentralPayrollSourceIntake.ImportEmployeeExcel` و`SaveManualLines` يتعامل مع `Excel` و`DIRECT_FORM`، وتلتقي المخرجات عند `SourceFinancialOccurrence` قبل التحقق والمطابقة والمراجعة. **OCR ليس مطلوبًا لتقديم البديل الحالي**. راجع [تصميم الدوال والـERD/UML](EXCEL-AND-DIRECT-EMPLOYEE-PAYROLL-INTAKE.md).
+
 ## شروط الانتقال إلى التنفيذ البرمجي
 - تحديد أشكال PDF المستهدفة ونطاق الجزء الأول بموافقة المالك.
 - استراتيجية حفظ الملفات الأصلية الخاصة والاختبارات الاصطناعية.
