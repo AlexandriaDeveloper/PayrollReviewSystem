@@ -104,3 +104,10 @@
 - [حزمة Oracle وExcel والشاشة ورعاية الطفل](egm/03-ORACLE-INTAKE-AND-EVIDENCE-DESIGN-DRAFT.md)
 - [قالب توثيق نتائج المراجع المستقل](egm/GOLDFISH-FINDINGS-TEMPLATE.md)
 تُعتمد القواعد القانونية والقرارات التجارية لدى أصحاب صلاحياتها؛ ولا يحوّل EGM مقترحات التصميم إلى SQL أو كود معتمد تلقائيًا.
+
+## القرار المعماري DDD / Modular Monolith / Clean Architecture (7 نوفمبر 2026)
+**اعتمد المالك المنهجية؛ التفاصيل الفيزيائية والـBounded Contexts المقترحة ما زالت في انتظار مراجعة Goldfish.**
+- [ADR-003 — اعتماد DDD + Modular Monolith + Clean Architecture](decisions/ADR-003-ddd-modular-monolith-clean-architecture.md).
+- [خريطة مبدئية لـBounded Contexts وAggregate Roots وحدود التكامل واختبارات التصميم](architecture/DDD-BOUNDED-CONTEXTS-AND-AGGREGATES.md).
+- [Issue #28](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/28) لتتبع إعداد قرار التصميم، وليست إذن برمجة.
+- **مهم:** ملف `docs/egm/01-DOMAIN-AND-PAYROLL-DESIGN-DRAFT.md` ومراجعه الثمانية **لم تتغير** أثناء الجولة الحالية؛ نتيجة المراجعة الحالية لا تصادق تلقائيًا على هذا التفصيل الجديد.

@@ -54,3 +54,8 @@ Excel عربي، وتقارير مصدر ومراجعة، واختبارات أ�
 
 ## قاعدة عدم إعادة العمل
 قبل إنشاء Entity أو Migration يكتب Gemini مرجع القرار المعماري والكيان ومكانه والعلاقات والقيود والاختبارات. مخطط Mermaid المقترح **ليس تصريح إنشاء جدول**. ملف أمثلة [ERD](../examples/01-ERD-INPUT-OUTPUT.md) و[UML](../examples/02-UML-REVIEW-EXAMPLES.md) لشرح شكل البيانات فقط.
+
+## مرحلة معمارية قبل أي تنفيذ: DDD وحدود الوحدات
+**قرار النهج المعماري مقبول** وفق `ADR-003`؛ لكن تفاصيل `Bounded Contexts` و`Aggregate Roots` و`Context Map` في [التصميم المقترح](DDD-BOUNDED-CONTEXTS-AND-AGGREGATES.md) تتطلب مراجعة Goldfish منفصلة وقرارًا يحدد حدود الاتساق وملكية القراءة/الكتابة لكل Context. بعد مراجعة الحزم الأصلية، راجع هذا المستند الجديد بمراجع Fresh Context، ثم حل `BLOCKER/MAJOR` وأكمل ADR تخطيط SQL الفيزيائي قبل الكود.
+
+**مطلوب في كل مهمة Gemini لاحقة:** إعلان `Bounded Context` و`Aggregate Root` و`Invariant` و`Application Use Case` و`Contract` و`Transaction Boundary` واختبارات التصميم المرتبطة قبل البرمجة؛ لا تجعل ORM يمحو ملكية البيانات، ولا تجعل ملف Oracle مصدر حقيقة الموظف. أي تنفيذ أو ترحيل يحتاج Issue مصرحًا بها منفصلة.
