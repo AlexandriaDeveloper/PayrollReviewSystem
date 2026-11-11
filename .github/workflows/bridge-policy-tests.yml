@@ -1,0 +1,29 @@
+# اختبارات بوابة BRIDGE-001 بلا أسرار أو صلاحيات كتابة.
+name: AI Bridge — policy tests
+
+on:
+  pull_request:
+    paths:
+      - '.github/scripts/bridge-policy.cjs'
+      - '.github/scripts/bridge-policy.test.cjs'
+      - '.github/workflows/ai-bridge-gemini.yml'
+      - '.github/workflows/bridge-policy-tests.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify-policy:
+    name: Validate authorized comment gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout test source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Run native Node tests without credentials
+        run: node --test .github/scripts/bridge-policy.test.cjs
