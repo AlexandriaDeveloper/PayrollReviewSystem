@@ -1,6 +1,6 @@
 # مخططات UML لدورة مراجعة المرتبات
 
-**الحالة: نموذج تصميم مقترح v0.2، لا كود منفذ.** يكمّل [الخطة](COMPREHENSIVE-WORK-PLAN-AR.md) و[ERD](DATABASE-DIAGRAM-AR.md). الأسماء والعلاقات التالية تحتاج مراجعة وحدود معاملات وعقود قبل التنفيذ.
+**الحالة: نموذج تصميم مقترح v0.3 — تعديل D-030 قيد المراجعة، لا كود منفذ.** يكمّل [الخطة](COMPREHENSIVE-WORK-PLAN-AR.md) و[ERD](DATABASE-DIAGRAM-AR.md). الأسماء والعلاقات التالية تحتاج مراجعة وحدود معاملات وعقود قبل التنفيذ.
 
 هذه رسوم Class وSequence وState. أسهم التعاون في Sequence تصف حالة استخدام مقترحة، ولا تعني اتصالًا فعليًا بـOracle أو تنفيذ دفع. القيم الاصطناعية الواردة في الشرح ليست أحكامًا مالية.
 
@@ -47,10 +47,14 @@ classDiagram
     +MessageId
     +RespondsToFindingRevisionId
     +PartyKind
-    +RecordedBy
-    +OccurredAt
+    +OriginChannel
+    +AuthenticatedAuthorRef_optional
+    +ClaimedExternalSenderRef_optional
+    +ExternalCorrespondenceRef_optional
+    +RecordedByRef
+    +OccurredAt_optional
     +RecordedAt
-    +EvidenceRef
+    +EvidenceRef_optional
   }
   class ResolutionDecision {
     +DecisionId
@@ -132,10 +136,11 @@ classDiagram
 sequenceDiagram
   autonumber
   actor Reviewer as المراجع
+  actor CentralUser as مستخدم المركزية
   participant UI as واجهة المراجعة
   participant Intake as استقبال المصدر
   participant Audit as حالة استخدام المراجعة
-  participant Central as الاستحقاقات خارج النظام
+  participant Central as مراسلات المركزية الخارجية
   participant Follow as متابعة الفروق
   Reviewer->>UI: استقبال ملف أو إدخال بديل
   UI->>Intake: Capture مع هوية الطلب والسياق
@@ -144,9 +149,17 @@ sequenceDiagram
   Audit-->>Reviewer: ملاحظة بإصدار ومرجع نسخة المصدر
   Reviewer->>Central: إبلاغ وفق قناة العمل المخولة
   Reviewer->>Audit: تسجيل الإبلاغ ومرجعه
-  Central-->>Reviewer: رد ودليل أو ملف رسمي مصحح
-  Reviewer->>Audit: تسجيل الرد منسوبًا لجهته ونسخة الملاحظة
-  Audit->>Audit: فحص السلطة والنسخة والأدلة
+  alt رد مباشر داخل النظام
+    CentralUser->>UI: رد مرتبط بإصدار الملاحظة ومستنداته
+    UI->>Audit: تسجيل رد مع هوية الحساب المركزي الموثقة
+    Audit->>Audit: فحص صلاحية الكاتب ونطاق الملاحظة
+  else تسجيل رد وصل خارج النظام
+    Central-->>Reviewer: رد عبر مراسلة أو مستند رسمي مصحح
+    Reviewer->>UI: إدخال الرد ومرجع المراسلة ودليله المتاح
+    UI->>Audit: تسجيل الرد مع هوية مُدخله والمرسل المنسوب
+    Audit->>Audit: منع نسبة الإدخال لحساب مركزي لم يدخل النظام
+  end
+  Audit->>Audit: فحص النسخة والأدلة دون حسم تلقائي
   alt ثبتت سلامة الملف وخطأ الملاحظة
     Reviewer->>Audit: قرار سحب الملاحظة بسبب مسند
     Audit-->>Reviewer: حسم محفوظ دون فرق مرحل
@@ -161,8 +174,10 @@ sequenceDiagram
   else الرد ناقص أو الخلاف مستمر
     Audit-->>Reviewer: انتظار دليل أو تصعيد للنطاق المتأثر
   end
-  Note over Audit,Follow: حسم الملاحظة مستقل عن إثبات تنفيذ الفرق
+  Note over Audit,Follow: القناتان تسجلان الرد فقط؛ حسم الملاحظة وإثبات التنفيذ قراران مستقلان
 ```
+
+**ضبط D-030:** يُميز `OriginChannel=IN_APP` عن `EXTERNAL_RECORDED`. في الرد الداخلي تُحفظ هوية الحساب الذي كتب الرد بالفعل، وفي الرد الخارجي تُحفظ هوية مستخدم الوحدة الذي نقله وبيانات مرسله المنسوبة دون انتحال حسابه. لا تفرض هذه المسودة إتاحة كل ملاحظة لجميع مستخدمي المركزية؛ صلاحية الاطلاع والرد وشروط إثبات المراسلة مسائل مفتوحة. لا يغيّر هذا القرار حالات UML-4 أو UML-5: الحسم والتنفيذ لا يحدثان عند تسجيل رد.
 
 ## UML-3 — اعتماد نسخة وتصحيح لاحق
 
