@@ -572,7 +572,7 @@ erDiagram
   DEDUCTION_FUND o|--o{ SOURCE_LABEL_MAPPING_RULE : identifiedByAlias
   SOURCE_LABEL_MAPPING_RULE o|--o{ COMPONENT_MAPPING_DECISION : usedWhenDeciding
   DEDUCTION_FUND o|--o{ COMPONENT_MAPPING_DECISION : identifiedFund
-  FINANCIAL_COMPONENT ||--o{ COMPONENT_MAPPING_DECISION : identifiedComponent
+  FINANCIAL_COMPONENT o|--o{ COMPONENT_MAPPING_DECISION : identifiedComponent
   FINANCIAL_COMPONENT ||--o{ FINANCIAL_COMPONENT_ACCOUNT_MAPPING : linkedToAccount
   GOVERNMENT_ACCOUNT_NODE ||--o{ FINANCIAL_COMPONENT_ACCOUNT_MAPPING : targetAccount
   SOURCE_FINANCIAL_OCCURRENCE {
@@ -604,7 +604,7 @@ erDiagram
   COMPONENT_MAPPING_DECISION {
     string MappingDecisionId PK
     string SourceLineId FK
-    string ComponentRef FK
+    string ComponentRef FK "optional"
     string FundRef FK "optional"
     string UsedRuleRef FK "optional"
     string DecisionStatus
