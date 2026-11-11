@@ -1,6 +1,6 @@
 # مخططات UML لدورة مراجعة المرتبات
 
-**الحالة: نموذج تصميم مقترح v0.3 — تعديلات D-030 وD-031 قيد المراجعة، لا كود منفذ.** يكمّل [الخطة](COMPREHENSIVE-WORK-PLAN-AR.md) و[ERD](DATABASE-DIAGRAM-AR.md). الأسماء والعلاقات التالية تحتاج مراجعة وحدود معاملات وعقود قبل التنفيذ.
+**الحالة: نموذج تصميم مقترح v0.3 — تعديلات D-030 إلى D-032 قيد المراجعة، لا كود منفذ.** يكمّل [الخطة](COMPREHENSIVE-WORK-PLAN-AR.md) و[ERD](DATABASE-DIAGRAM-AR.md). الأسماء والعلاقات التالية تحتاج مراجعة وحدود معاملات وعقود قبل التنفيذ.
 
 هذه رسوم Class وSequence وState. أسهم التعاون في Sequence تصف حالة استخدام مقترحة، ولا تعني اتصالًا فعليًا بـOracle أو تنفيذ دفع. القيم الاصطناعية الواردة في الشرح ليست أحكامًا مالية.
 
@@ -44,6 +44,16 @@ classDiagram
     +EntitlementPeriod
     +ProposedDifference
   }
+  class FindingResolutionDelegation {
+    +ResolutionDelegationId
+    +FindingId
+    +OriginalFindingVersion
+    +AssignedByRef
+    +AssignedReviewerRef
+    +ReasonKind
+    +AssignedAt
+    +RevokedAt_optional
+  }
   class ReviewMessage {
     +MessageId
     +RespondsToFindingRevisionId
@@ -62,6 +72,7 @@ classDiagram
     +FindingRevisionId
     +DecidedByReviewerRef
     +DecidedAt
+    +ResolutionDelegationId_optional
     +SupportingMessageId_optional
     +DecisionKind
     +Reason
@@ -102,7 +113,8 @@ classDiagram
   }
   class ReviewUseCase {
     +RecordReply(command)
-    +ResolveFindingByOwner(command)
+    +AssignFindingResolutionDelegate(command)
+    +ResolveFindingByAuthorizedReviewer(command)
     +ApproveReview(command)
   }
   class PdfSourceAdapter
@@ -116,8 +128,10 @@ classDiagram
   AuditCase "1" *-- "1..*" ReviewRevision : versions
   AuditCase "1" --> "0..*" Finding : references
   Finding "1" *-- "1..*" FindingRevision : versions
+  Finding "1" --> "0..*" FindingResolutionDelegation : resolutionAssignments
   FindingRevision "1" --> "0..*" ReviewMessage : addressedReplies
   FindingRevision "1" --> "0..*" ResolutionDecision : decisions
+  ResolutionDecision "0..*" --> "0..1" FindingResolutionDelegation : delegatedAuthority
   ReviewRevision "0..*" --> "0..*" ResolutionDecision : frozenDecisionRefs
   ReviewRevision "1" --> "0..*" ReviewApproval : approvals
   ResolutionDecision "1" --> "0..*" FollowUpItem : authorizedFollowUp
@@ -139,7 +153,9 @@ classDiagram
 ```mermaid
 sequenceDiagram
   autonumber
-  actor Reviewer as المراجع
+  actor Reviewer as المراجع الأصلي
+  actor Responsible as المسؤول المخوّل
+  actor DelegateReviewer as المراجع البديل
   actor CentralUser as مستخدم المركزية
   participant UI as واجهة المراجعة
   participant Intake as استقبال المصدر
@@ -164,8 +180,15 @@ sequenceDiagram
     Audit->>Audit: منع نسبة الإدخال لحساب مركزي لم يدخل النظام
   end
   Audit->>Audit: فحص النسخة والأدلة دون حسم تلقائي
-  Reviewer->>Audit: طلب حسم الملاحظة بصفته صاحبها مع دليل وسبب وإصدار
-  Audit->>Audit: تحقق من RaisedByReviewerRef وهوية الطالب وصلاحيته ونطاق الملاحظة والنسخة
+  alt صاحب الملاحظة متاح
+    Reviewer->>Audit: طلب حسم بصفته صاحب الملاحظة مع دليل وسبب وإصدار
+    Audit->>Audit: تحقق من RaisedByReviewerRef وهوية الطالب وصلاحيته والنطاق والنسخة
+  else صاحب الملاحظة غائب أو منقول
+    Responsible->>Audit: إصدار تكليف مراجع بديل لملاحظة محددة مع سبب غياب أو نقل
+    Audit->>Audit: تحقق سلطة المسؤول ثم حفظ هويته وتوقيت التكليف والإصدار دون تغيير الأصل
+    DelegateReviewer->>Audit: حسم باسم البديل مع مرجع التكليف والدليل وإصدار الملاحظة
+    Audit->>Audit: تحقق من صلاحية تكليف البديل وحالته والنطاق والإصدار
+  end
   alt ثبتت سلامة الملف وخطأ الملاحظة
     Audit-->>Reviewer: حفظ سحب الملاحظة بقرار صاحبها دون فرق مرحل
   else اتفاق على فرق وتصحيح مصدر
@@ -179,12 +202,12 @@ sequenceDiagram
   else الرد ناقص أو الخلاف مستمر
     Audit-->>Reviewer: انتظار دليل أو تصعيد للنطاق المتأثر
   end
-  Note over Audit,Follow: صاحب الملاحظة يحسمها بعد فحص الرد؛ اعتماد الصرفية وإثبات التنفيذ مستقلان
+  Note over Audit,Follow: يحسم صاحب الملاحظة أو بديل مكلف رسميًا باسمه دون محو الأصل؛ اعتماد الصرفية والتنفيذ مستقلان
 ```
 
 **ضبط D-030:** يُميز `OriginChannel=IN_APP` عن `EXTERNAL_RECORDED`. في الرد الداخلي تُحفظ هوية الحساب الذي كتب الرد بالفعل، وفي الرد الخارجي تُحفظ هوية مستخدم الوحدة الذي نقله وبيانات مرسله المنسوبة دون انتحال حسابه. لا تفرض هذه المسودة إتاحة كل ملاحظة لجميع مستخدمي المركزية؛ صلاحية الاطلاع والرد وشروط إثبات المراسلة مسائل مفتوحة. لا يغيّر هذا القرار حالات UML-4 أو UML-5: الحسم والتنفيذ لا يحدثان عند تسجيل رد.
 
-**ضبط D-031:** لا يلزم توقيع رئيس المراجعة لحسم الملاحظة التي سجلها صاحبها؛ تُقارن هوية صاحب الطلب بـ`RaisedByReviewerRef` ويُتحقق من النطاق والإصدار قبل إنشاء `ResolutionDecision` مؤرخ ومسبب. `ReviewApproval` لاعتماد نسخة مراجعة صرفية **إجراء مختلف** لا يحصل عليه المراجع بهذا القرار. انتقال ملكية الملاحظة لزميل عند الغياب أو تغيير المجموعة غير محسوم.
+**ضبط D-031/D-032:** الأصل أن يحسم صاحب الملاحظة برد مسند؛ عند الغياب أو النقل يختار المسؤول المخوّل مراجعًا بديلًا لملاحظة محددة، فيحسم البديل باسمه مستخدمًا تكليفًا صالحًا مع حفظ اسم صاحب الملاحظة. يفحص التطبيق `RaisedByReviewerRef` أو `FindingResolutionDelegation`، وهوية الحاسم، وسلطة مصدر التكليف، والنسخة والنطاق والدليل. التكليف لا يغير `RaisedByReviewerRef` ولا يمنح `ReviewApproval`؛ قواعد مدة التكليف وإلغائه ومسمى المسؤول غير معتمدة بعد.
 
 ## UML-3 — اعتماد نسخة وتصحيح لاحق
 
@@ -232,16 +255,16 @@ stateDiagram-v2
   ReplyReview --> WaitingEvidence: دليل الرد غير كاف
   ReplyReview --> Escalated: استمرار خلاف
   Escalated --> ReplyReview: قرار أو توضيح مختص
-  ReplyReview --> SourceCorrect: صاحب الملاحظة قبل الرد بدليل وإصدار
-  ReplyReview --> DifferenceConfirmed: صاحب الملاحظة حسم الفرق بسند
-  UnderReview --> Withdrawn: صاحب الملاحظة سحبها بسبب مسند
+  ReplyReview --> SourceCorrect: حسم مخول مع دليل وإصدار
+  ReplyReview --> DifferenceConfirmed: حسم فرق بواسطة مراجع مخول بسند
+  UnderReview --> Withdrawn: سحب بسبب مسند بواسطة مراجع مخول
   SourceCorrect --> [*]
   Withdrawn --> [*]
   DifferenceConfirmed --> [*]
   Note right of DifferenceConfirmed: قد تبقى متابعة تصحيح أو تنفيذ مفتوحة
 ```
 
-تجتاز انتقالات الحسم فحص هوية `RaisedByReviewerRef` ونطاق الصلاحية ونسخة الملاحظة؛ لا يحتاج **حسم الملاحظة ذاته** إلى معتمد أعلى وفق D-031. النتائج تخص الحسم الموضوعي للملاحظة، وليست تصريح إغلاق كل مراجعة الصرفية. إذا وصل دليل يغير حسمًا قديمًا، تحفظ نسخة القرار السابقة وتفتح نسخة فحص جديدة مرتبطة بها؛ لا تُمسح النهاية التاريخية.
+تجتاز انتقالات الحسم فحص هوية صاحب الملاحظة `RaisedByReviewerRef` أو مرجع تكليف البديل وسلطة مُصدره عند الغياب/النقل، مع نطاق الصلاحية ونسخة الملاحظة؛ لا يحتاج **حسم الملاحظة ذاته** إلى توقيع رئيس إضافي وفق D-031/D-032. النتائج تخص الحسم الموضوعي للملاحظة، وليست تصريح إغلاق كل مراجعة الصرفية. إذا وصل دليل يغير حسمًا قديمًا، تحفظ نسخة القرار السابقة وتفتح نسخة فحص جديدة مرتبطة بها؛ لا تُمسح النهاية التاريخية.
 
 ## UML-5 — حالة متابعة الفرق مستقلة
 
