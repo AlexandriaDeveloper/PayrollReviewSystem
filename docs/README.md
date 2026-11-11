@@ -129,3 +129,7 @@
 - [Skill التطوير المالي: payroll-engineering-quality](../.agents/skills/payroll-engineering-quality/SKILL.md).
 - [Skill التحقق: payroll-pr-quality-gate](../.agents/skills/payroll-pr-quality-gate/SKILL.md).
 - [Issue #33](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/33) لتتبع التوثيق، وليس تصريح Gemini بالبرمجة.
+
+
+## حزمة التخطيط لـGemini / Antigravity
+[البرومبت والخطة العربية وUML ومخطط البيانات](planning/README.md) — مسودات مبنية على قاعدة العمل، مع مصفوفة قبول ودليل مراجعة مستقلة ونتائج فحص موثقة. لا تعد اعتمادًا لكود أو SQL.
