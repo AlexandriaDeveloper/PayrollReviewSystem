@@ -1,6 +1,6 @@
 # مخططات UML لدورة مراجعة المرتبات
 
-**الحالة: نموذج تصميم مقترح v0.3 — تعديلات D-030 إلى D-042 وتبسيط التسجيل، لا كود منفذ.** يكمّل [الخطة](COMPREHENSIVE-WORK-PLAN-AR.md) و[ERD](DATABASE-DIAGRAM-AR.md). الأسماء والعلاقات التالية تحتاج مراجعة وحدود معاملات وعقود قبل التنفيذ.
+**الحالة: نموذج تصميم مقترح v0.3 — تعديلات D-030 إلى D-043 وتبسيط التسجيل، لا كود منفذ.** يكمّل [الخطة](COMPREHENSIVE-WORK-PLAN-AR.md) و[ERD](DATABASE-DIAGRAM-AR.md). الأسماء والعلاقات التالية تحتاج مراجعة وحدود معاملات وعقود قبل التنفيذ.
 
 هذه رسوم Class وSequence وState. أسهم التعاون في Sequence تصف حالة استخدام مقترحة، ولا تعني اتصالًا فعليًا بـOracle أو تنفيذ دفع. القيم الاصطناعية الواردة في الشرح ليست أحكامًا مالية.
 
@@ -145,6 +145,8 @@ classDiagram
     +PersonRef
     +EmploymentRelationshipRefs
     +PayeeRelationshipRefs
+    +RelationKindLabels
+    +HasEmploymentRelationship
     +AsOfDate
     +AdministrativeHistory
     +DepartmentHistory
@@ -155,7 +157,7 @@ classDiagram
   }
   class IEmployeeProfileQuery {
     <<interface>>
-    +SearchEmployees(filters)
+    +SearchPersonsAndPayees(filters)
     +GetEmployeeProfile(personRef, asOfDate)
     +SearchPersonnelHistory(filters, period)
   }
@@ -215,6 +217,8 @@ classDiagram
   ExcelSourceAdapter ..|> ISourceIntake
   DirectFormAdapter ..|> ISourceIntake
 ```
+
+**D-043 — دليل الموظفين الشامل:** `SearchPersonsAndPayees` استعلام مفاهيمي مقترح لشاشة «الموظفون» التي تضم من له علاقة عمل ومن لا يملك إلا علاقة استحقاق، وتعيد **نوع علاقة العمل/الصرف** لا مجرد الاسم؛ يحتفظ `EmployeeProfileReadModel` بمراجع ‏`Person` و‏`EmploymentRelationship` و‏`PayeeRelationship` منفصلة. `HasEmploymentRelationship` يساعد العرض فقط: أقسام وترقيات ودرجات من علاقة عمل موجودة؛ لغير الموظف تُعرض «لا ينطبق» بدل توليد درجة أو تاريخ وظيفة. هل تُجمّع علاقات الشخص في صف واحد أم عدة صفوف خيار واجهة لم يحسم بعد. لا صلاحية إضافية على بيانات حساسة لمجرد وجودها في نتائج البحث.
 
 **D-042 — شكلَا الورود:** تدعم شاشة «وقائع شؤون العاملين» المكاتبة الفردية والكشف المجمع. `RecordPersonnelReportedAbsencesFromDocument` **حالة استخدام منطقية مقترحة** لتسجيل عدة وقائع محددة ومُراجعة من **مستند واحد** ‏`sourceDocumentRef`، مع مراجع علاقات عمل مستقلة لكل واقعة وفترة ونوع؛ تتيح `RecordPersonnelReportedAbsence` المسار الفردي. لا يُنشأ قرار أو حكم مالي لكل سطر، ولا تُنسخ صورة المستند الأصلية عدة مرات، ولا يُفترض تفعيل استخراج آلي من ملف. قائمة `confirmedOccurrences` لا تربط سطرًا مجهول الهوية لموظف بالتخمين، ولا يُسمح لحضور/غياب يومي بالظهور من تلقاء نفسه.
 
