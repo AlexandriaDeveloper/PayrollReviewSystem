@@ -1,6 +1,6 @@
 # مخطط قاعدة البيانات المنطقي وقاموسه
 
-**الحالة: ERD منطقي مقترح v0.3 — تعديلات D-030 إلى D-037 وتبسيط التسجيل قيد المراجعة — لا DDL أو Migration أو اختيار محرك قاعدة بيانات.** يكمّل المخططات الحالية ويعيد استعمال مفاهيمها؛ اختلاف الاسم يحتاج توحيدًا عند اعتماد التصميم الفيزيائي، ولا يبرر إنشاء جدولين للمعنى نفسه.
+**الحالة: ERD منطقي مقترح v0.3 — تعديلات D-030 إلى D-038 وتبسيط التسجيل قيد المراجعة — لا DDL أو Migration أو اختيار محرك قاعدة بيانات.** يكمّل المخططات الحالية ويعيد استعمال مفاهيمها؛ اختلاف الاسم يحتاج توحيدًا عند اعتماد التصميم الفيزيائي، ولا يبرر إنشاء جدولين للمعنى نفسه.
 
 PK هوية داخلية مقترحة، وFK علاقة مرشحة. `optional` تعني أن غيابها مقصود في الحالة المحددة. العلاقات بين مجالات DDD تمثل مراجع وعقودًا؛ لا تمنح وحدة حق كتابة جداول وحدة أخرى، ولا تقرر كل FK فيزيائي. `uuid` و`decimal` أسماء أنواع توضيحية، وتُعتمد أنواع التخزين والدقة والقيود مع التقنية.
 
@@ -497,6 +497,40 @@ erDiagram
 4. المقارنة على المستفيد والعملة والفترة والغرض والبند وسياسة الدليل. اختلاف البند يحتاج سند توافق للفترة والنوع، ولا يحله تطابق المبلغ أو باب الصرف.
 5. عكس تخصيص يربط بالأصل والسبب والجهة المخولة ويمنع عكس أكثر مما خصص. تبقى عمليات العكس تاريخية، ولا تحذف اعتمادًا أو دليلًا. المبالغ السالبة الأصلية لا تُحذف أو تُحوّل إلى موجبة أثناء القراءة.
 6. يجب أن تشير `AllocationVerification` إلى تخصيص صالح ودليل مناسب لنوع التنفيذ، مع نسخة سياسة وهوية المعتمد. القبول بتأكيد تسوية يتبع سياسة الجهة؛ لا يفرض دليل بنك واحدًا على كل نوع عمل دون قرار.
+
+## ERD-E — الشجرة الحكومية ودليل بنود المرتبات والربط (D-038)
+
+```mermaid
+erDiagram
+  GOVERNMENT_ACCOUNT_NODE o|--o{ GOVERNMENT_ACCOUNT_NODE : parentChild
+  GOVERNMENT_ACCOUNT_NODE ||--o{ FINANCIAL_COMPONENT_ACCOUNT_MAPPING : mappedAccount
+  FINANCIAL_COMPONENT ||--o{ FINANCIAL_COMPONENT_ACCOUNT_MAPPING : mappedComponent
+  GOVERNMENT_ACCOUNT_NODE {
+    string GovernmentAccountNodeId PK
+    string OfficialCode
+    string OfficialName
+    string ParentNodeId FK "optional"
+    date ValidFrom "optional"
+    date ValidTo "optional"
+  }
+  FINANCIAL_COMPONENT {
+    string FinancialComponentId PK
+    string ComponentCode
+    string ComponentName
+    string ComponentKind
+  }
+  FINANCIAL_COMPONENT_ACCOUNT_MAPPING {
+    string MappingId PK
+    string FinancialComponentId FK
+    string GovernmentAccountNodeId FK
+    date ValidFrom "optional"
+    date ValidTo "optional"
+    string EvidenceRef "optional"
+    string ApprovalStatus
+  }
+```
+
+هذا رسم منطقي **غير منفذ وغير معتمد كجدول جديد**. `FINANCIAL_COMPONENT` يعيد استعمال مفهوم `FinancialComponent` الموجود في المواصفات؛ `GOVERNMENT_ACCOUNT_NODE` و`FINANCIAL_COMPONENT_ACCOUNT_MAPPING` اقتراحان مبدئيان لحفظ تصنيف حكومي مستقل عن بنود المرتبات وروابطها. لا يقرر هذا الرسم عدد الروابط المسموح لكل بند أو نطاق استعمالها (جهة/فترة/نوع صرف) ولا تفاصيل مستويات دليل الحسابات الرسمي؛ تُثبت من مصدر محاسبي معتمد. `SourceLine` أو كود Oracle الخام يظل سجل مصدر مستقلًا، وقد يلزم جدول ربط له بالبند طبقًا لدليل البيانات القائم، **لا يُدمج آليًا مع عقدة الحساب**. مثال `PAY-ITEM-01` ⇄ `GOV-ACC-01` رموز تجريبية وليست أكوادًا حكومية حقيقية. عرض الرابط لا يعني صلاحية إنشاء أو تنفيذ قيد محاسبي.
 
 ## مرجع الحساب والتاريخ خارج الرسوم التفصيلية
 
