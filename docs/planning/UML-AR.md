@@ -1,6 +1,6 @@
 # مخططات UML لدورة مراجعة المرتبات
 
-**الحالة: نموذج تصميم مقترح v0.3 — تعديلات D-030 إلى D-041 وتبسيط التسجيل، لا كود منفذ.** يكمّل [الخطة](COMPREHENSIVE-WORK-PLAN-AR.md) و[ERD](DATABASE-DIAGRAM-AR.md). الأسماء والعلاقات التالية تحتاج مراجعة وحدود معاملات وعقود قبل التنفيذ.
+**الحالة: نموذج تصميم مقترح v0.3 — تعديلات D-030 إلى D-042 وتبسيط التسجيل، لا كود منفذ.** يكمّل [الخطة](COMPREHENSIVE-WORK-PLAN-AR.md) و[ERD](DATABASE-DIAGRAM-AR.md). الأسماء والعلاقات التالية تحتاج مراجعة وحدود معاملات وعقود قبل التنفيذ.
 
 هذه رسوم Class وSequence وState. أسهم التعاون في Sequence تصف حالة استخدام مقترحة، ولا تعني اتصالًا فعليًا بـOracle أو تنفيذ دفع. القيم الاصطناعية الواردة في الشرح ليست أحكامًا مالية.
 
@@ -164,6 +164,7 @@ classDiagram
     +RecordDecisionForSelectedEmployees(command, confirmedTargets)
     +RecordGradeOrDepartmentChange(command)
     +RecordPersonnelReportedAbsence(command)
+    +RecordPersonnelReportedAbsencesFromDocument(command, confirmedOccurrences)
   }
   class GovernmentAccountNode {
     +GovernmentAccountNodeId
@@ -214,6 +215,8 @@ classDiagram
   ExcelSourceAdapter ..|> ISourceIntake
   DirectFormAdapter ..|> ISourceIntake
 ```
+
+**D-042 — شكلَا الورود:** تدعم شاشة «وقائع شؤون العاملين» المكاتبة الفردية والكشف المجمع. `RecordPersonnelReportedAbsencesFromDocument` **حالة استخدام منطقية مقترحة** لتسجيل عدة وقائع محددة ومُراجعة من **مستند واحد** ‏`sourceDocumentRef`، مع مراجع علاقات عمل مستقلة لكل واقعة وفترة ونوع؛ تتيح `RecordPersonnelReportedAbsence` المسار الفردي. لا يُنشأ قرار أو حكم مالي لكل سطر، ولا تُنسخ صورة المستند الأصلية عدة مرات، ولا يُفترض تفعيل استخراج آلي من ملف. قائمة `confirmedOccurrences` لا تربط سطرًا مجهول الهوية لموظف بالتخمين، ولا يُسمح لحضور/غياب يومي بالظهور من تلقاء نفسه.
 
 **D-041 — استلام واقعة غياب من شؤون العاملين فقط:** عملية `RecordPersonnelReportedAbsence` مقترح منطقي لتسجيل واقعة غياب **وردت من شؤون العاملين** مع الموظف والفترة والنوع والمرجع وسند المصدر. يبحث المستخدم فيها من ملف الموظف أو من شاشة الاستعلامات العامة؛ **لا** يمتلك هذا المسار خدمة حضور وانصراف يومي أو حساب جزاءات أو خصم آلي، ولا يفترض أن يومًا بلا واقعة هو حضور أو غياب. لا تفرض عقود UML نوع الملف أو آلية الإدخال قبل معرفة مستندات شؤون العاملين.
 
