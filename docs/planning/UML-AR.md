@@ -1,6 +1,6 @@
 # مخططات UML لدورة مراجعة المرتبات
 
-**الحالة: نموذج تصميم مقترح v0.3 — تعديلات D-030 إلى D-044 وتبسيط التسجيل، لا كود منفذ.** يكمّل [الخطة](COMPREHENSIVE-WORK-PLAN-AR.md) و[ERD](DATABASE-DIAGRAM-AR.md). الأسماء والعلاقات التالية تحتاج مراجعة وحدود معاملات وعقود قبل التنفيذ.
+**الحالة: نموذج تصميم مقترح v0.3 — تعديلات D-030 إلى D-045 وتبسيط التسجيل، لا كود منفذ.** يكمّل [الخطة](COMPREHENSIVE-WORK-PLAN-AR.md) و[ERD](DATABASE-DIAGRAM-AR.md). الأسماء والعلاقات التالية تحتاج مراجعة وحدود معاملات وعقود قبل التنفيذ.
 
 هذه رسوم Class وSequence وState. أسهم التعاون في Sequence تصف حالة استخدام مقترحة، ولا تعني اتصالًا فعليًا بـOracle أو تنفيذ دفع. القيم الاصطناعية الواردة في الشرح ليست أحكامًا مالية.
 
@@ -147,6 +147,8 @@ classDiagram
     +PayeeRelationshipRefs
     +RelationKindLabels
     +DistinctPersonSearchRow
+    +RelationshipCards
+    +SelectedRelationshipDetailPanel
     +SelectedEmploymentRelationshipRef_optional
     +SelectedPayeeRelationshipRef_optional
     +HasEmploymentRelationship
@@ -221,6 +223,8 @@ classDiagram
   ExcelSourceAdapter ..|> ISourceIntake
   DirectFormAdapter ..|> ISourceIntake
 ```
+
+**D-045 — شكل الواجهة المدمجة:** رأس الملف يعرّف الشخص دون تغيير أثناء الاختيار؛ `RelationshipCards` تشير لعلاقات العمل/الاستحقاق الموجودة فعلًا، و`SelectedRelationshipDetailPanel` **إسقاط عرض** لتفاصيل العلاقة المختارة داخل نفس الصفحة مع تبويبات متناسبة مع نوعها. تبويب الدرجات والترقيات يخص ‏`EmploymentRelationship`، وتبويب البنود والصرفيات يخص ‏`PayeeRelationship` المناسب. اختيار بطاقة أخرى لا يدمج بياناتها في السابقة؛ ويُشترط عند التعديل مرجع العلاقة المستهدفة والصلاحية والسند. كلا الاسمين حقلا ReadModel مقترحان لا كيانين أو جدولين جديدين، ولا تُحوّل كل صرفية إلى بطاقة علاقة مستقلة.
 
 **D-044 — قائمة أشخاص واحدة وعلاقات منفصلة داخل الملف:** نتائج `SearchPersonsAndPayees` تُجمع لأغراض **العرض فقط حسب `PersonId` مثبت** فتظهر نتيجة واحدة للشخص حتى لو له أكثر من علاقة عمل أو صرف؛ `GetPersonRelationshipDetail` مقترح لاستعراض علاقة بعينها مع تواريخها ووقائعها ولا يسمح بخلط القيم عند تغيير العلاقة. `DistinctPersonSearchRow` وحقلا `Selected*RelationshipRef` إشارات واجهة/ReadModel فقط، وليست أعمدة أو مفاتيح تخزين. تشابه الاسم بين شخصين لا يبرر الدمج، وتبقى صلاحيات العرض محددة لكل علاقة. تصحيح الموظف أو تسجيل واقعة مالية يستلزم اختيار العلاقة المستهدفة الصحيحة وفق D-040.
 
