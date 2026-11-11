@@ -1,6 +1,6 @@
 # مخططات UML لدورة مراجعة المرتبات
 
-**الحالة: نموذج تصميم مقترح v0.3 — تعديلات D-030 إلى D-038 وتبسيط التسجيل، لا كود منفذ.** يكمّل [الخطة](COMPREHENSIVE-WORK-PLAN-AR.md) و[ERD](DATABASE-DIAGRAM-AR.md). الأسماء والعلاقات التالية تحتاج مراجعة وحدود معاملات وعقود قبل التنفيذ.
+**الحالة: نموذج تصميم مقترح v0.3 — تعديلات D-030 إلى D-039 وتبسيط التسجيل، لا كود منفذ.** يكمّل [الخطة](COMPREHENSIVE-WORK-PLAN-AR.md) و[ERD](DATABASE-DIAGRAM-AR.md). الأسماء والعلاقات التالية تحتاج مراجعة وحدود معاملات وعقود قبل التنفيذ.
 
 هذه رسوم Class وSequence وState. أسهم التعاون في Sequence تصف حالة استخدام مقترحة، ولا تعني اتصالًا فعليًا بـOracle أو تنفيذ دفع. القيم الاصطناعية الواردة في الشرح ليست أحكامًا مالية.
 
@@ -140,6 +140,24 @@ classDiagram
     +DecimalAmount
     +Currency
   }
+  class EmployeeProfileReadModel {
+    <<ReadModel>>
+    +PersonRef
+    +EmploymentRelationshipRefs
+    +PayeeRelationshipRefs
+    +AsOfDate
+    +AdministrativeHistory
+    +DepartmentHistory
+    +GradeAndPromotionHistory
+    +FinancialComponentHistory
+    +OrdersAndJudicialEffects
+    +RelatedDisbursements
+  }
+  class IEmployeeProfileQuery {
+    <<interface>>
+    +SearchEmployees(filters)
+    +GetEmployeeProfile(personRef, asOfDate)
+  }
   class GovernmentAccountNode {
     +GovernmentAccountNodeId
     +OfficialCode
@@ -175,6 +193,7 @@ classDiagram
   ReviewRevision "1" --> "0..*" ReviewApproval : approvals
   ResolutionDecision "1" --> "0..*" FollowUpItem : authorizedFollowUp
   FollowUpItem --> Money : amount
+  EmployeeProfileReadModel ..> IEmployeeProfileQuery : projectionContract
   GovernmentAccountNode "0..1" --> "0..*" GovernmentAccountNode : hierarchy
   FinancialComponent "1" --> "0..*" FinancialComponentAccountMapping : accountLinks
   GovernmentAccountNode "1" --> "0..*" FinancialComponentAccountMapping : receivingAccount
@@ -187,6 +206,8 @@ classDiagram
   ExcelSourceAdapter ..|> ISourceIntake
   DirectFormAdapter ..|> ISourceIntake
 ```
+
+**D-039 — صفحة الموظف التاريخية:** `EmployeeProfileReadModel` و`IEmployeeProfileQuery` عقود **قراءة/عرض مقترحة**: البحث في دليل الموظفين ثم فتح ملف منفصل يضم فترات الأقسام والنقل والترقيات والدرجات والأوامر والقيم المالية عبر السنين والأحكام المرتبطة بتغيير بند، مع مصدر وتاريخ سريان/تسجيل وأثر. لا يحوّلان بيانات الموظف التاريخية إلى جدول شامل مكرر؛ علاقات الأحكام والأقسام تحتاج قرار نمذجة مستقل قبل SQL، ولا تُختزل أحكام القضاء تلقائيًا في أوامر إدارية.
 
 **D-038 — مخطط العلاقات المقترح للشاشة:** `FinancialComponent` يمثل دليل البنود الموجود أصلًا في التصميم، و`GovernmentAccountNode` يمثل موضع الحساب داخل الشجرة الحكومية، والربط `FinancialComponentAccountMapping` ليس اعتمادًا بأن كل بند له حساب واحد دائمًا. يحتفظ `SourceLine` أو مرجع Oracle المناظر بكوده الخام مستقلًا؛ التفاصيل والعلاقة مع البنود في مستند المصدر لا تُختزل في كود حكومي واحد. أسماء العقد والربط مقترحات لتجنب تكرار الكيانات القائمة، وتحتاج فحص التصميم الأصلي.
 
