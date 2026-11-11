@@ -17,6 +17,10 @@
 - **Gemini:** تنفيذ المهام المصرح بها على فروع وPull Requests منفصلة.
 - **GitHub:** قناة التوثيق والعمل والمراجعة.
 
+## قناة التواصل بين ChatGPT وGemini
+
+**[قناة AI-BRIDGE-001 على GitHub — Issue #41](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/41)** هي مكان الرسائل والتسليمات بين وكيل التصميم والمراجعة ووكيل التنفيذ. يبدأ Gemini كل مهمة بقراءة القناة وفق [البروتوكول](docs/governance/AI-AGENT-COMMUNICATION.md) ثم يضيف إقرار الاستلام والنتيجة. لا يوجد تواصل لحظي تلقائي، ولا تمنح الرسائل إذنًا لكتابة كود دون موافقة المالك.
+
 ## ابدأ من هنا
 1. [التعليمات الإلزامية](AGENTS.md).
 2. [تعليمات Gemini](GEMINI.md).
