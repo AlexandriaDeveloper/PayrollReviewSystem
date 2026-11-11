@@ -25,7 +25,7 @@
 
 ## ما يلزم من المالك قبل التفعيل
 
-1. **راجع [PR الخاص بالتنفيذ](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/pulls)** وقائمة الملفات والفروق والاختبارات. لا تدمج قبل التحقق من عدم وجود أوامر غير موثوقة أو صلاحيات زائدة.
+1. **راجع [PR الخاص بالتنفيذ](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/pull/44)** وقائمة الملفات والفروق والاختبارات. لا تدمج قبل التحقق من عدم وجود أوامر غير موثوقة أو صلاحيات زائدة.
 2. افتح مستودع GitHub ← `Settings` ← `Secrets and variables` ← `Actions` ← `New repository secret`، وأنشئ `GEMINI_API_KEY` من Google AI Studio. **لا تكتب قيمة المفتاح في Issue أو PR أو المحادثة.**
 3. تحقق من تفعيل GitHub Actions للمستودع ومن السماح للتنفيذ بقراءة Issue ونشر تعليق بواسطة `GITHUB_TOKEN`. صلاحيات كل وظيفة مضبوطة داخل YAML؛ قد تمنع سياسة المؤسسة صلاحيات الكتابة رغم طلبها.
 4. بعد نجاح مراجعة PR والأمان، والاطمئنان إلى وجود المفتاح، يصدر المالك إذنًا بتفعيل Workflow على `main`. **الدمج لا ينشر تطبيق المرتبات ولا يسمح بتعديل Oracle.**
@@ -51,7 +51,7 @@
 
 - تعليق Issue **مدخل غير موثوق**؛ لذلك البوابة تستخدم صيغة أمر محددة ويفحص المصدر، ولا تدخل أي قيمة تعليق في سكربتات Bash أو JavaScript بوصفها كودًا. المحتوى الوحيد الذي يُعطى لـGemini هو نص المصدر من حساب مخول، دون أدوات تنفيذ.
 - جلسة `Gemini CLI` تحت `tools.core: []` و`disableYoloMode`، ولا يصل إليها `GITHUB_TOKEN` ذي صلاحية كتابة. لا تستخدم `pull_request_target` أو `workflow_run` لتشغيل كود PR.
-- الـWorkflow يعتمد على `actions/checkout@v4` و`actions/github-script@v7` و`setup-node@v4` و`upload/download-artifact@v4` ونسخة `@google/gemini-cli@0.64.0`. **يلزم مراجعة تحديثات واعتماديات هذه الأدوات وفحص توفر إصدار CLI فعليًا ضمن اختبارات تفعيل PR**؛ المقترح لا يعني أن نسخها اختُبرت.
+- الـWorkflow يعتمد على `actions/checkout@v7` و`actions/github-script@v8` و`setup-node@v7` و`upload/download-artifact@v7` ونسخة `@google/gemini-cli@0.64.0`. **يلزم مراجعة تحديثات واعتماديات هذه الأدوات وفحص توفر إصدار CLI فعليًا ضمن اختبارات تفعيل PR**؛ المقترح لا يعني أن نسخها اختُبرت.
 - رد Gemini لا يستطيع تعديل مصدر Markdown أو برنامج الموظفين؛ النشر في تعليق منفصل. أي طلب كود أو SQL أو ترحيل يظل بحاجة Issue معتمدة وإذن المالك وEGM عند انطباقه.
 - GitHub لا يثبت استقلال Goldfish ولا يثبت قانونًا أو يغير صلاحية اعتماد المراجع.
 - مصدر الاستخدام الرسمي: [Gemini CLI headless](https://geminicli.com/docs/cli/headless/) و[التحكم بالأدوات](https://geminicli.com/docs/reference/configuration/) و[GitHub Actions Security](https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions).
