@@ -1,0 +1,254 @@
+# مخططات UML لدورة مراجعة المرتبات
+
+**الحالة: نموذج تصميم مقترح v0.2، لا كود منفذ.** يكمّل [الخطة](COMPREHENSIVE-WORK-PLAN-AR.md) و[ERD](DATABASE-DIAGRAM-AR.md). الأسماء والعلاقات التالية تحتاج مراجعة وحدود معاملات وعقود قبل التنفيذ.
+
+هذه رسوم Class وSequence وState. أسهم التعاون في Sequence تصف حالة استخدام مقترحة، ولا تعني اتصالًا فعليًا بـOracle أو تنفيذ دفع. القيم الاصطناعية الواردة في الشرح ليست أحكامًا مالية.
+
+## UML-1 — الكيانات والعمليات والعقود
+
+`AuditCase` يضبط نطاق الاعتماد ونسخه؛ `Finding` يضبط الملاحظة ونسخها والردود عليها؛ `FollowUpItem` يتابع أثرًا اتفق على متابعته. الفصل يمنع تحول حسم ملاحظة إلى إثبات تنفيذ. أسماء حدود Aggregates مرشحة وتخضع لاختبار الاتساق.
+
+```mermaid
+classDiagram
+  direction TB
+  class AuditCase {
+    +CaseId
+    +ScopeKind
+    +CaseVersion
+    +OpenRevision()
+    +ApproveRevision(snapshotHash, expectedVersion)
+    +RequestRevalidation(reason)
+  }
+  class ReviewRevision {
+    +RevisionId
+    +SourceSetVersion
+    +CalculationSetRef
+    +DecisionSetRef
+    +CoverageSetRef
+    +ApprovalCoverageMode
+    +KnownAt
+    +SnapshotHash
+  }
+  class Finding {
+    +FindingId
+    +CaseId
+    +FindingVersion
+    +RecordReply(command, expectedVersion)
+    +Resolve(command, expectedVersion)
+  }
+  class FindingRevision {
+    +FindingRevisionId
+    +ReviewRevisionId
+    +ComponentRef
+    +EntitlementPeriod
+    +ProposedDifference
+  }
+  class ReviewMessage {
+    +MessageId
+    +RespondsToFindingRevisionId
+    +PartyKind
+    +RecordedBy
+    +OccurredAt
+    +RecordedAt
+    +EvidenceRef
+  }
+  class ResolutionDecision {
+    +DecisionId
+    +FindingRevisionId
+    +DecisionKind
+    +Reason
+    +EvidenceRef
+    +SupersedesDecisionId
+  }
+  class ReviewApproval {
+    +ApprovalId
+    +ReviewRevisionId
+    +SnapshotHash
+    +ApprovedBy
+    +ApprovedAt
+  }
+  class FollowUpItem {
+    +FollowUpId
+    +ResolutionDecisionId
+    +ConfirmedAmount
+    +OriginPeriod
+    +RecordCarryForward()
+    +AllocateEvidence(command, expectedVersion)
+    +RequestRecheck(reason)
+  }
+  class ISourceIntake {
+    <<interface>>
+    +Capture(input, context) CapturedSource
+  }
+  class IReviewAuthorization {
+    <<interface>>
+    +CanPerform(actor, scope, action) PermissionResult
+  }
+  class IExpectedCalculator {
+    <<interface>>
+    +Propose(approvedSnapshot) CalculationResult
+  }
+  class IExecutionEvidenceVerifier {
+    <<interface>>
+    +Verify(evidence, policy) VerificationResult
+  }
+  class ReviewUseCase {
+    +RecordReply(command)
+    +ResolveFinding(command)
+    +ApproveReview(command)
+  }
+  class PdfSourceAdapter
+  class ExcelSourceAdapter
+  class DirectFormAdapter
+  class Money {
+    <<ValueObject>>
+    +DecimalAmount
+    +Currency
+  }
+  AuditCase "1" *-- "1..*" ReviewRevision : versions
+  AuditCase "1" --> "0..*" Finding : references
+  Finding "1" *-- "1..*" FindingRevision : versions
+  FindingRevision "1" --> "0..*" ReviewMessage : addressedReplies
+  FindingRevision "1" --> "0..*" ResolutionDecision : decisions
+  ReviewRevision "0..*" --> "0..*" ResolutionDecision : frozenDecisionRefs
+  ReviewRevision "1" --> "0..*" ReviewApproval : approvals
+  ResolutionDecision "1" --> "0..*" FollowUpItem : authorizedFollowUp
+  FollowUpItem --> Money : amount
+  ReviewUseCase ..> IReviewAuthorization
+  ReviewUseCase ..> IExpectedCalculator
+  ReviewUseCase ..> IExecutionEvidenceVerifier
+  ReviewUseCase ..> AuditCase
+  ReviewUseCase ..> Finding
+  PdfSourceAdapter ..|> ISourceIntake
+  ExcelSourceAdapter ..|> ISourceIntake
+  DirectFormAdapter ..|> ISourceIntake
+```
+
+التكوين `*--` يعني ملكية نسخة داخل الكيان، والسهم `-->` مرجع لا تصريح كتابة في سياق آخر، والسهم المنقط تبعية أو تحقيق عقد. لا تعني أي علاقة تحميل كل السجل في الذاكرة. يجوز أن تتضمن عدة لقطات قرار حسم ثابتًا من الحالة نفسها إذا أعيد التحقق من صلاحيته وسجل مرجع ذلك الفحص؛ يختلف ذلك عن نقل القرار من لقطة قديمة أو إعادة استعماله بصمت. تحوي CoverageSetRef البنود والمقاطع المعتمدة وغير المعتمدة وأسبابها ضمن البصمة؛ الاعتماد الجزئي يحتاج سياسة مخولة ولا يسمى اعتمادًا شاملًا. `Money` يحفظ القيمة والعملة؛ سياسة التقريب مؤرخة في عقد الحساب، ولا تُختزل في تقريب عام لكل المبالغ.
+
+## UML-2 — الاستلام والملاحظة والرد والحسم
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor Reviewer as المراجع
+  participant UI as واجهة المراجعة
+  participant Intake as استقبال المصدر
+  participant Audit as حالة استخدام المراجعة
+  participant Central as الاستحقاقات خارج النظام
+  participant Follow as متابعة الفروق
+  Reviewer->>UI: استقبال ملف أو إدخال بديل
+  UI->>Intake: Capture مع هوية الطلب والسياق
+  Intake-->>UI: نسخة مصدر محفوظة وحالات الجودة والتغطية
+  Reviewer->>Audit: تثبيت النطاق والملاحظة وأدلتها
+  Audit-->>Reviewer: ملاحظة بإصدار ومرجع نسخة المصدر
+  Reviewer->>Central: إبلاغ وفق قناة العمل المخولة
+  Reviewer->>Audit: تسجيل الإبلاغ ومرجعه
+  Central-->>Reviewer: رد ودليل أو ملف رسمي مصحح
+  Reviewer->>Audit: تسجيل الرد منسوبًا لجهته ونسخة الملاحظة
+  Audit->>Audit: فحص السلطة والنسخة والأدلة
+  alt ثبتت سلامة الملف وخطأ الملاحظة
+    Reviewer->>Audit: قرار سحب الملاحظة بسبب مسند
+    Audit-->>Reviewer: حسم محفوظ دون فرق مرحل
+  else اتفاق على فرق وتصحيح مصدر
+    Reviewer->>Intake: حفظ التصحيح الرسمي كنسخة جديدة
+    Intake-->>Audit: مرجع النسخة والأجزاء المتغيرة
+    Audit-->>Reviewer: إعادة فحص الأثر قبل اعتماد نسخة المراجعة
+  else فرق مثبت مع تأجيل أو تسوية لاحقة مسموحة
+    Reviewer->>Audit: حسم الفرق وسند متابعته
+    Audit->>Follow: إنشاء متابعة مرجعية دون تنفيذ خصم
+    Follow-->>Reviewer: أصل الفترة والهدف والمتبقي وحالة الدليل
+  else الرد ناقص أو الخلاف مستمر
+    Audit-->>Reviewer: انتظار دليل أو تصعيد للنطاق المتأثر
+  end
+  Note over Audit,Follow: حسم الملاحظة مستقل عن إثبات تنفيذ الفرق
+```
+
+## UML-3 — اعتماد نسخة وتصحيح لاحق
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor Approver as المعتمد المخول
+  participant Audit as مراجعة الصرفية
+  participant Registry as عقد نسخ المصدر المقبولة
+  participant Store as تخزين القرار واللقطة
+  participant Intake as استقبال التصحيح
+  Approver->>Audit: معاينة الاعتماد لنطاق محدد
+  Audit->>Registry: قراءة SourceSetVersion ومراجع النسخ المقبولة
+  Registry-->>Audit: المراجع وإصدار المجموعة
+  Audit-->>Approver: SnapshotHash وCaseVersion ونواقص النطاق
+  Approver->>Audit: طلب اعتماد بنفس البصمة والإصدارات
+  Audit->>Audit: تحقق السلطة والشروط ونفس مجموعة القرارات
+  Audit->>Registry: تحقق أن المصدر المقبول لم يتغير
+  alt تغير مصدر مقبول أو قرار مؤثر أو نسخة الحالة
+    Audit-->>Approver: إعادة معاينة، دون نجاح اعتماد قديم
+  else اللقطة مطابقة وشروط الاعتماد مستوفاة
+    Audit->>Store: حفظ اعتماد ولقطة ثابتة بمعاملة معتمدة
+    Store-->>Approver: اعتماد مراجعة هذا النطاق والإصدار
+  end
+  Intake->>Audit: وصول تصحيح مرشح متعلق بنطاق سبق اعتماده
+  Audit->>Store: سجل أثر ووضع الحاجة للفحص، دون محو الاعتماد
+  Approver->>Audit: فحص التصحيح وقبول ربطه وفق الصلاحية
+  Audit->>Store: نسخة مراجعة جديدة ومراجع مصدر جديدة
+  Audit-->>Approver: إعادة تحقق من القرارات والردود والتعديلات المتأثرة
+  Note over Registry,Store: التحقق والحفظ يحتاجان ضمان اتساق، لا فحصًا منفصلًا يعقبه سباق
+```
+
+إجراء المعاملة واتساق عقد المصدر والاعتماد لم يُحسم تقنيًا. قبل التنفيذ يلزم تصميم يضمن أن قبول مصدر جديد أو قرار مؤثر لا ينجح بين فحص النسخة وحفظ الاعتماد دون اكتشافه؛ يمكن أن يحتاج إجراء Application ومعاملة مشتركة معتمدة داخل التطبيق أو بروتوكول حجز/تحقق مكافئ. لا يفسر الرسم استدعاء `Check` ثم `Save` مستقلين بوصفه ضمانًا ذريًا.
+
+## UML-4 — حالة حسم الملاحظة
+
+```mermaid
+stateDiagram-v2
+  [*] --> Detected
+  Detected --> UnderReview: تثبيت النطاق والتحقق
+  UnderReview --> WaitingEvidence: مستند أو مدخل ناقص
+  WaitingEvidence --> UnderReview: استيفاء البيانات
+  UnderReview --> WaitingReply: إبلاغ ملاحظة وتسجيل المرجع
+  WaitingReply --> ReplyReview: وصول رد مرتبط بإصدار
+  ReplyReview --> WaitingEvidence: دليل الرد غير كاف
+  ReplyReview --> Escalated: استمرار خلاف
+  Escalated --> ReplyReview: قرار أو توضيح مختص
+  ReplyReview --> SourceCorrect: ثبتت سلامة الملف
+  ReplyReview --> DifferenceConfirmed: ثبت فرق واتفق على الإجراء
+  UnderReview --> Withdrawn: سحب مسبب لملاحظة غير صحيحة
+  SourceCorrect --> [*]
+  Withdrawn --> [*]
+  DifferenceConfirmed --> [*]
+  Note right of DifferenceConfirmed: قد تبقى متابعة تصحيح أو تنفيذ مفتوحة
+```
+
+النتائج تخص الحسم الموضوعي للملاحظة، وليست تصريح إغلاق كل مراجعة الصرفية. إذا وصل دليل يغير حسمًا قديمًا، تحفظ نسخة القرار السابقة وتفتح نسخة فحص جديدة مرتبطة بها؛ لا تُمسح النهاية التاريخية.
+
+## UML-5 — حالة متابعة الفرق مستقلة
+
+```mermaid
+stateDiagram-v2
+  [*] --> Candidate
+  Candidate --> WaitingAuthorization: أصل المبلغ أو الإجراء يحتاج سندا
+  WaitingAuthorization --> AuthorizedOpen: ثبت الأصل وجواز المتابعة
+  AuthorizedOpen --> Deferred: قرار هدف لشهر لاحق
+  Deferred --> Reported: ظهر مبلغ مصدر مرشح
+  AuthorizedOpen --> Reported: ظهر مبلغ مصدر مرشح
+  Reported --> WaitingProof: الظهور لا يثبت التنفيذ
+  Reported --> RecheckRequired: قرار يصحح الأصل أو الدليل
+  WaitingProof --> RecheckRequired: إلغاء أو تصحيح قبل تحقق التنفيذ
+  WaitingProof --> PartlyVerified: تخصيص جزئي بدليل مقبول
+  AuthorizedOpen --> PartlyVerified: دليل مستقل يثبت جزءا
+  PartlyVerified --> PartlyVerified: تخصيص إضافي ضمن الحدود
+  WaitingProof --> FullyVerified: الدليل يغطي كامل المطلوب
+  PartlyVerified --> FullyVerified: اكتمل الباقي المثبت
+  AuthorizedOpen --> FullyVerified: دليل مستقل يغطي الكامل
+  AuthorizedOpen --> CancelledByDecision: إلغاء الأصل بقرار مختص
+  Deferred --> CancelledByDecision: إلغاء الأصل بقرار مختص
+  FullyVerified --> RecheckRequired: تصحيح دليل أو قرار لاحق
+  PartlyVerified --> RecheckRequired: تصحيح دليل أو قرار لاحق
+  RecheckRequired --> AuthorizedOpen: نسخة متابعة مصححة تبين الرصيد
+  RecheckRequired --> CancelledByDecision: إلغاء مسند مع حفظ كل الأثر السابق
+  FullyVerified --> [*]
+  CancelledByDecision --> [*]
+  Note right of RecheckRequired: يحفظ القديم وتضاف نسخة أو عكس مسند
+```
+
+عند إثبات أصل مطلوب 200، وظهور 100 بلا دليل تنفيذ مقبول، لا يصبح المتبقي المثبت 100 تلقائيًا. يعرض البرنامج ما ظهر وما ثبت تنفيذه كلًا على حدة. الإلغاء أو عكس تخصيص بعد تحقق جزئي يحتاج معالجة نسخ وأثر المبالغ السابقة، ولا يستخدم لطمس ما ثبت وقوعه.
