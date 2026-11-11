@@ -1,6 +1,6 @@
 # مخططات UML لدورة مراجعة المرتبات
 
-**الحالة: نموذج تصميم مقترح v0.3 — تعديلات D-030 إلى D-034 قيد المراجعة، لا كود منفذ.** يكمّل [الخطة](COMPREHENSIVE-WORK-PLAN-AR.md) و[ERD](DATABASE-DIAGRAM-AR.md). الأسماء والعلاقات التالية تحتاج مراجعة وحدود معاملات وعقود قبل التنفيذ.
+**الحالة: نموذج تصميم مقترح v0.3 — تعديلات D-030 إلى D-035 قيد المراجعة، لا كود منفذ.** يكمّل [الخطة](COMPREHENSIVE-WORK-PLAN-AR.md) و[ERD](DATABASE-DIAGRAM-AR.md). الأسماء والعلاقات التالية تحتاج مراجعة وحدود معاملات وعقود قبل التنفيذ.
 
 هذه رسوم Class وSequence وState. أسهم التعاون في Sequence تصف حالة استخدام مقترحة، ولا تعني اتصالًا فعليًا بـOracle أو تنفيذ دفع. القيم الاصطناعية الواردة في الشرح ليست أحكامًا مالية.
 
@@ -56,7 +56,16 @@ classDiagram
     +AssignedReviewerRef
     +ReasonKind
     +AssignedAt
-    +RevokedAt_optional
+  }
+  class FindingResolutionDelegationRevocation {
+    +RevocationId
+    +ResolutionDelegationId
+    +RevokedByRef
+    +RevokedByRoleRef
+    +RevocationScopeRef
+    +RevocationScopeVersion
+    +RevokedAt
+    +Reason
   }
   class ReviewMessage {
     +MessageId
@@ -118,6 +127,7 @@ classDiagram
   class ReviewUseCase {
     +RecordReply(command)
     +AssignFindingResolutionDelegate(command)
+    +RevokeFindingResolutionDelegation(command)
     +ResolveFindingByAuthorizedReviewer(command)
     +ApproveReview(command)
   }
@@ -133,6 +143,7 @@ classDiagram
   AuditCase "1" --> "0..*" Finding : references
   Finding "1" *-- "1..*" FindingRevision : versions
   Finding "1" --> "0..*" FindingResolutionDelegation : resolutionAssignments
+  FindingResolutionDelegation "1" --> "0..1" FindingResolutionDelegationRevocation : appendOnlyCancellation
   FindingRevision "1" --> "0..*" ReviewMessage : addressedReplies
   FindingRevision "1" --> "0..*" ResolutionDecision : decisions
   ResolutionDecision "0..*" --> "0..1" FindingResolutionDelegation : delegatedAuthority
@@ -199,8 +210,23 @@ sequenceDiagram
     Audit->>Audit: رفض تكليف رئيس مراجعة خارج مجموعاته أو لصرفية منفصلة
     Audit->>Audit: رفض تكليف رئيس وحدة لملاحظة من وحدة أخرى
     Audit->>Audit: حفظ هوية المُصدِر وصفته ونطاقه وتوقيت التكليف دون تغيير الأصل
-    DelegateReviewer->>Audit: حسم باسم البديل مع مرجع التكليف والدليل وإصدار الملاحظة
-    Audit->>Audit: تحقق من صلاحية تكليف البديل وحالته والنطاق والإصدار
+    opt إلغاء التكليف قبل حسم الملاحظة
+      alt إلغاء من رئيس المراجعة
+        ReviewHead->>Audit: إلغاء أي تكليف داخل مجموعات إشرافه ولو أصدره رئيس الوحدة
+        Audit->>Audit: فحص إشراف الرئيس على مجموعة الملاحظة
+      else إلغاء من رئيس الوحدة الحسابية
+        UnitHead->>Audit: إلغاء أي تكليف داخل وحدته ولو أصدره رئيس المراجعة
+        Audit->>Audit: فحص وحدة الملاحظة وعدم تجاوز نطاق الوحدة
+      end
+      Audit->>Audit: تسجيل واقعة إلغاء مستقلة بهوية وسبب وتوقيت دون محو التكليف
+    end
+    DelegateReviewer->>Audit: محاولة حسم باسم البديل مع مرجع التكليف والنسخة
+    Audit->>Audit: تحقق ذري من صلاحية التكليف وعدم إلغائه قبل قبول الحسم
+    alt التكليف ملغى أو خارج الاختصاص
+      Audit-->>DelegateReviewer: رفض الحسم وإبقاء أصل الملاحظة والردود
+    else التكليف صالح ولم يلغ
+      Audit-->>DelegateReviewer: السماح بمواصلة فحص الحسم بالسند والإصدار
+    end
   end
   alt ثبتت سلامة الملف وخطأ الملاحظة
     Audit-->>Reviewer: حفظ سحب الملاحظة بقرار صاحبها دون فرق مرحل
@@ -220,7 +246,7 @@ sequenceDiagram
 
 **ضبط D-030:** يُميز `OriginChannel=IN_APP` عن `EXTERNAL_RECORDED`. في الرد الداخلي تُحفظ هوية الحساب الذي كتب الرد بالفعل، وفي الرد الخارجي تُحفظ هوية مستخدم الوحدة الذي نقله وبيانات مرسله المنسوبة دون انتحال حسابه. لا تفرض هذه المسودة إتاحة كل ملاحظة لجميع مستخدمي المركزية؛ صلاحية الاطلاع والرد وشروط إثبات المراسلة مسائل مفتوحة. لا يغيّر هذا القرار حالات UML-4 أو UML-5: الحسم والتنفيذ لا يحدثان عند تسجيل رد.
 
-**ضبط D-031/D-032:** الأصل أن يحسم صاحب الملاحظة برد مسند؛ عند الغياب أو النقل يختار المسؤول المخوّل مراجعًا بديلًا لملاحظة محددة، فيحسم البديل باسمه مستخدمًا تكليفًا صالحًا مع حفظ اسم صاحب الملاحظة. يفحص التطبيق `RaisedByReviewerRef` أو `FindingResolutionDelegation`، وهوية الحاسم، وسلطة مصدر التكليف، والنسخة والنطاق والدليل. التكليف لا يغير `RaisedByReviewerRef` ولا يمنح `ReviewApproval`. **D-033/D-034:** مُصدر التكليف هو رئيس المراجعة **في مجموعات إشرافه فقط** أو رئيس الوحدة الحسابية **في مجموعات المراجعة والصرفيات داخل وحدته**. يسجل التكليف الصفة و`AuthorizationScopeKind` و`AuthorizationScopeRef` و`AuthorizationScopeVersion` للتحقق من العلاقة المعتمدة عند الإصدار والاستعمال؛ لا يُسمح للرئيس الأول بتكليف صرفية منفصلة خارج نطاق المجموعات ولا للرئيس الثاني بتكليف وحدة أخرى. حدود إلغاء التكليف وإعادة إصداره ما زالت مفتوحة.
+**ضبط D-031/D-032:** الأصل أن يحسم صاحب الملاحظة برد مسند؛ عند الغياب أو النقل يختار المسؤول المخوّل مراجعًا بديلًا لملاحظة محددة، فيحسم البديل باسمه مستخدمًا تكليفًا صالحًا مع حفظ اسم صاحب الملاحظة. يفحص التطبيق `RaisedByReviewerRef` أو `FindingResolutionDelegation`، وهوية الحاسم، وسلطة مصدر التكليف، والنسخة والنطاق والدليل. التكليف لا يغير `RaisedByReviewerRef` ولا يمنح `ReviewApproval`. **D-033/D-034:** مُصدر التكليف هو رئيس المراجعة **في مجموعات إشرافه فقط** أو رئيس الوحدة الحسابية **في مجموعات المراجعة والصرفيات داخل وحدته**. يسجل التكليف الصفة و`AuthorizationScopeKind` و`AuthorizationScopeRef` و`AuthorizationScopeVersion` للتحقق من العلاقة المعتمدة عند الإصدار والاستعمال؛ لا يُسمح للرئيس الأول بتكليف صرفية منفصلة خارج نطاق المجموعات ولا للرئيس الثاني بتكليف وحدة أخرى. **D-035:** يملك رئيس المراجعة إلغاء أي تكليف داخل مجموعات إشرافه ويملك رئيس الوحدة إلغاء أي تكليف داخل وحدته، بصرف النظر عن مُصدِر التكليف الأصلي. يُنشأ `FindingResolutionDelegationRevocation` كواقعة جديدة غير ماسحة لملف التكليف، ويمنع استخدامها للحسم بعد الإلغاء؛ لا يبطل ذلك حسمًا صحيحًا صدر قبل الإلغاء. عدد التكليفات النشطة وآلية انتهائها تلقائيًا لم يُحسما.
 
 ## UML-3 — اعتماد نسخة وتصحيح لاحق
 
