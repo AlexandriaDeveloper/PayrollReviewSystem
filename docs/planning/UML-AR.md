@@ -1,6 +1,6 @@
 # مخططات UML لدورة مراجعة المرتبات
 
-**الحالة: نموذج تصميم مقترح v0.3 — تعديلات D-030 إلى D-037 وتبسيط التسجيل، لا كود منفذ.** يكمّل [الخطة](COMPREHENSIVE-WORK-PLAN-AR.md) و[ERD](DATABASE-DIAGRAM-AR.md). الأسماء والعلاقات التالية تحتاج مراجعة وحدود معاملات وعقود قبل التنفيذ.
+**الحالة: نموذج تصميم مقترح v0.3 — تعديلات D-030 إلى D-038 وتبسيط التسجيل، لا كود منفذ.** يكمّل [الخطة](COMPREHENSIVE-WORK-PLAN-AR.md) و[ERD](DATABASE-DIAGRAM-AR.md). الأسماء والعلاقات التالية تحتاج مراجعة وحدود معاملات وعقود قبل التنفيذ.
 
 هذه رسوم Class وSequence وState. أسهم التعاون في Sequence تصف حالة استخدام مقترحة، ولا تعني اتصالًا فعليًا بـOracle أو تنفيذ دفع. القيم الاصطناعية الواردة في الشرح ليست أحكامًا مالية.
 
@@ -140,6 +140,29 @@ classDiagram
     +DecimalAmount
     +Currency
   }
+  class GovernmentAccountNode {
+    +GovernmentAccountNodeId
+    +OfficialCode
+    +OfficialName
+    +ParentNodeId_optional
+    +ValidFrom_optional
+    +ValidTo_optional
+  }
+  class FinancialComponent {
+    +FinancialComponentId
+    +ComponentCode
+    +ComponentName
+    +ComponentKind
+  }
+  class FinancialComponentAccountMapping {
+    +MappingId
+    +FinancialComponentId
+    +GovernmentAccountNodeId
+    +ValidFrom_optional
+    +ValidTo_optional
+    +EvidenceRef_optional
+    +ApprovalStatus
+  }
   AuditCase "1" *-- "1..*" ReviewRevision : versions
   AuditCase "1" --> "0..*" Finding : references
   Finding "1" *-- "1..*" FindingRevision : versions
@@ -152,6 +175,9 @@ classDiagram
   ReviewRevision "1" --> "0..*" ReviewApproval : approvals
   ResolutionDecision "1" --> "0..*" FollowUpItem : authorizedFollowUp
   FollowUpItem --> Money : amount
+  GovernmentAccountNode "0..1" --> "0..*" GovernmentAccountNode : hierarchy
+  FinancialComponent "1" --> "0..*" FinancialComponentAccountMapping : accountLinks
+  GovernmentAccountNode "1" --> "0..*" FinancialComponentAccountMapping : receivingAccount
   ReviewUseCase ..> IReviewAuthorization
   ReviewUseCase ..> IExpectedCalculator
   ReviewUseCase ..> IExecutionEvidenceVerifier
@@ -161,6 +187,8 @@ classDiagram
   ExcelSourceAdapter ..|> ISourceIntake
   DirectFormAdapter ..|> ISourceIntake
 ```
+
+**D-038 — مخطط العلاقات المقترح للشاشة:** `FinancialComponent` يمثل دليل البنود الموجود أصلًا في التصميم، و`GovernmentAccountNode` يمثل موضع الحساب داخل الشجرة الحكومية، والربط `FinancialComponentAccountMapping` ليس اعتمادًا بأن كل بند له حساب واحد دائمًا. يحتفظ `SourceLine` أو مرجع Oracle المناظر بكوده الخام مستقلًا؛ التفاصيل والعلاقة مع البنود في مستند المصدر لا تُختزل في كود حكومي واحد. أسماء العقد والربط مقترحات لتجنب تكرار الكيانات القائمة، وتحتاج فحص التصميم الأصلي.
 
 التكوين `*--` يعني ملكية نسخة داخل الكيان، والسهم `-->` مرجع لا تصريح كتابة في سياق آخر، والسهم المنقط تبعية أو تحقيق عقد. لا تعني أي علاقة تحميل كل السجل في الذاكرة. يجوز أن تتضمن عدة لقطات قرار حسم ثابتًا من الحالة نفسها إذا أعيد التحقق من صلاحيته وسجل مرجع ذلك الفحص؛ يختلف ذلك عن نقل القرار من لقطة قديمة أو إعادة استعماله بصمت. تحوي CoverageSetRef البنود والمقاطع المعتمدة وغير المعتمدة وأسبابها ضمن البصمة؛ الاعتماد الجزئي يحتاج سياسة مخولة ولا يسمى اعتمادًا شاملًا. `Money` يحفظ القيمة والعملة؛ سياسة التقريب مؤرخة في عقد الحساب، ولا تُختزل في تقريب عام لكل المبالغ.
 
