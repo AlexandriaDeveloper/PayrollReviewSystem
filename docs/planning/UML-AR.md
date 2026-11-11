@@ -1,6 +1,6 @@
 # مخططات UML لدورة مراجعة المرتبات
 
-**الحالة: نموذج تصميم مقترح v0.3 — تعديل D-030 قيد المراجعة، لا كود منفذ.** يكمّل [الخطة](COMPREHENSIVE-WORK-PLAN-AR.md) و[ERD](DATABASE-DIAGRAM-AR.md). الأسماء والعلاقات التالية تحتاج مراجعة وحدود معاملات وعقود قبل التنفيذ.
+**الحالة: نموذج تصميم مقترح v0.3 — تعديلات D-030 وD-031 قيد المراجعة، لا كود منفذ.** يكمّل [الخطة](COMPREHENSIVE-WORK-PLAN-AR.md) و[ERD](DATABASE-DIAGRAM-AR.md). الأسماء والعلاقات التالية تحتاج مراجعة وحدود معاملات وعقود قبل التنفيذ.
 
 هذه رسوم Class وSequence وState. أسهم التعاون في Sequence تصف حالة استخدام مقترحة، ولا تعني اتصالًا فعليًا بـOracle أو تنفيذ دفع. القيم الاصطناعية الواردة في الشرح ليست أحكامًا مالية.
 
@@ -32,9 +32,10 @@ classDiagram
   class Finding {
     +FindingId
     +CaseId
+    +RaisedByReviewerRef
     +FindingVersion
     +RecordReply(command, expectedVersion)
-    +Resolve(command, expectedVersion)
+    +ResolveByOwner(command, expectedVersion)
   }
   class FindingRevision {
     +FindingRevisionId
@@ -59,6 +60,9 @@ classDiagram
   class ResolutionDecision {
     +DecisionId
     +FindingRevisionId
+    +DecidedByReviewerRef
+    +DecidedAt
+    +SupportingMessageId_optional
     +DecisionKind
     +Reason
     +EvidenceRef
@@ -98,7 +102,7 @@ classDiagram
   }
   class ReviewUseCase {
     +RecordReply(command)
-    +ResolveFinding(command)
+    +ResolveFindingByOwner(command)
     +ApproveReview(command)
   }
   class PdfSourceAdapter
@@ -160,24 +164,27 @@ sequenceDiagram
     Audit->>Audit: منع نسبة الإدخال لحساب مركزي لم يدخل النظام
   end
   Audit->>Audit: فحص النسخة والأدلة دون حسم تلقائي
+  Reviewer->>Audit: طلب حسم الملاحظة بصفته صاحبها مع دليل وسبب وإصدار
+  Audit->>Audit: تحقق من RaisedByReviewerRef وهوية الطالب وصلاحيته ونطاق الملاحظة والنسخة
   alt ثبتت سلامة الملف وخطأ الملاحظة
-    Reviewer->>Audit: قرار سحب الملاحظة بسبب مسند
-    Audit-->>Reviewer: حسم محفوظ دون فرق مرحل
+    Audit-->>Reviewer: حفظ سحب الملاحظة بقرار صاحبها دون فرق مرحل
   else اتفاق على فرق وتصحيح مصدر
     Reviewer->>Intake: حفظ التصحيح الرسمي كنسخة جديدة
     Intake-->>Audit: مرجع النسخة والأجزاء المتغيرة
     Audit-->>Reviewer: إعادة فحص الأثر قبل اعتماد نسخة المراجعة
   else فرق مثبت مع تأجيل أو تسوية لاحقة مسموحة
-    Reviewer->>Audit: حسم الفرق وسند متابعته
-    Audit->>Follow: إنشاء متابعة مرجعية دون تنفيذ خصم
+    Reviewer->>Audit: توثيق أصل الفرق وقراره بصفته صاحب الملاحظة
+    Audit->>Follow: طلب إنشاء متابعة وفق سند وسلطة منفصلين دون تنفيذ خصم
     Follow-->>Reviewer: أصل الفترة والهدف والمتبقي وحالة الدليل
   else الرد ناقص أو الخلاف مستمر
     Audit-->>Reviewer: انتظار دليل أو تصعيد للنطاق المتأثر
   end
-  Note over Audit,Follow: القناتان تسجلان الرد فقط؛ حسم الملاحظة وإثبات التنفيذ قراران مستقلان
+  Note over Audit,Follow: صاحب الملاحظة يحسمها بعد فحص الرد؛ اعتماد الصرفية وإثبات التنفيذ مستقلان
 ```
 
 **ضبط D-030:** يُميز `OriginChannel=IN_APP` عن `EXTERNAL_RECORDED`. في الرد الداخلي تُحفظ هوية الحساب الذي كتب الرد بالفعل، وفي الرد الخارجي تُحفظ هوية مستخدم الوحدة الذي نقله وبيانات مرسله المنسوبة دون انتحال حسابه. لا تفرض هذه المسودة إتاحة كل ملاحظة لجميع مستخدمي المركزية؛ صلاحية الاطلاع والرد وشروط إثبات المراسلة مسائل مفتوحة. لا يغيّر هذا القرار حالات UML-4 أو UML-5: الحسم والتنفيذ لا يحدثان عند تسجيل رد.
+
+**ضبط D-031:** لا يلزم توقيع رئيس المراجعة لحسم الملاحظة التي سجلها صاحبها؛ تُقارن هوية صاحب الطلب بـ`RaisedByReviewerRef` ويُتحقق من النطاق والإصدار قبل إنشاء `ResolutionDecision` مؤرخ ومسبب. `ReviewApproval` لاعتماد نسخة مراجعة صرفية **إجراء مختلف** لا يحصل عليه المراجع بهذا القرار. انتقال ملكية الملاحظة لزميل عند الغياب أو تغيير المجموعة غير محسوم.
 
 ## UML-3 — اعتماد نسخة وتصحيح لاحق
 
@@ -225,16 +232,16 @@ stateDiagram-v2
   ReplyReview --> WaitingEvidence: دليل الرد غير كاف
   ReplyReview --> Escalated: استمرار خلاف
   Escalated --> ReplyReview: قرار أو توضيح مختص
-  ReplyReview --> SourceCorrect: ثبتت سلامة الملف
-  ReplyReview --> DifferenceConfirmed: ثبت فرق واتفق على الإجراء
-  UnderReview --> Withdrawn: سحب مسبب لملاحظة غير صحيحة
+  ReplyReview --> SourceCorrect: صاحب الملاحظة قبل الرد بدليل وإصدار
+  ReplyReview --> DifferenceConfirmed: صاحب الملاحظة حسم الفرق بسند
+  UnderReview --> Withdrawn: صاحب الملاحظة سحبها بسبب مسند
   SourceCorrect --> [*]
   Withdrawn --> [*]
   DifferenceConfirmed --> [*]
   Note right of DifferenceConfirmed: قد تبقى متابعة تصحيح أو تنفيذ مفتوحة
 ```
 
-النتائج تخص الحسم الموضوعي للملاحظة، وليست تصريح إغلاق كل مراجعة الصرفية. إذا وصل دليل يغير حسمًا قديمًا، تحفظ نسخة القرار السابقة وتفتح نسخة فحص جديدة مرتبطة بها؛ لا تُمسح النهاية التاريخية.
+تجتاز انتقالات الحسم فحص هوية `RaisedByReviewerRef` ونطاق الصلاحية ونسخة الملاحظة؛ لا يحتاج **حسم الملاحظة ذاته** إلى معتمد أعلى وفق D-031. النتائج تخص الحسم الموضوعي للملاحظة، وليست تصريح إغلاق كل مراجعة الصرفية. إذا وصل دليل يغير حسمًا قديمًا، تحفظ نسخة القرار السابقة وتفتح نسخة فحص جديدة مرتبطة بها؛ لا تُمسح النهاية التاريخية.
 
 ## UML-5 — حالة متابعة الفرق مستقلة
 
