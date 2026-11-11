@@ -32,13 +32,13 @@ jobs:
       bridge_id: ${{ steps.verify.outputs.bridge_id }}
     steps:
       - name: Read trusted policy from default branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
       - name: Verify trigger and locate original bridge message
         id: verify
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             // لا نُدخل نص التعليق داخل كود JS أو داخل أمر shell.
@@ -84,12 +84,12 @@ jobs:
       issues: read
     steps:
       - name: Checkout pinned trusted revision without credentials
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
       - name: Read only the validated source comment
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           SOURCE_COMMENT_ID: ${{ needs.gate.outputs.source_comment_id }}
           SOURCE_BRIDGE_ID: ${{ needs.gate.outputs.bridge_id }}
@@ -119,9 +119,10 @@ jobs:
             ].join('\n\n');
             fs.writeFileSync('bridge-prompt.txt', prompt, { mode: 0o600 });
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: '24'
+          package-manager-cache: false
       - name: Install pinned Gemini CLI
         run: npm install --global @google/gemini-cli@0.64.0 --no-audit --no-fund
       - name: Execute Gemini without model tools
@@ -170,7 +171,7 @@ jobs:
           NODE
       - name: Upload non-secret response for publisher
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: bridge-reply-${{ github.event.comment.id }}
           path: bridge-result.json
@@ -186,12 +187,12 @@ jobs:
       issues: write
     steps:
       - name: Download response artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         continue-on-error: true
         with:
           name: bridge-reply-${{ github.event.comment.id }}
       - name: Post one traceable result
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           SOURCE_COMMENT_ID: ${{ needs.gate.outputs.source_comment_id }}
           SOURCE_BRIDGE_ID: ${{ needs.gate.outputs.bridge_id }}
