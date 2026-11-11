@@ -1,6 +1,6 @@
 # مخطط قاعدة البيانات المنطقي وقاموسه
 
-**الحالة: ERD منطقي مقترح v0.3 — تعديلات D-030 إلى D-045 وتبسيط التسجيل قيد المراجعة — لا DDL أو Migration أو اختيار محرك قاعدة بيانات.** يكمّل المخططات الحالية ويعيد استعمال مفاهيمها؛ اختلاف الاسم يحتاج توحيدًا عند اعتماد التصميم الفيزيائي، ولا يبرر إنشاء جدولين للمعنى نفسه.
+**الحالة: ERD منطقي مقترح v0.3 — تعديلات D-030 إلى D-046 وتبسيط التسجيل قيد المراجعة — لا DDL أو Migration أو اختيار محرك قاعدة بيانات.** يكمّل المخططات الحالية ويعيد استعمال مفاهيمها؛ اختلاف الاسم يحتاج توحيدًا عند اعتماد التصميم الفيزيائي، ولا يبرر إنشاء جدولين للمعنى نفسه.
 
 PK هوية داخلية مقترحة، وFK علاقة مرشحة. `optional` تعني أن غيابها مقصود في الحالة المحددة. العلاقات بين مجالات DDD تمثل مراجع وعقودًا؛ لا تمنح وحدة حق كتابة جداول وحدة أخرى، ولا تقرر كل FK فيزيائي. `uuid` و`decimal` أسماء أنواع توضيحية، وتُعتمد أنواع التخزين والدقة والقيود مع التقنية.
 
@@ -562,6 +562,75 @@ erDiagram
 ```
 
 هذا رسم منطقي **غير منفذ وغير معتمد كجدول جديد**. `FINANCIAL_COMPONENT` يعيد استعمال مفهوم `FinancialComponent` الموجود في المواصفات؛ `GOVERNMENT_ACCOUNT_NODE` و`FINANCIAL_COMPONENT_ACCOUNT_MAPPING` اقتراحان مبدئيان لحفظ تصنيف حكومي مستقل عن بنود المرتبات وروابطها. لا يقرر هذا الرسم عدد الروابط المسموح لكل بند أو نطاق استعمالها (جهة/فترة/نوع صرف) ولا تفاصيل مستويات دليل الحسابات الرسمي؛ تُثبت من مصدر محاسبي معتمد. `SourceLine` أو كود Oracle الخام يظل سجل مصدر مستقلًا، وقد يلزم جدول ربط له بالبند طبقًا لدليل البيانات القائم، **لا يُدمج آليًا مع عقدة الحساب**. مثال `PAY-ITEM-01` ⇄ `GOV-ACC-01` رموز تجريبية وليست أكوادًا حكومية حقيقية. عرض الرابط لا يعني صلاحية إنشاء أو تنفيذ قيد محاسبي.
+
+## ERD-F — قواعد مطابقة مسميات Oracle مع البند والصندوق (D-046)
+
+```mermaid
+erDiagram
+  SOURCE_FINANCIAL_OCCURRENCE ||--o{ COMPONENT_MAPPING_DECISION : resolvedAs
+  FINANCIAL_COMPONENT ||--o{ SOURCE_LABEL_MAPPING_RULE : mappedFromLabels
+  DEDUCTION_FUND o|--o{ SOURCE_LABEL_MAPPING_RULE : identifiedByAlias
+  SOURCE_LABEL_MAPPING_RULE o|--o{ COMPONENT_MAPPING_DECISION : usedWhenDeciding
+  DEDUCTION_FUND o|--o{ COMPONENT_MAPPING_DECISION : identifiedFund
+  FINANCIAL_COMPONENT ||--o{ COMPONENT_MAPPING_DECISION : identifiedComponent
+  FINANCIAL_COMPONENT ||--o{ FINANCIAL_COMPONENT_ACCOUNT_MAPPING : linkedToAccount
+  GOVERNMENT_ACCOUNT_NODE ||--o{ FINANCIAL_COMPONENT_ACCOUNT_MAPPING : targetAccount
+  SOURCE_FINANCIAL_OCCURRENCE {
+    string SourceLineId PK
+    string RawCode
+    string RawLabel
+    decimal ParsedAmount
+    string FinancialSide
+    string ReportPeriod
+  }
+  DEDUCTION_FUND {
+    string FundId PK
+    string CanonicalName
+    string OfficialFundRef "optional"
+  }
+  SOURCE_LABEL_MAPPING_RULE {
+    string RuleId PK
+    string SourceLabelPattern
+    string SourceCode "optional"
+    string FinancialSide
+    string FinancialComponentId FK
+    string FundId FK "optional"
+    date ValidFrom
+    date ValidTo "optional"
+    string ContextScope "optional"
+    int MappingVersion
+    string ApprovalStatus
+  }
+  COMPONENT_MAPPING_DECISION {
+    string MappingDecisionId PK
+    string SourceLineId FK
+    string ComponentRef FK
+    string FundRef FK "optional"
+    string UsedRuleRef FK "optional"
+    string DecisionStatus
+    string EvidenceRef
+  }
+  FINANCIAL_COMPONENT {
+    string FinancialComponentId PK
+    string ComponentName
+  }
+  FINANCIAL_COMPONENT_ACCOUNT_MAPPING {
+    string MappingId PK
+    string FinancialComponentId FK
+    string GovernmentAccountNodeId FK
+  }
+  GOVERNMENT_ACCOUNT_NODE {
+    string GovernmentAccountNodeId PK
+    string OfficialName
+    string OfficialCode
+  }
+```
+
+**رسم مفاهيمي إضافي، غير منفذ ولا ينسخ الجداول السابقة:** `SourceFinancialOccurrence` و`ComponentMappingDecision` الموجودان في ERD-B يعاد **إظهارهما في الرسم لغرض الربط** فقط؛ وكذلك `FinancialComponent` و`FinancialComponentAccountMapping` و`GovernmentAccountNode` من ERD-E. الحقول الإضافية `FundRef` و`UsedRuleRef` في `ComponentMappingDecision` **مقترحات تحتاج توحيدًا مع ملكية مجال التدقيق قبل SQL** وليست أعمدة موجودة. `DeductionFund` و`SourceLabelMappingRule` مفهومان جديدان مرشحان لحل هوية الصندوق ونسخ مرادفات Oracle، لا دليلًا على وجود كيانات تنفيذية.
+
+**الهوية والمحاسبة:** سطر المصدر له أصل ومبلغ واسم كما ورد بغض النظر عن الربط؛ قد يرتبط استقطاعان لصندوقين مختلفين بالبند الداخلي نفسه أو بحساب حكومي واحد بعد اعتماد الخرائط. **إجمالي الحساب لا يستبدل تجميع الصندوق؛** أي عرض يجب أن يدعم `FundId` و`SourceLineId` والشهر والمستفيد وعلاقة الصرف والنسخة. لا يجوز إعادة استخدام الكود أو النص كقيد فرادة للسطر، ولا اعتماد اسم جديد بأثر رجعي على Snapshot معتمدة دون قرار إعادة مراجعة.
+
+**حدود أساسية:** عند تشابه الاسم بين أكثر من صندوق أو غياب كود واضح، يخرج السطر `MappingAmbiguous` أو `Unmapped` بدل تخمين هوية صندوق؛ لا يضم للصندوق «أخرى» تلقائيًا. يجب ضبط قواعد عدم تضارب المرادفات حسب السياق والفترة ونوع الجانب، وعدم مضاعفة مبلغ سطر في الإجماليات عند وجود أكثر من ترشيح. **سطر واحد قد يمثل تجميعًا أصليًا**، ولا يجوز توزيعه على صناديق متعددة افتراضيًا؛ يستلزم ذلك أدلة توزيع ومراجعة مستقلة إذا كان المصدر لا يفصلها. يتضح نوع البند المالي والسياسة الخاصة بكل صندوق من مصادره المعتمدة، لا من مجرد اسم الشجرة.
 
 ## مرجع الحساب والتاريخ خارج الرسوم التفصيلية
 
