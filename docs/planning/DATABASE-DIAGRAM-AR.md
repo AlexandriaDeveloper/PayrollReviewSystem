@@ -1,6 +1,6 @@
 # مخطط قاعدة البيانات المنطقي وقاموسه
 
-**الحالة: ERD منطقي مقترح v0.3 — تعديلات D-030 وD-031 قيد المراجعة — لا DDL أو Migration أو اختيار محرك قاعدة بيانات.** يكمّل المخططات الحالية ويعيد استعمال مفاهيمها؛ اختلاف الاسم يحتاج توحيدًا عند اعتماد التصميم الفيزيائي، ولا يبرر إنشاء جدولين للمعنى نفسه.
+**الحالة: ERD منطقي مقترح v0.3 — تعديلات D-030 إلى D-032 قيد المراجعة — لا DDL أو Migration أو اختيار محرك قاعدة بيانات.** يكمّل المخططات الحالية ويعيد استعمال مفاهيمها؛ اختلاف الاسم يحتاج توحيدًا عند اعتماد التصميم الفيزيائي، ولا يبرر إنشاء جدولين للمعنى نفسه.
 
 PK هوية داخلية مقترحة، وFK علاقة مرشحة. `optional` تعني أن غيابها مقصود في الحالة المحددة. العلاقات بين مجالات DDD تمثل مراجع وعقودًا؛ لا تمنح وحدة حق كتابة جداول وحدة أخرى، ولا تقرر كل FK فيزيائي. `uuid` و`decimal` أسماء أنواع توضيحية، وتُعتمد أنواع التخزين والدقة والقيود مع التقنية.
 
@@ -245,6 +245,8 @@ erDiagram
   AUDIT_CASE ||--o{ REVIEW_REVISION : reviewedVersions
   AUDIT_CASE ||--o{ FINDING : hasFindings
   FINDING ||--o{ FINDING_REVISION : historicalFinding
+  FINDING ||--o{ FINDING_RESOLUTION_DELEGATION : delegatedResolution
+  FINDING_RESOLUTION_DELEGATION |o--o{ RESOLUTION_DECISION : delegatedDecisionBasis
   FINDING_REVISION ||--o{ REVIEW_MESSAGE : addressedMessages
   FINDING_REVISION ||--o{ RESOLUTION_DECISION : reasonedDecisions
   RESOLUTION_DECISION ||--o{ REVIEW_ADJUSTMENT : optionalOverlays
@@ -291,6 +293,16 @@ erDiagram
     string EntitlementPeriod "optional"
     decimal ProposedDifference "optional"
   }
+  FINDING_RESOLUTION_DELEGATION {
+    uuid ResolutionDelegationId PK
+    uuid FindingId FK
+    string OriginalFindingVersion
+    string AssignedByRef
+    string AssignedReviewerRef
+    string ReasonKind
+    datetime AssignedAt
+    datetime RevokedAt "optional"
+  }
   REVIEW_MESSAGE {
     uuid MessageId PK
     uuid FindingRevisionId FK
@@ -311,6 +323,7 @@ erDiagram
     uuid SupportingMessageId FK "optional"
     string DecidedByReviewerRef
     datetime DecidedAt
+    uuid ResolutionDelegationId FK "optional for assigned reviewer"
     string DecisionKind
     string Reason
     string AuthorityEvidenceRef
@@ -376,7 +389,7 @@ erDiagram
 
 - **D-030 — مصدر الرد:** `OriginChannel` يميز `IN_APP` (كتبه مستخدم المركزية بحسابه الموثق، بعد فحص سلطته) من `EXTERNAL_RECORDED` (وصل خارج التطبيق وسجله مستخدم الوحدة المخوّل). `RecordedByRef` هو حساب مَن أدخل السجل بالفعل، و`AuthenticatedAuthorRef` يشير إلى كاتب الرد الموثق داخل النظام فقط، بينما `ClaimedExternalSenderRef` و`ExternalCorrespondenceRef` يحفظان بيانات جهة الرد ومرجع مراسلته كما وردا دون ادعاء تحقق حساب مركزي. لا تستنتج قوة الإثبات من القناة وحدها.
 - **قيود منطقية مقترحة:** في رد المركزية الداخلي لا يُقبل سجل بلا مرجع مستخدم موثق وصلاحية بالنطاق. في تسجيل الرد الخارجي لا يحل المرسل المنسوب محل `RecordedByRef` ولا يتحول إلى `AuthenticatedAuthorRef`. تظل متطلبات المرفق والتوقيع واعتماد التسجيل والصلاحيات التفصيلية قرارات مفتوحة؛ هذه ليست قيود DB منفذة.
-- **D-031 — سلطة حسم الملاحظة:** `FINDING.RaisedByReviewerRef` هو مرجع المراجع الذي أنشأ الملاحظة، و`RESOLUTION_DECISION.DecidedByReviewerRef` يثبت من حسمها ووقت الحسم. في المسار المعتاد يجب أن تتطابق الهويتان وأن يجتاز صاحب الملاحظة فحص النطاق والصلاحية والإصدار والسند؛ لا يلزم توقيع رئيس المراجعة على **قرار الحسم وحده**. لا تؤدي هذه القاعدة إلى اعتماد `REVIEW_REVISION` أو إثبات تسوية، ولا تسمح ضمنيًا بمراجع بديل عند غياب صاحبها. بعد تثبيت نموذج الهوية والصلاحيات تُختار قيودها الفيزيائية وعقودها؛ ليست هذه حقول SQL أو قيودًا منفذة.
+- **D-031/D-032 — سلطة حسم الملاحظة والتكليف:** `FINDING.RaisedByReviewerRef` يبقى مرجع صاحب الملاحظة الأصلي. `RESOLUTION_DECISION.DecidedByReviewerRef` و`DecidedAt` يثبتان الشخص الذي حسمها وتوقيته: في المسار المعتاد يطابق الحاسم صاحبها؛ وعند غيابه أو نقله يجب أن يشير `ResolutionDelegationId` إلى تكليف صريح صالح يحدد `AssignedReviewerRef` و`AssignedByRef` و`ReasonKind` ومرجع الملاحظة الأصلي ونسختها. تُفحص هوية المسؤول المخوّل عند التكليف، وهوية البديل ونطاقه والإصدار عند الحسم. سجلات التكليف والقرارات تاريخية لا تستبدل بعضها، ولا تُنقل ملكية أصل الملاحظة إلى البديل. لا يلزم توقيع رئيس المراجعة **لحسم الملاحظة ذاته**؛ اعتماد `REVIEW_REVISION` وإثبات التسوية مستقلان. دور المسؤول المُصدر للتكليف وسياسات الإلغاء والتزامن لم يُحسم بعد؛ ليست هذه قيود SQL منفذة.
 - `ScopeKind` يحدد مستفيدًا في صرفية أو صرفية كاملة أو مجموعة مراجعة. يجب وجود المرجع الموافق فقط، وانتماء المصادر والمستفيد والمجموعة للدورة والوحدة المصرح بهما. الحالة الجماعية لا تمنح مراجع مجموعة إذن الاطلاع على الجميع.
 - `ReviewSourceLink` و`ReviewCalculationLink` و`ReviewFindingLink` تجمع النسخ التي يشملها اعتماد بعينه. تربط قرارات الحسم بنسخة الملاحظة الصحيحة؛ لا تستخدم أحدث رد بالوقت فقط.
 - `ReviewCoverageItem` تحفظ مكونات النطاق التي فحصت والمعتمدة وغير المعتمدة والمستثناة وأسبابها، بما فيها البنود والمقاطع الزمنية. `ApprovalCoverageMode` يميز `WHOLE_SCOPE` عن `EXPLICIT_SUBSET` المسموح بسياسة مخولة. تدخل التغطية وأسبابها في البصمة وتظهر في التصدير، ولا يعرض مجموع أجزاء مقبولة باعتباره صافيًا معتمدًا كاملًا.
