@@ -84,3 +84,10 @@
 - **D-026 (مالك معتمد):** إضافة معايير `TDD/Regression` و`KISS/DRY/YAGNI` و`Database Integrity/ACID` و`Deterministic Financial Calculations` و`Idempotency` و`API Contracts` و`Security/Auditability` و`Observability` و`Performance` و`CI/Safe Delivery`، مع `Definition of Done` قائمة على أدلة. [ADR-005](../decisions/ADR-005-engineering-quality-and-agent-skills.md).
 - **D-027 (مالك معتمد):** تقديم المعايير إلى Gemini/Antigravity بمهارات مشروع `SKILL.md` فعلية في [مهارة هندسة المرتبات](../../.agents/skills/payroll-engineering-quality/SKILL.md) و[مهارة تدقيق PR](../../.agents/skills/payroll-pr-quality-gate/SKILL.md)، ومراجع [Engineering Standards](../engineering/ENGINEERING-STANDARDS.md) و[Definition of Done](../engineering/DEFINITION-OF-DONE.md).
 - **تفويض التنفيذ ثابت:** `Skill` و`ADR` لا يمنحان تصريح Code/SQL/CI/Deploy، ومرور Goldfish مستقلة وحسم القانون والـBounded Contexts لا يزال بوابة مستقلة. `PASS` تُدعم بنتيجة فعلية فقط.
+
+
+## توحيد قاعدة العمل وضم الدراسات (11 نوفمبر 2026)
+- **D-028 (توجيه مالك معتمد):** إضافة التوثيق المتاح من الدراسة إلى GitHub واتخاذه قاعدة العمل. [ADR-006](../decisions/ADR-006-consolidated-working-baseline.md) و[نقطة البدء](../WORKING-BASELINE-AR.md) و[فهرس المذكرات](../research/README.md). يعتمد هذا مرجعية المعرفة وإتاحتها، ولا يحول المقترحات أو دراسات القوانين التاريخية إلى قواعد تشغيل معتمدة.
+- **D-029 (تثبيت وصف المستخدم لدورة العمل):** استلام أوراكل من المركزية ومراجعته بالوحدة، وإبلاغ الملاحظات ثم تصحيحها أو تأجيل فرق أو تسويته، أو قبول رد يثبت سلامة الملف وخطأ المراجع؛ مع حفظ الملاحظة والرد وسبب الحسم ومتابعة التنفيذ عند اللزوم. التفاصيل التقنية والصلاحيات والمواعيد ليست محسومة بهذا الوصف.
+- **P-017 (أولوية تحليل مقترحة):** بدء الجزء التشغيلي بدورة الملاحظات والردود والحسم ومتابعة الفروق، ثم توسيع الحساب الآلي للبنود المكتملة السند. لا يعد ذلك تصريحًا بكود أو تغييرًا في مخطط البيانات.
+- **تحديث حالة الأدلة:** توجد تقارير EGM الستة منذ الإصدار 844624d؛ استقلال تشغيلها لم يتحقق في الدراسة الحالية. الحالة الحالية وقيودها في [REVIEW-STATUS](../egm/REVIEW-STATUS.md)، وتُقرأ عبارات NOT_RUN السابقة كتاريخ للإعداد، لا نفي وجود ملفات التقارير.

@@ -17,12 +17,12 @@
 
 | مرحلة المراجعة | شخصية الوكيل (Persona) | الحالة الفعلية | معرف التشغيل | مسار التقرير الفعلي على القرص | الحكم النهائي للمرحلة |
 | :--- | :--- | :---: | :--- | :--- | :---: |
-| **1. egm-zoom-out** | Skeptical Architect & YAGNI Auditor | **PASS** (نفذت بالكامل) | `RUN-20261108-ZOOMOUT` | [`docs/egm/reports/egm-zoom-out.md`](docs/egm/reports/egm-zoom-out.md) | `CHANGES_REQUESTED` |
-| **2. egm-comprehension** | Naive Reader (Zero Institutional Knowledge) | **PASS** (نفذت بالكامل) | `RUN-20261108-COMPREHENSION` | [`docs/egm/reports/egm-comprehension.md`](docs/egm/reports/egm-comprehension.md) | `NOT_APPROVED` |
-| **3. egm-design** | Hostile Design Critic & Distributed Systems | **PASS** (نفذت بالكامل) | `RUN-20261108-DESIGN` | [`docs/egm/reports/egm-design.md`](docs/egm/reports/egm-design.md) | `REJECTED` |
-| **4. egm-structural** | Structural Layout & Document Architect | **PASS** (نفذت بالكامل) | `RUN-20261108-STRUCTURAL` | [`docs/egm/reports/egm-structural.md`](docs/egm/reports/egm-structural.md) | `NOT_APPROVED` |
-| **5. egm-style** | Technical Copy Editor & Style Auditor | **PASS** (نفذت بالكامل) | `RUN-20261108-STYLE` | [`docs/egm/reports/egm-style.md`](docs/egm/reports/egm-style.md) | `CHANGES_REQUESTED` |
-| **6. egm-implementation-readiness** | Pragmatic Tech Lead & Software Engineer | **PASS** (نفذت بالكامل) | `RUN-20261108-IMPL-READY` | [`docs/egm/reports/egm-implementation-readiness.md`](docs/egm/reports/egm-implementation-readiness.md) | `NOT_READY` |
+| **1. egm-zoom-out** | Skeptical Architect & YAGNI Auditor | **PASS** (نفذت بالكامل) | `RUN-20261108-ZOOMOUT` | [`docs/egm/reports/egm-zoom-out.md`](reports/egm-zoom-out.md) | `CHANGES_REQUESTED` |
+| **2. egm-comprehension** | Naive Reader (Zero Institutional Knowledge) | **PASS** (نفذت بالكامل) | `RUN-20261108-COMPREHENSION` | [`docs/egm/reports/egm-comprehension.md`](reports/egm-comprehension.md) | `NOT_APPROVED` |
+| **3. egm-design** | Hostile Design Critic & Distributed Systems | **PASS** (نفذت بالكامل) | `RUN-20261108-DESIGN` | [`docs/egm/reports/egm-design.md`](reports/egm-design.md) | `REJECTED` |
+| **4. egm-structural** | Structural Layout & Document Architect | **PASS** (نفذت بالكامل) | `RUN-20261108-STRUCTURAL` | [`docs/egm/reports/egm-structural.md`](reports/egm-structural.md) | `NOT_APPROVED` |
+| **5. egm-style** | Technical Copy Editor & Style Auditor | **PASS** (نفذت بالكامل) | `RUN-20261108-STYLE` | [`docs/egm/reports/egm-style.md`](reports/egm-style.md) | `CHANGES_REQUESTED` |
+| **6. egm-implementation-readiness** | Pragmatic Tech Lead & Software Engineer | **PASS** (نفذت بالكامل) | `RUN-20261108-IMPL-READY` | [`docs/egm/reports/egm-implementation-readiness.md`](reports/egm-implementation-readiness.md) | `NOT_READY` |
 
 > **إيضاح حوكمة:** حالة "PASS" في الجدول أعلاه تعني **نجاح تنفيذ وتشغيل مرحلة المراجعة وفحصها الفعلي** وفقاً للبروتوكول، وليست إقراراً بصلاحية التصميم للبرمجة؛ إذ أجمعت كافة مراحل المراجعة على وجود عيوب مانعة تحول دون التنفيذ البرمجي.
 
@@ -210,4 +210,3 @@
 
 ---
 *تم إعداد هذا التقرير الموحد استناداً إلى نتائج المراجعة المستقلة لبروتوكول EGM المحفوظة على القرص في `docs/egm/reports/`.*
-
