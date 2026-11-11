@@ -1,6 +1,6 @@
 # مخططات UML لدورة مراجعة المرتبات
 
-**الحالة: نموذج تصميم مقترح v0.3 — تعديلات D-030 إلى D-043 وتبسيط التسجيل، لا كود منفذ.** يكمّل [الخطة](COMPREHENSIVE-WORK-PLAN-AR.md) و[ERD](DATABASE-DIAGRAM-AR.md). الأسماء والعلاقات التالية تحتاج مراجعة وحدود معاملات وعقود قبل التنفيذ.
+**الحالة: نموذج تصميم مقترح v0.3 — تعديلات D-030 إلى D-044 وتبسيط التسجيل، لا كود منفذ.** يكمّل [الخطة](COMPREHENSIVE-WORK-PLAN-AR.md) و[ERD](DATABASE-DIAGRAM-AR.md). الأسماء والعلاقات التالية تحتاج مراجعة وحدود معاملات وعقود قبل التنفيذ.
 
 هذه رسوم Class وSequence وState. أسهم التعاون في Sequence تصف حالة استخدام مقترحة، ولا تعني اتصالًا فعليًا بـOracle أو تنفيذ دفع. القيم الاصطناعية الواردة في الشرح ليست أحكامًا مالية.
 
@@ -146,6 +146,9 @@ classDiagram
     +EmploymentRelationshipRefs
     +PayeeRelationshipRefs
     +RelationKindLabels
+    +DistinctPersonSearchRow
+    +SelectedEmploymentRelationshipRef_optional
+    +SelectedPayeeRelationshipRef_optional
     +HasEmploymentRelationship
     +AsOfDate
     +AdministrativeHistory
@@ -159,6 +162,7 @@ classDiagram
     <<interface>>
     +SearchPersonsAndPayees(filters)
     +GetEmployeeProfile(personRef, asOfDate)
+    +GetPersonRelationshipDetail(personRef, relationRef, asOfDate)
     +SearchPersonnelHistory(filters, period)
   }
   class PersonnelRecordUseCase {
@@ -218,7 +222,9 @@ classDiagram
   DirectFormAdapter ..|> ISourceIntake
 ```
 
-**D-043 — دليل الموظفين الشامل:** `SearchPersonsAndPayees` استعلام مفاهيمي مقترح لشاشة «الموظفون» التي تضم من له علاقة عمل ومن لا يملك إلا علاقة استحقاق، وتعيد **نوع علاقة العمل/الصرف** لا مجرد الاسم؛ يحتفظ `EmployeeProfileReadModel` بمراجع ‏`Person` و‏`EmploymentRelationship` و‏`PayeeRelationship` منفصلة. `HasEmploymentRelationship` يساعد العرض فقط: أقسام وترقيات ودرجات من علاقة عمل موجودة؛ لغير الموظف تُعرض «لا ينطبق» بدل توليد درجة أو تاريخ وظيفة. هل تُجمّع علاقات الشخص في صف واحد أم عدة صفوف خيار واجهة لم يحسم بعد. لا صلاحية إضافية على بيانات حساسة لمجرد وجودها في نتائج البحث.
+**D-044 — قائمة أشخاص واحدة وعلاقات منفصلة داخل الملف:** نتائج `SearchPersonsAndPayees` تُجمع لأغراض **العرض فقط حسب `PersonId` مثبت** فتظهر نتيجة واحدة للشخص حتى لو له أكثر من علاقة عمل أو صرف؛ `GetPersonRelationshipDetail` مقترح لاستعراض علاقة بعينها مع تواريخها ووقائعها ولا يسمح بخلط القيم عند تغيير العلاقة. `DistinctPersonSearchRow` وحقلا `Selected*RelationshipRef` إشارات واجهة/ReadModel فقط، وليست أعمدة أو مفاتيح تخزين. تشابه الاسم بين شخصين لا يبرر الدمج، وتبقى صلاحيات العرض محددة لكل علاقة. تصحيح الموظف أو تسجيل واقعة مالية يستلزم اختيار العلاقة المستهدفة الصحيحة وفق D-040.
+
+**D-043 — دليل الموظفين الشامل:** `SearchPersonsAndPayees` استعلام مفاهيمي مقترح لشاشة «الموظفون» التي تضم من له علاقة عمل ومن لا يملك إلا علاقة استحقاق، وتعيد **نوع علاقة العمل/الصرف** لا مجرد الاسم؛ يحتفظ `EmployeeProfileReadModel` بمراجع ‏`Person` و‏`EmploymentRelationship` و‏`PayeeRelationship` منفصلة. `HasEmploymentRelationship` يساعد العرض فقط: أقسام وترقيات ودرجات من علاقة عمل موجودة؛ لغير الموظف تُعرض «لا ينطبق» بدل توليد درجة أو تاريخ وظيفة. **D-044 حسم عرض صف واحد لكل شخص في نتائج البحث**؛ تُستعرض كل العلاقات منفصلة داخل صفحته ولا يُختزل بعضها في بعض. لا صلاحية إضافية على بيانات حساسة لمجرد وجودها في نتائج البحث.
 
 **D-042 — شكلَا الورود:** تدعم شاشة «وقائع شؤون العاملين» المكاتبة الفردية والكشف المجمع. `RecordPersonnelReportedAbsencesFromDocument` **حالة استخدام منطقية مقترحة** لتسجيل عدة وقائع محددة ومُراجعة من **مستند واحد** ‏`sourceDocumentRef`، مع مراجع علاقات عمل مستقلة لكل واقعة وفترة ونوع؛ تتيح `RecordPersonnelReportedAbsence` المسار الفردي. لا يُنشأ قرار أو حكم مالي لكل سطر، ولا تُنسخ صورة المستند الأصلية عدة مرات، ولا يُفترض تفعيل استخراج آلي من ملف. قائمة `confirmedOccurrences` لا تربط سطرًا مجهول الهوية لموظف بالتخمين، ولا يُسمح لحضور/غياب يومي بالظهور من تلقاء نفسه.
 
