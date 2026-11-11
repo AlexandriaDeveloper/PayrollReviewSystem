@@ -1,6 +1,6 @@
 # مخططات UML لدورة مراجعة المرتبات
 
-**الحالة: نموذج تصميم مقترح v0.3 — تعديلات D-030 إلى D-039 وتبسيط التسجيل، لا كود منفذ.** يكمّل [الخطة](COMPREHENSIVE-WORK-PLAN-AR.md) و[ERD](DATABASE-DIAGRAM-AR.md). الأسماء والعلاقات التالية تحتاج مراجعة وحدود معاملات وعقود قبل التنفيذ.
+**الحالة: نموذج تصميم مقترح v0.3 — تعديلات D-030 إلى D-040 وتبسيط التسجيل، لا كود منفذ.** يكمّل [الخطة](COMPREHENSIVE-WORK-PLAN-AR.md) و[ERD](DATABASE-DIAGRAM-AR.md). الأسماء والعلاقات التالية تحتاج مراجعة وحدود معاملات وعقود قبل التنفيذ.
 
 هذه رسوم Class وSequence وState. أسهم التعاون في Sequence تصف حالة استخدام مقترحة، ولا تعني اتصالًا فعليًا بـOracle أو تنفيذ دفع. القيم الاصطناعية الواردة في الشرح ليست أحكامًا مالية.
 
@@ -157,6 +157,12 @@ classDiagram
     <<interface>>
     +SearchEmployees(filters)
     +GetEmployeeProfile(personRef, asOfDate)
+    +SearchPersonnelHistory(filters, period)
+  }
+  class PersonnelRecordUseCase {
+    +RecordIndividualDecision(command)
+    +RecordDecisionForSelectedEmployees(command, confirmedTargets)
+    +RecordGradeOrDepartmentChange(command)
   }
   class GovernmentAccountNode {
     +GovernmentAccountNodeId
@@ -194,6 +200,7 @@ classDiagram
   ResolutionDecision "1" --> "0..*" FollowUpItem : authorizedFollowUp
   FollowUpItem --> Money : amount
   EmployeeProfileReadModel ..> IEmployeeProfileQuery : projectionContract
+  PersonnelRecordUseCase ..> IEmployeeProfileQuery : selectedTargetLookup
   GovernmentAccountNode "0..1" --> "0..*" GovernmentAccountNode : hierarchy
   FinancialComponent "1" --> "0..*" FinancialComponentAccountMapping : accountLinks
   GovernmentAccountNode "1" --> "0..*" FinancialComponentAccountMapping : receivingAccount
@@ -206,6 +213,8 @@ classDiagram
   ExcelSourceAdapter ..|> ISourceIntake
   DirectFormAdapter ..|> ISourceIntake
 ```
+
+**D-040 — واجهة تسجيل واحدة لمسارين:** `PersonnelRecordUseCase` مثال عقد منطقي مقترح، يعبّر عن تسجيل فردي من صفحة الموظف أو تسجيل قرار على مستهدفين محددين من شاشة القرارات والترقيات/التنقلات. `confirmedTargets` هي قائمة علاقات العمل التي عاينها المستخدم وثبّتها وقت التسجيل، لا فلتر يعاد تقييمه لاحقًا؛ يظهر **نفس مرجع الواقعة/القرار** في ملفات المشمولين دون نسخ أصل القرار في كل واجهة. `SearchPersonnelHistory` يعبر عن استعلام عام بفلاتر فترة وجهة/قسم وحالة واقعة مسجلة مثل الغياب دون إذن، بشرط وجود مصدر معتمد للواقعة؛ لا تُشتق منه مخالفة أو جزاء أو خصم. يجب مراجعة طريقة تمثيل مستهدفي القرار وتعارضات التواريخ والصلاحيات مع `Personnel` قبل أي DDL أو API. الرموز المقترحة ليست عقود تنفيذ معتمدة.
 
 **D-039 — صفحة الموظف التاريخية:** `EmployeeProfileReadModel` و`IEmployeeProfileQuery` عقود **قراءة/عرض مقترحة**: البحث في دليل الموظفين ثم فتح ملف منفصل يضم فترات الأقسام والنقل والترقيات والدرجات والأوامر والقيم المالية عبر السنين والأحكام المرتبطة بتغيير بند، مع مصدر وتاريخ سريان/تسجيل وأثر. لا يحوّلان بيانات الموظف التاريخية إلى جدول شامل مكرر؛ علاقات الأحكام والأقسام تحتاج قرار نمذجة مستقل قبل SQL، ولا تُختزل أحكام القضاء تلقائيًا في أوامر إدارية.
 
