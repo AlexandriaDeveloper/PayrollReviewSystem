@@ -7,7 +7,7 @@
 - **قناة الرسائل:** [GitHub Issue #41 — AI-BRIDGE-001](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/41).
 - **سياسة الأدوار:** [COLLABORATION](COLLABORATION.md) و[`AGENTS.md`](../../AGENTS.md) و[`GEMINI.md`](../../GEMINI.md).
 - **التكليفات التنفيذية:** Issues مستقلة صريحة بتفويض المالك، ثم Draft PR للتنفيذ. **التعليقات في Issue #41 ليست إذنًا** بتنفيذ أي مهمة.
-- **الموقف الحالي:** [تقرير جاهزية التنفيذ في PR #40](../planning/IMPLEMENTATION-READINESS-AR.md) (متاح على فرع `docs/p0-central-replies-dual-channel` حتى دمجه). مسودة PR #40 ليست `main`؛ لا تخلط الحالة.
+- **الموقف الحالي:** [تقرير جاهزية التنفيذ في PR #40](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/blob/docs/p0-central-replies-dual-channel/docs/planning/IMPLEMENTATION-READINESS-AR.md) (متاح على فرع `docs/p0-central-replies-dual-channel` حتى دمجه). مسودة PR #40 ليست `main`؛ لا تخلط الحالة.
 
 ## قاعدة القراءة الإلزامية في كل جلسة
 
