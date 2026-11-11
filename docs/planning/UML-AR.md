@@ -1,6 +1,6 @@
 # مخططات UML لدورة مراجعة المرتبات
 
-**الحالة: نموذج تصميم مقترح v0.3 — تعديلات D-030 إلى D-045 وتبسيط التسجيل، لا كود منفذ.** يكمّل [الخطة](COMPREHENSIVE-WORK-PLAN-AR.md) و[ERD](DATABASE-DIAGRAM-AR.md). الأسماء والعلاقات التالية تحتاج مراجعة وحدود معاملات وعقود قبل التنفيذ.
+**الحالة: نموذج تصميم مقترح v0.3 — تعديلات D-030 إلى D-046 وتبسيط التسجيل، لا كود منفذ.** يكمّل [الخطة](COMPREHENSIVE-WORK-PLAN-AR.md) و[ERD](DATABASE-DIAGRAM-AR.md). الأسماء والعلاقات التالية تحتاج مراجعة وحدود معاملات وعقود قبل التنفيذ.
 
 هذه رسوم Class وSequence وState. أسهم التعاون في Sequence تصف حالة استخدام مقترحة، ولا تعني اتصالًا فعليًا بـOracle أو تنفيذ دفع. القيم الاصطناعية الواردة في الشرح ليست أحكامًا مالية.
 
@@ -188,6 +188,25 @@ classDiagram
     +ComponentName
     +ComponentKind
   }
+  class DeductionFund {
+    +FundId
+    +CanonicalName
+    +OfficialFundRef_optional
+    +ValidFrom_optional
+    +ValidTo_optional
+  }
+  class SourceLabelMappingRule {
+    +RuleId
+    +SourceLabelPattern
+    +SourceCode_optional
+    +FinancialSide
+    +FinancialComponentId
+    +FundId_optional
+    +ValidFrom
+    +ValidTo
+    +MappingVersion
+    +ApprovalStatus
+  }
   class FinancialComponentAccountMapping {
     +MappingId
     +FinancialComponentId
@@ -214,6 +233,8 @@ classDiagram
   GovernmentAccountNode "0..1" --> "0..*" GovernmentAccountNode : hierarchy
   FinancialComponent "1" --> "0..*" FinancialComponentAccountMapping : accountLinks
   GovernmentAccountNode "1" --> "0..*" FinancialComponentAccountMapping : receivingAccount
+  FinancialComponent "1" --> "0..*" SourceLabelMappingRule : canonicalTargets
+  DeductionFund "0..1" --> "0..*" SourceLabelMappingRule : fundDimension
   ReviewUseCase ..> IReviewAuthorization
   ReviewUseCase ..> IExpectedCalculator
   ReviewUseCase ..> IExecutionEvidenceVerifier
@@ -223,6 +244,8 @@ classDiagram
   ExcelSourceAdapter ..|> ISourceIntake
   DirectFormAdapter ..|> ISourceIntake
 ```
+
+**D-046 — تمييز الصناديق عن البنود والحسابات:** `SourceLabelMappingRule` سجل مرادفات/قواعد مطابقة مقترح مؤرخ بأصل اسم Oracle وسياقه وجانبه ونسخته والجهة المخولة؛ يربط الاسم بأحد `FinancialComponent` وبـ`DeductionFund` عند وجود صندوق. يظل `SourceFinancialOccurrence` والقرار `ComponentMappingDecision` أصلَي ظهور وربط منفصلين في ERD-B؛ لا يُخزن اسم Oracle الخام على أنه اسم رسمي دائم في الشجرة. يعرض التقرير جميع الاستقطاعات في الحساب المشترك مع **تفصيل مبلغ كل `FundId`**، وأي سطر لا يُحسم يبقى منفصلًا. `DeductionFund` و`SourceLabelMappingRule` **مفهومان مرشحان للنمذجة** لا كلاس أو جدول موجود، وتركيب البند الداخلي الواحد مقابل بنود فرعية بحسب سياسة كل صندوق لا يزال يحتاج قرارًا. يحتفظ التطبيق بتاريخ اعتماد المرادف ولا يعيد تصنيف الأشهر الماضية بصمت.
 
 **D-045 — شكل الواجهة المدمجة:** رأس الملف يعرّف الشخص دون تغيير أثناء الاختيار؛ `RelationshipCards` تشير لعلاقات العمل/الاستحقاق الموجودة فعلًا، و`SelectedRelationshipDetailPanel` **إسقاط عرض** لتفاصيل العلاقة المختارة داخل نفس الصفحة مع تبويبات متناسبة مع نوعها. تبويب الدرجات والترقيات يخص ‏`EmploymentRelationship`، وتبويب البنود والصرفيات يخص ‏`PayeeRelationship` المناسب. اختيار بطاقة أخرى لا يدمج بياناتها في السابقة؛ ويُشترط عند التعديل مرجع العلاقة المستهدفة والصلاحية والسند. كلا الاسمين حقلا ReadModel مقترحان لا كيانين أو جدولين جديدين، ولا تُحوّل كل صرفية إلى بطاقة علاقة مستقلة.
 
