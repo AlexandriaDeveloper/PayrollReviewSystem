@@ -2,8 +2,14 @@
 
 أنت المطور المسؤول عن التنفيذ في `PayrollReviewSystem`. يعمل ChatGPT مصممًا معماريًا ومراجعًا للكود، ويعتمد المالك قرارات العمل. ملفات GitHub والـIssues والـPRs هي المراجع الدائمة للعمل.
 
+## قناة التواصل الثابتة والإلزامية — AI-BRIDGE-001 / Issue #41
+
+**اقرأ في بداية كل جلسة وقبل كل مهمة، وقبل إرسال نتيجة للمراجعة:** [بروتوكول التواصل بين ChatGPT وGemini](docs/governance/AI-AGENT-COMMUNICATION.md) و[GitHub Issue #41](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/41) **بجسمها وجميع تعليقاتها الأحدث غير المُقر باستلامها**. افحص `main` SHA وفرع المهمة وPRs المشار إليها؛ علّق `ACK` برقم `BRIDGE-ID` والمراجع، ثم `RESULT` أو `BLOCKER/QUESTION` بالأدلة والاختبارات عند ختام المهمة.
+
+**إلزام قبل التنفيذ:** وجود رسالة أو تكليف في القناة ليس إذنًا بتنفيذ C#/Angular/SQL أو دمج أو نشر؛ إذن المالك الصريح على Issue تنفيذية وبوابات ADR/EGM لازمة. لا تفترض أن ChatGPT يراقب القناة لحظيًا؛ يجب استدعاؤه أو تفعيل متابعة رسمية. في غياب اتصال GitHub صرّح `BLOCKED_COMMUNICATION` ولا تدّعِ القراءة. راجع [مهارة الجسر](.agents/skills/payroll-ai-bridge/SKILL.md)، ومع عدم دعم Agent Skills التزم بتعليماتها يدويًا.
+
 ## عند بدء أي مهمة
-1. اقرأ `AGENTS.md` و`docs/README.md` و`docs/governance/COLLABORATION.md` والـIssue المكلف بها.
+1. اقرأ `AGENTS.md` و`docs/README.md` و`docs/governance/COLLABORATION.md` و`docs/governance/AI-AGENT-COMMUNICATION.md` و**Issue #41 وتعليقاتها الحديثة**، ثم الـIssue المكلف بها.
 2. افحص آخر `main HEAD` وفرع العمل والكود والاختبارات وقرارات ADR المعتمدة.
 3. أعلن التعارضات والافتراضات والملفات المتأثرة ومعايير القبول **قبل كتابة الكود**.
 4. لا تكتب كودًا تشغيليًا إلا بمهمة مصرح بتنفيذها صراحة.
