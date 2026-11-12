@@ -130,7 +130,6 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_CLI_HOME: ${{ runner.temp }}/bridge-gemini-home
-          GEMINI_CLI_TRUST_WORKSPACE: "true"
         run: |
           # يتم وضع مفتاح Gemini في هذه الخطوة فقط، وليس في خطوات npm أو GitHub.
           mkdir -p .gemini "$GEMINI_CLI_HOME"
@@ -142,10 +141,11 @@ jobs:
           }
           EOF
           if [ -z "${GEMINI_API_KEY:-}" ]; then
-            node -e "require('fs').writeFileSync('bridge-result.json', JSON.stringify({status:'BLOCKED_CONFIG',text:'المفتاح GEMINI_API_KEY غير مُعدّ في GitHub Actions Secrets؛ لم يتم تشغيل Gemini.'}))"
+            node -e "require('fs').writeFileSync('bridge-result.json', JSON.stringify({status:'BLOCKED_CONFIG',category:'CONFIG_MISSING_API_KEY',text:'[تصنيف الخطأ: CONFIG_MISSING_API_KEY] المفتاح GEMINI_API_KEY غير مُعدّ في GitHub Actions Secrets؛ لم يتم تشغيل Gemini.'}))"
             exit 0
           fi
           # أداة CLI مقيدة بلا أدوات؛ محتوى الرسالة يُمرّر كوسيط بيانات مقتبس، لا كأمر Shell.
+          # تجاوز فحص الثقة مقيد ببيئة Runner لفرع main مثبت، مع تجريد تام للأدوات عبر settings.json.
           set +e
           gemini --skip-trust --model gemini-2.5-flash --output-format json --prompt "$(cat bridge-prompt.txt)" > gemini-output.json 2> gemini-stderr.log
           exit_code=$?
@@ -157,25 +157,27 @@ jobs:
           const exitCode = process.env.exit_code;
           const stdoutText = fs.existsSync('gemini-output.json') ? fs.readFileSync('gemini-output.json', 'utf8') : '';
           const stderrText = fs.existsSync('gemini-stderr.log') ? fs.readFileSync('gemini-stderr.log', 'utf8') : '';
-          const secretKeys = [process.env.GEMINI_API_KEY].filter(Boolean);
 
+          // تصنيف مغلق آمن دون نشر نصوص stderr الحرة أو المسارات أو الأسرار
           const outcome = policy.buildExecutionOutcome({
             exitCode,
             stdoutText,
-            stderrText,
-            secretKeys
+            stderrText
           });
 
           fs.writeFileSync('bridge-result.json', JSON.stringify(outcome));
 
-          // كتابة ملخص تشخيصي آمن في سجل Actions Step Summary دون أسرار
+          // كتابة ملخص تشخيصي آمن في سجل Actions Step Summary دون أسرار أو نصوص حرة
           const summaryLines = [
             '### ملخص تشغيل Gemini CLI',
             `- الحالة: **${outcome.status}**`,
             `- رمز الخروج (Exit Code): \`${exitCode}\``
           ];
+          if (outcome.category) {
+            summaryLines.push(`- تصنيف النتيجة: \`${outcome.category}\``);
+          }
           if (outcome.status !== 'ANSWERED') {
-            summaryLines.push('', '```text', outcome.text, '```');
+            summaryLines.push('', `> ${outcome.text}`);
           }
           if (process.env.GITHUB_STEP_SUMMARY) {
             try {
@@ -201,8 +203,7 @@ jobs:
             }
             const res = JSON.parse(fs.readFileSync('bridge-result.json', 'utf8'));
             if (res.status !== 'ANSWERED') {
-              console.error('فشل تشغيل Gemini بنتيجة غير ناجحة:', res.status);
-              console.error(res.text);
+              console.error('فشل تشغيل Gemini بنتيجة:', res.status, res.category || '');
               process.exit(1);
             }
           "
@@ -281,7 +282,7 @@ jobs:
             }
             const res = JSON.parse(fs.readFileSync('bridge-result.json', 'utf8'));
             if (res.status !== 'ANSWERED') {
-              console.error('اكتمل تشغيل الـ Bridge بحالة غير ناجحة:', res.status);
+              console.error('اكتمل تشغيل الـ Bridge بحالة غير ناجحة:', res.status, res.category || '');
               process.exit(1);
             }
           "

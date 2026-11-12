@@ -7,6 +7,8 @@ const {
   validateTrigger,
   findSource,
   alreadyProcessed,
+  ERROR_CATEGORIES,
+  classifyError,
   sanitizeErrorText,
   buildExecutionOutcome
 } = require('./bridge-policy.cjs');
@@ -95,6 +97,50 @@ test('تقليص رسائل الخطأ الطويلة جدًا لحماية ال
   assert.equal(clean.includes('[تم تقليص الرسالة للسلامة والإيجاز]'), true);
 });
 
+test('تصنيف الأخطاء بدقة وفق القائمة المغلقة ERROR_CATEGORIES', () => {
+  // خطأ موثوقية مسار العمل
+  assert.equal(classifyError({ exitCode: 55, stderrText: 'FatalUntrustedWorkspaceError' }).code, 'TRUST_FAILURE');
+  assert.equal(classifyError({ exitCode: 1, stderrText: 'not running in a trusted directory' }).code, 'TRUST_FAILURE');
+
+  // خطأ المصادقة ومفتاح API
+  assert.equal(classifyError({ exitCode: 1, stderrText: 'code: 41\nPlease set an Auth method' }).code, 'AUTH_FAILURE');
+  assert.equal(classifyError({ exitCode: 1, stderrText: 'API key not valid' }).code, 'AUTH_FAILURE');
+  assert.equal(classifyError({ exitCode: 1, stderrText: 'Request failed with status 401 UNAUTHENTICATED' }).code, 'AUTH_FAILURE');
+
+  // خطأ الحصة المخصصة ومعدل الطلبات
+  assert.equal(classifyError({ exitCode: 1, stderrText: 'RESOURCE_EXHAUSTED: quota exceeded' }).code, 'QUOTA_FAILURE');
+  assert.equal(classifyError({ exitCode: 1, stderrText: 'status 429 Too Many Requests' }).code, 'QUOTA_FAILURE');
+
+  // خطأ الشبكة وانقطاع الاتصال
+  assert.equal(classifyError({ exitCode: 1, stderrText: 'fetch failed: ETIMEDOUT' }).code, 'NETWORK_FAILURE');
+  assert.equal(classifyError({ exitCode: 1, stderrText: 'ENOTFOUND generativelanguage.googleapis.com' }).code, 'NETWORK_FAILURE');
+
+  // خطأ غير متوقع عام
+  assert.equal(classifyError({ exitCode: 99, stderrText: 'something completely generic' }).code, 'CLI_UNEXPECTED_ERROR');
+});
+
+test('SEC-01: منع تسريب المسارات الشخصية والرموز غير النمطية من stderr إلى الخارج', () => {
+  const privatePath = '/home/user_personal/payroll/internal/data.json';
+  const customWeirdToken = 'CUSTOM_NON_STANDARD_BEARER_998877665544332211';
+  const sensitiveStderr = `Error at ${privatePath} with bearer ${customWeirdToken}: FatalUntrustedWorkspaceError occurred`;
+
+  const outcome = buildExecutionOutcome({
+    exitCode: 55,
+    stdoutText: '',
+    stderrText: sensitiveStderr
+  });
+
+  assert.equal(outcome.status, 'ERROR');
+  assert.equal(outcome.category, 'TRUST_FAILURE');
+  assert.equal(outcome.text.includes('TRUST_FAILURE'), true);
+
+  // تحقق حاسم: عدم وجود أي أثر للمسار الشخصي أو الرمز غير النمطي في نص النتيجة النهائي
+  assert.equal(outcome.text.includes(privatePath), false, 'ممنوع ظهور المسارات الشخصية في نص النتيجة');
+  assert.equal(outcome.text.includes(customWeirdToken), false, 'ممنوع ظهور الرموز غير النمطية في نص النتيجة');
+  assert.equal(outcome.text.includes('user_personal'), false);
+  assert.equal(outcome.text.includes('998877665544332211'), false);
+});
+
 test('بناء النتيجة عند خروج Gemini CLI برمز الخطأ 55 (مساحة عمل غير موثوقة)', () => {
   const stderr = 'FatalUntrustedWorkspaceError: Gemini CLI is not running in a trusted directory.';
   const outcome = buildExecutionOutcome({
@@ -104,39 +150,25 @@ test('بناء النتيجة عند خروج Gemini CLI برمز الخطأ 55 
   });
 
   assert.equal(outcome.status, 'ERROR');
-  assert.equal(outcome.text.includes('exit code: 55'), true);
-  assert.equal(outcome.text.includes('FatalUntrustedWorkspaceError'), true);
+  assert.equal(outcome.category, 'TRUST_FAILURE');
+  assert.equal(outcome.text.includes('رمز الخروج: 55'), true);
+  assert.equal(outcome.text.includes('TRUST_FAILURE'), true);
+  // تأكيد أن نص stderr الحر لم يُحقن في النتيجة
+  assert.equal(outcome.text.includes('FatalUntrustedWorkspaceError'), false);
 });
 
-test('بناء النتيجة عند حدوث خطأ يتضمن مفتاح API في stderr', () => {
-  const stderr = 'Error: Invalid API key AIzaSyD1234567890abcdef1234567890abcde in request';
+test('بناء النتيجة عند حدوث خطأ مصادقة أو مفتاح API', () => {
+  const stderr = 'Error: Invalid API key in request with status 403 PERMISSION_DENIED';
   const outcome = buildExecutionOutcome({
     exitCode: 1,
     stdoutText: '',
-    stderrText: stderr,
-    secretKeys: []
+    stderrText: stderr
   });
 
   assert.equal(outcome.status, 'ERROR');
-  assert.equal(outcome.text.includes('exit code: 1'), true);
-  assert.equal(outcome.text.includes('AIzaSyD'), false, 'ممنوع ظهور المفتاح في نص النتيجة');
-  assert.equal(outcome.text.includes('[REDACTED_API_KEY]'), true);
-});
-
-test('بناء النتيجة مع حجب الأسرار المحددة صراحة في secretKeys', () => {
-  const customSecret = 'SUPER_SECRET_VALUE_12345';
-  const stderr = 'Connection failed to host with token: SUPER_SECRET_VALUE_12345';
-  const outcome = buildExecutionOutcome({
-    exitCode: 2,
-    stdoutText: '',
-    stderrText: stderr,
-    secretKeys: [customSecret]
-  });
-
-  assert.equal(outcome.status, 'ERROR');
-  assert.equal(outcome.text.includes('exit code: 2'), true);
-  assert.equal(outcome.text.includes('SUPER_SECRET_VALUE_12345'), false);
-  assert.equal(outcome.text.includes('[REDACTED_SECRET]'), true);
+  assert.equal(outcome.category, 'AUTH_FAILURE');
+  assert.equal(outcome.text.includes('AUTH_FAILURE'), true);
+  assert.equal(outcome.text.includes('رمز الخروج: 1'), true);
 });
 
 test('بناء النتيجة عند نجاح Gemini CLI ورد صالح', () => {
@@ -159,7 +191,8 @@ test('بناء النتيجة عند خروج 0 لكن مع تعذر تحليل 
     stderrText: ''
   });
   assert.equal(invalidJson.status, 'ERROR');
-  assert.equal(invalidJson.text.includes('تعذر تحليل رد Gemini بصيغة JSON'), true);
+  assert.equal(invalidJson.category, 'MALFORMED_OUTPUT');
+  assert.equal(invalidJson.text.includes('MALFORMED_OUTPUT'), true);
 
   const emptyResponse = buildExecutionOutcome({
     exitCode: 0,
@@ -167,7 +200,8 @@ test('بناء النتيجة عند خروج 0 لكن مع تعذر تحليل 
     stderrText: ''
   });
   assert.equal(emptyResponse.status, 'ERROR');
-  assert.equal(emptyResponse.text.includes('لم يرجع response نصيًا صالحًا'), true);
+  assert.equal(emptyResponse.category, 'EMPTY_RESPONSE');
+  assert.equal(emptyResponse.text.includes('EMPTY_RESPONSE'), true);
 
   const errorInJson = buildExecutionOutcome({
     exitCode: 0,
@@ -175,6 +209,7 @@ test('بناء النتيجة عند خروج 0 لكن مع تعذر تحليل 
     stderrText: ''
   });
   assert.equal(errorInJson.status, 'ERROR');
-  assert.equal(errorInJson.text.includes('Resource exhausted (quota)'), true);
+  assert.equal(errorInJson.category, 'QUOTA_FAILURE');
+  assert.equal(errorInJson.text.includes('QUOTA_FAILURE'), true);
 });
 
