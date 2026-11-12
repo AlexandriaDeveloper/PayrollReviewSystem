@@ -1,6 +1,6 @@
 # فهرس التوثيق العربي وحالة اعتماد المعلومات
 
-> **نقطة البدء الحالية:** [قاعدة العمل الموحدة](WORKING-BASELINE-AR.md)، [فهرس 43 مذكرة دراسة](research/README.md)، [مراجعة المستودع](reviews/2026-11-11-repository-review-ar.md)، [حالة EGM المحدثة](egm/REVIEW-STATUS.md)، و[سجل تحكيم ملاحظات EGM (`EGM-ADJ-001`)](egm/EGM-ADJUDICATION-REGISTER-AR.md). اعتماد نقل المعرفة لا يفعّل قانونًا أو كودًا.
+> **نقطة البدء الحالية:** [قاعدة العمل الموحدة](WORKING-BASELINE-AR.md)، [فهرس 43 مذكرة دراسة](research/README.md)، [مراجعة المستودع](reviews/2026-11-11-repository-review-ar.md)، [حالة EGM المحدثة](egm/REVIEW-STATUS.md)، [سجل تحكيم ملاحظات EGM (`EGM-ADJ-001`)](egm/EGM-ADJUDICATION-REGISTER-AR.md)، و[مواصفة دورة الملاحظة والرد والحسم ومتابعة الفروق (`SPEC-029-001`)](specs/AUDIT-FINDING-RESPONSE-RESOLUTION-WORKFLOW-AR.md). اعتماد نقل المعرفة لا يفعّل قانونًا أو كودًا.
 
 **مرجع التوثيق بتاريخ 6 نوفمبر 2026.** المستودع يحتوي مخططات وقواعد ومواصفات ولا يعني وجود برنامج منفذ أو مخطط SQL معتمد. جميع ملفات Markdown مشروحة بالعربية؛ تُترك أسماء الكلاسات والمفاتيح والـAPI وأكواد الاختبارات بالإنجليزية لتظل متوافقة مع البرمجة.
 
@@ -19,6 +19,7 @@
 | 10 | [استيراد Oracle](domain/ORACLE-IMPORT-AND-RECONCILIATION.md) | قراءة PDF وتطابق التقارير |
 | 11 | [حوكمة القانون](domain/LEGAL-AND-RULE-GOVERNANCE.md) | مصادر النصوص وسريانها |
 | 12 | [المتطلبات والاختبارات](specs/REQUIREMENTS-AND-ACCEPTANCE.md) | الوظائف والحالات المطلوبة |
+| 13 | [مواصفة دورة الملاحظة والرد والحسم ومتابعة الفروق (`D-029/P-017/D-030`)](specs/AUDIT-FINDING-RESPONSE-RESOLUTION-WORKFLOW-AR.md) | آلتا الحالات، قناتا الرد، العقود التصورية، وقبول `SPEC-029-001` |
 
 ## مخططات ERD وUML
 - [Blueprint — المخطط الشامل](architecture/BLUEPRINT-V1.md).
