@@ -14,10 +14,10 @@ const TO_RE = /^\[TO: GEMINI(?:\s*\|[^\]]*)?\]$/m;
  */
 function validateTrigger(event) {
   if (!event || event.action !== 'created' ||
-      event.repository !== 'AlexandriaDeveloper/PayrollReviewSystem' ||
-      event.issueNumber !== ISSUE_NUMBER || event.isPullRequest ||
-      event.actor !== OWNER || event.commenter !== OWNER ||
-      !Number.isSafeInteger(event.commentId) || event.commentId <= 0) {
+    event.repository !== 'AlexandriaDeveloper/PayrollReviewSystem' ||
+    event.issueNumber !== ISSUE_NUMBER || event.isPullRequest ||
+    event.actor !== OWNER || event.commenter !== OWNER ||
+    !Number.isSafeInteger(event.commentId) || event.commentId <= 0) {
     return { accepted: false, reason: 'UNAUTHORIZED_OR_UNRELATED' };
   }
   const body = typeof event.body === 'string' ? event.body : '';
@@ -98,27 +98,27 @@ const ERROR_CATEGORIES = Object.freeze({
 function classifyError({ exitCode, stdoutText, stderrText }) {
   const code = Number(exitCode);
   const combined = ((typeof stderrText === 'string' ? stderrText : '') + ' ' +
-                    (typeof stdoutText === 'string' ? stdoutText : '')).toLowerCase();
+    (typeof stdoutText === 'string' ? stdoutText : '')).toLowerCase();
 
   if (code === 55 || combined.includes('fataluntrustedworkspaceerror') || combined.includes('trusted directory')) {
     return ERROR_CATEGORIES.TRUST_FAILURE;
   }
 
   if (combined.includes('code: 41') || combined.includes('code": 41') ||
-      combined.includes('please set an auth method') || combined.includes('api key not valid') ||
-      combined.includes('unauthenticated') || combined.includes('permission_denied') ||
-      combined.includes('status 401') || combined.includes('status 403') ||
-      combined.includes('status": 401') || combined.includes('status": 403')) {
+    combined.includes('please set an auth method') || combined.includes('api key not valid') ||
+    combined.includes('unauthenticated') || combined.includes('permission_denied') ||
+    combined.includes('status 401') || combined.includes('status 403') ||
+    combined.includes('status": 401') || combined.includes('status": 403')) {
     return ERROR_CATEGORIES.AUTH_FAILURE;
   }
 
   if (combined.includes('resource_exhausted') || combined.includes('quota') ||
-      combined.includes('rate limit') || combined.includes('status 429') || combined.includes('status": 429')) {
+    combined.includes('rate limit') || combined.includes('status 429') || combined.includes('status": 429')) {
     return ERROR_CATEGORIES.QUOTA_FAILURE;
   }
 
   if (combined.includes('enotfound') || combined.includes('etimedout') ||
-      combined.includes('econnrefused') || combined.includes('fetch failed') || combined.includes('network error')) {
+    combined.includes('econnrefused') || combined.includes('fetch failed') || combined.includes('network error')) {
     return ERROR_CATEGORIES.NETWORK_FAILURE;
   }
 
