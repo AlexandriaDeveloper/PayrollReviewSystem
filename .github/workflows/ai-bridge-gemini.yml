@@ -130,6 +130,7 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_CLI_HOME: ${{ runner.temp }}/bridge-gemini-home
+          GEMINI_CLI_TRUST_WORKSPACE: "true"
         run: |
           # يتم وضع مفتاح Gemini في هذه الخطوة فقط، وليس في خطوات npm أو GitHub.
           mkdir -p .gemini "$GEMINI_CLI_HOME"
@@ -146,28 +147,41 @@ jobs:
           fi
           # أداة CLI مقيدة بلا أدوات؛ محتوى الرسالة يُمرّر كوسيط بيانات مقتبس، لا كأمر Shell.
           set +e
-          gemini --model gemini-2.5-flash --output-format json --prompt "$(cat bridge-prompt.txt)" > gemini-output.json 2> gemini-stderr.log
+          gemini --skip-trust --model gemini-2.5-flash --output-format json --prompt "$(cat bridge-prompt.txt)" > gemini-output.json 2> gemini-stderr.log
           exit_code=$?
           set -e
           export exit_code
           node <<'NODE'
           const fs = require('node:fs');
-          const code = Number(process.env.exit_code);
-          let outcome;
-          if (code !== 0) {
-            outcome = { status: 'ERROR', text: 'تعذر تشغيل Gemini CLI بنجاح (exit code: ' + code + '). راجع سجل Actions بعد تنقيح أي معلومات حساسة.' };
-          } else {
-            try {
-              const raw = JSON.parse(fs.readFileSync('gemini-output.json', 'utf8'));
-              const response = typeof raw.response === 'string' ? raw.response.trim() : '';
-              outcome = response
-                ? { status: 'ANSWERED', text: response.slice(0, 14000) }
-                : { status: 'ERROR', text: 'Gemini لم يرجع response نصيًا صالحًا؛ لا يُعد هذا تنفيذًا ناجحًا.' };
-            } catch {
-              outcome = { status: 'ERROR', text: 'تعذر تحليل رد Gemini بصيغة JSON؛ لا تُعلن نجاحًا.' };
-            }
-          }
+          const policy = require(process.env.GITHUB_WORKSPACE + '/.github/scripts/bridge-policy.cjs');
+          const exitCode = process.env.exit_code;
+          const stdoutText = fs.existsSync('gemini-output.json') ? fs.readFileSync('gemini-output.json', 'utf8') : '';
+          const stderrText = fs.existsSync('gemini-stderr.log') ? fs.readFileSync('gemini-stderr.log', 'utf8') : '';
+          const secretKeys = [process.env.GEMINI_API_KEY].filter(Boolean);
+
+          const outcome = policy.buildExecutionOutcome({
+            exitCode,
+            stdoutText,
+            stderrText,
+            secretKeys
+          });
+
           fs.writeFileSync('bridge-result.json', JSON.stringify(outcome));
+
+          // كتابة ملخص تشخيصي آمن في سجل Actions Step Summary دون أسرار
+          const summaryLines = [
+            '### ملخص تشغيل Gemini CLI',
+            `- الحالة: **${outcome.status}**`,
+            `- رمز الخروج (Exit Code): \`${exitCode}\``
+          ];
+          if (outcome.status !== 'ANSWERED') {
+            summaryLines.push('', '```text', outcome.text, '```');
+          }
+          if (process.env.GITHUB_STEP_SUMMARY) {
+            try {
+              fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summaryLines.join('\n') + '\n');
+            } catch {}
+          }
           NODE
       - name: Upload non-secret response for publisher
         if: always()
@@ -177,6 +191,21 @@ jobs:
           path: bridge-result.json
           if-no-files-found: warn
           retention-days: 1
+      - name: Check execution status
+        run: |
+          node -e "
+            const fs = require('node:fs');
+            if (!fs.existsSync('bridge-result.json')) {
+              console.error('الملف bridge-result.json غير موجود.');
+              process.exit(1);
+            }
+            const res = JSON.parse(fs.readFileSync('bridge-result.json', 'utf8'));
+            if (res.status !== 'ANSWERED') {
+              console.error('فشل تشغيل Gemini بنتيجة غير ناجحة:', res.status);
+              console.error(res.text);
+              process.exit(1);
+            }
+          "
 
   publish:
     name: Publish result to issue 41 without Gemini secrets
@@ -242,3 +271,17 @@ jobs:
             await github.rest.issues.createComment({
               ...context.repo, issue_number: 41, body: lines.join('\n')
             });
+      - name: Fail run if result was not answered
+        run: |
+          node -e "
+            const fs = require('node:fs');
+            if (!fs.existsSync('bridge-result.json')) {
+              console.error('لم يتم العثور على أثر النتيجة bridge-result.json.');
+              process.exit(1);
+            }
+            const res = JSON.parse(fs.readFileSync('bridge-result.json', 'utf8'));
+            if (res.status !== 'ANSWERED') {
+              console.error('اكتمل تشغيل الـ Bridge بحالة غير ناجحة:', res.status);
+              process.exit(1);
+            }
+          "

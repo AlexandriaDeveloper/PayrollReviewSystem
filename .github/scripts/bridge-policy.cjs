@@ -57,4 +57,107 @@ function alreadyProcessed(comments, triggerCommentId) {
     item.body.split('\n').some((line) => line.trim() === marker));
 }
 
-module.exports = { validateTrigger, findSource, alreadyProcessed };
+/**
+ * ينقح النصوص ورسائل الخطأ من أي أسرار أو مفاتيح أو بيانات حساسة قبل نشرها.
+ */
+function sanitizeErrorText(text, secrets = []) {
+  if (typeof text !== 'string') return '';
+  let sanitized = text;
+
+  // إزالة رموز التحكم وANSI escape codes
+  sanitized = sanitized.replace(/\x1B\[[0-9;]*[a-zA-Z]/g, '');
+
+  // تنقيح الأسرار المحددة في البيئة إن وجدت
+  if (Array.isArray(secrets)) {
+    for (const secret of secrets) {
+      if (typeof secret === 'string' && secret.length >= 6) {
+        sanitized = sanitized.split(secret).join('[REDACTED_SECRET]');
+      }
+    }
+  }
+
+  // تنقيح أنماط المفاتيح والرموز الحساسة الشائعة
+  sanitized = sanitized
+    .replace(/([?&]key=)[^&\s]+/gi, '$1[REDACTED_KEY]')
+    .replace(/(bearer\s+)[a-z0-9._-]+/gi, '$1[REDACTED_TOKEN]')
+    .replace(/AIza[0-9A-Za-z-_]{30,40}/g, '[REDACTED_API_KEY]')
+    .replace(/ghp_[a-zA-Z0-9]{36}/g, '[REDACTED_GITHUB_TOKEN]')
+    .replace(/github_pat_[a-zA-Z0-9_]{82}/g, '[REDACTED_GITHUB_TOKEN]');
+
+  // تقليم المسافات وتحديد الحد الأقصى للطول
+  sanitized = sanitized.trim();
+  if (sanitized.length > 800) {
+    sanitized = sanitized.slice(0, 800) + '... [تم تقليص الرسالة للسلامة والإيجاز]';
+  }
+  return sanitized;
+}
+
+/**
+ * يحلل مخرجات تشغيل Gemini CLI ويبني نتيجة محددة خالية من الأسرار.
+ */
+function buildExecutionOutcome({ exitCode, stdoutText, stderrText, secretKeys = [] }) {
+  const code = Number(exitCode);
+
+  let rawError = (typeof stderrText === 'string' ? stderrText.trim() : '');
+  let parsedJson = null;
+  if (typeof stdoutText === 'string' && stdoutText.trim()) {
+    try {
+      parsedJson = JSON.parse(stdoutText.trim());
+    } catch {
+      // ليس JSON صالحاً
+    }
+  }
+
+  if (parsedJson && parsedJson.error) {
+    const jsonErrMsg = parsedJson.error.message || JSON.stringify(parsedJson.error);
+    rawError = rawError ? (rawError + '\n' + jsonErrMsg) : jsonErrMsg;
+  }
+
+  const cleanError = sanitizeErrorText(rawError, secretKeys);
+
+  if (code !== 0) {
+    const reasonText = cleanError ? ` السبب: ${cleanError}` : '';
+    return {
+      status: 'ERROR',
+      text: `تعذر تشغيل Gemini CLI بنجاح (exit code: ${code}).${reasonText}`
+    };
+  }
+
+  if (!parsedJson) {
+    const reasonText = cleanError ? ` السبب: ${cleanError}` : '';
+    return {
+      status: 'ERROR',
+      text: `تعذر تحليل رد Gemini بصيغة JSON؛ لا تُعلن نجاحًا.${reasonText}`
+    };
+  }
+
+  if (parsedJson.error) {
+    const reasonText = cleanError ? ` السبب: ${cleanError}` : '';
+    return {
+      status: 'ERROR',
+      text: `أرجع Gemini خطأ داخليًا.${reasonText}`
+    };
+  }
+
+  const response = typeof parsedJson.response === 'string' ? parsedJson.response.trim() : '';
+  if (!response) {
+    return {
+      status: 'ERROR',
+      text: 'Gemini لم يرجع response نصيًا صالحًا؛ لا يُعد هذا تنفيذًا ناجحًا.'
+    };
+  }
+
+  return {
+    status: 'ANSWERED',
+    text: response.slice(0, 14000)
+  };
+}
+
+module.exports = {
+  validateTrigger,
+  findSource,
+  alreadyProcessed,
+  sanitizeErrorText,
+  buildExecutionOutcome
+};
+
