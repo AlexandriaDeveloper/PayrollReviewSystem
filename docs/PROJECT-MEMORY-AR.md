@@ -1,6 +1,6 @@
 # الذاكرة المعمارية لمشروع مراجعة المرتبات (PROJECT-MEMORY-AR)
 
-> **الحالة:** تم اعتماد ودمج الهيكل التقني الأولي لمشروع **PayrollReviewSystem** عبر [PR #49](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/pull/49) (`656097a2e9fe35c14dceb98f7daeb819355c0097`)، ثم دمج المسودة الأولية لدراسة **[Issue #50 — DB-COMPAT-001](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/50)** عبر [PR #51](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/pull/51) على `main` (`c995074e1046dc820cbeee390ae32d632fa6db7f`)، وتُستكمل تصحيحات المراجعة (`AI-0022`: `DBREV-01..DBREV-04`) بحالة `RESEARCH_ONLY / NO_PROVIDER_SELECTED / NO_SQL_OR_MIGRATIONS` (12 نوفمبر 2026).  
+> **الحالة:** تم اعتماد ودمج الهيكل التقني الأولي لمشروع **PayrollReviewSystem** عبر [PR #49](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/pull/49) (`656097a2e9fe35c14dceb98f7daeb819355c0097`)، ثم دمج دراسة المرحلة أ لـ **[Issue #50 — DB-COMPAT-001](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/50)** عبر [PR #51](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/pull/51) و[PR #52](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/pull/52) (`6ad3419c62850fcc7442a61da14726ded6f07963`). وتوقف فحص البيئة الأولي **[Issue #53 — DB-COMPAT-002](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/53)** عند `BLOCKED_ISOLATION / BLOCKED_TLS_BUILD`، وأُعدّت خطة المعمل المستقل **[Issue #54 — LAB-PLAN-001](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/54)** في [Draft PR #55](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/pull/55) للتوثيق فقط (`NO_PROVIDER_SELECTED / NO_TABLES / PHASE_B_NOT_RUN`) بتاريخ 13 نوفمبر 2026.  
 > **تنبيه الحوكمة:** هذا الملف هو المرجع الثابت لخريطة المشاريع والتبعيات وحالة قاعدة البيانات، **ويجب تحديثه في كل Pull Request لاحق يغير العلاقات أو يضيف مكونات برمجية**.
 
 ---
@@ -56,7 +56,7 @@
 | **الخادم (Backend)** | **.NET 10 LTS** | SDK `10.0.404` (`net10.0`) | إعداد `global.json` و `Directory.Build.props` بصرامة |
 | **الواجهة (Frontend)** | **Angular 22** | Angular `22.2.6`, TypeScript `6.0.2`, Node `24.15.0` | تطبيق خفيف معزول يدعم RTL واللغة العربية مع `strict` و `strictTemplates` |
 | **قاعدة البيانات (Database)** | **SQL Server 2014 (12.x)** | مستهدف في مراحل لاحقة | **قرار مالك صريح** في Issue #39 و #41 و #48 (#47)؛ لا تفترض SQL 2022 |
-| **الوصول للبيانات (ORM)** | **NOT_SELECTED / NOT_IMPLEMENTED** | غير محدد حتى اعتماد `ADR` | لا `EF Core` ولا `Dapper` ولا `SqlClient` في الإنتاج حاليًا؛ راجع دراسة التوافق [SQL2014-DATA-ACCESS-COMPATIBILITY-AR.md](research/SQL2014-DATA-ACCESS-COMPATIBILITY-AR.md) (`Issue #50` — `Phase B / TC01..TC11` بحالة `NOT_RUN`) |
+| **الوصول للبيانات (ORM)** | **NOT_SELECTED / NOT_IMPLEMENTED** | غير محدد حتى اعتماد `ADR` | لا `EF Core` ولا `Dapper` ولا `SqlClient` في الإنتاج حاليًا؛ راجع [دراسة التوافق](research/SQL2014-DATA-ACCESS-COMPATIBILITY-AR.md) و[خطة المعمل المستقل LAB-PLAN-001](research/SQL2014-ISOLATED-LAB-PLAN-AR.md) (`Issue #53` متوقف `BLOCKED_ISOLATION / BLOCKED_TLS_BUILD` و`TC01..TC11: NOT_RUN`) |
 
 ---
 
