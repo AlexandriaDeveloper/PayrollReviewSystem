@@ -1,0 +1,78 @@
+name: BOOT-001 — Technical Scaffold CI
+
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'client/**'
+      - 'PayrollReviewSystem.sln'
+      - 'PayrollReviewSystem.slnx'
+      - 'global.json'
+      - 'Directory.Build.props'
+      - '.github/workflows/boot-001-ci.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'client/**'
+      - 'PayrollReviewSystem.sln'
+      - 'PayrollReviewSystem.slnx'
+      - 'global.json'
+      - 'Directory.Build.props'
+      - '.github/workflows/boot-001-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: .NET 10 LTS Build & Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup .NET 10 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore PayrollReviewSystem.sln
+
+      - name: Build solution
+        run: dotnet build PayrollReviewSystem.sln --no-restore --configuration Release
+
+      - name: Run architecture & unit tests
+        run: dotnet test PayrollReviewSystem.sln --no-build --configuration Release --verbosity normal
+
+  frontend:
+    name: Angular 22 Client Build & Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24.15.x'
+
+      - name: Install client dependencies
+        working-directory: client
+        run: npm ci
+
+      - name: Build Angular application
+        working-directory: client
+        run: npm run build
+
+      - name: Run frontend unit tests
+        working-directory: client
+        run: npm test -- --watch=false
