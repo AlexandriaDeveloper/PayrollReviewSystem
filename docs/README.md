@@ -135,4 +135,4 @@
 [البرومبت والخطة العربية وUML ومخطط البيانات](planning/README.md) — مسودات مبنية على قاعدة العمل، مع مصفوفة قبول ودليل مراجعة مستقلة ونتائج فحص موثقة. لا تعد اعتمادًا لكود أو SQL.
 
 ## دراسات التوافق التقني والبيئي
-- [دراسة توافق الوصول للبيانات من .NET 10 مع SQL Server 2014 (DB-COMPAT-001)](research/SQL2014-DATA-ACCESS-COMPATIBILITY-AR.md) — دراسة `RESEARCH_ONLY / NO_PROVIDER_SELECTED` وفق `Issue #50` و`AI-0019` (`Phase B / TC01..TC08: NOT_RUN`).
+- [دراسة توافق الوصول للبيانات من .NET 10 مع SQL Server 2014 (DB-COMPAT-001)](research/SQL2014-DATA-ACCESS-COMPATIBILITY-AR.md) — دراسة `RESEARCH_ONLY / NO_PROVIDER_SELECTED` وفق `Issue #50` و`AI-0019` وتصحيحات المراجعة `AI-0022` (`Phase B / TC01..TC11: NOT_RUN`).
