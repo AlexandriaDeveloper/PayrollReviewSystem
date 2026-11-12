@@ -1,6 +1,6 @@
 # مخطط قاعدة البيانات المنطقي وقاموسه
 
-**الحالة: ERD منطقي مقترح v0.2 — لا DDL أو Migration أو اختيار محرك قاعدة بيانات.** يكمّل المخططات الحالية ويعيد استعمال مفاهيمها؛ اختلاف الاسم يحتاج توحيدًا عند اعتماد التصميم الفيزيائي، ولا يبرر إنشاء جدولين للمعنى نفسه.
+**الحالة: ERD منطقي مقترح v0.3 — تعديلات D-030 إلى D-046 وتبسيط التسجيل قيد المراجعة — لا DDL أو Migration أو اختيار محرك قاعدة بيانات.** يكمّل المخططات الحالية ويعيد استعمال مفاهيمها؛ اختلاف الاسم يحتاج توحيدًا عند اعتماد التصميم الفيزيائي، ولا يبرر إنشاء جدولين للمعنى نفسه.
 
 PK هوية داخلية مقترحة، وFK علاقة مرشحة. `optional` تعني أن غيابها مقصود في الحالة المحددة. العلاقات بين مجالات DDD تمثل مراجع وعقودًا؛ لا تمنح وحدة حق كتابة جداول وحدة أخرى، ولا تقرر كل FK فيزيائي. `uuid` و`decimal` أسماء أنواع توضيحية، وتُعتمد أنواع التخزين والدقة والقيود مع التقنية.
 
@@ -136,6 +136,37 @@ erDiagram
 
 الصرفية رأس يجمع مستفيدين؛ فرادة المرتب لا توضع عليه كأنه صف موظف. `MainRevisionRecipientLink` يوضح ربط الأجزاء أو المستندات المكملة المقبولة بنفس النسخة المنطقية، مع دليل يمنع اعتماد تكرار كامل كجزء مكمل. الهوية المصدرية غير المحسومة تحفظ في ERD-B؛ لا تُنشأ لها علاقة صرف معتمدة لمجرد نجاح الاستخراج.
 
+### D-045 — بطاقات علاقات وتفاصيل مدمجة: إسقاط عرض دون Schema جديد
+
+- تعرض صفحة الشخص رأسه الثابت وبطاقات تشير إلى مراجع `EMPLOYMENT_RELATIONSHIP` و`PAYEE_RELATIONSHIP` الحقيقية، ولوحة تفاصيل العلاقة المختارة أسفلها. لا تُنشأ جداول للبطاقات أو لوحة التفاصيل ولا تجمع علاقة صرف غير مرتبطة بعلاقة عمل لمجرد امتلاك الشخص لهما.
+- **تمييز الحدود:** السجلات التاريخية للترقيات والدرجات والأقسام تستعلم حسب `EmploymentId` الصحيح؛ البنود المالية والصرفيات حسب `PayeeId` الصحيح. العلاقة المختارة لا تعطي حق تعديل غيرها؛ صلاحية الوصول والتعديل تُفحص على كل علاقة.
+- **الصرفية ليست علاقة صرف جديدة تلقائيًا:** تعدد كشوف أو صرفيات `PAYROLL_DISBURSEMENT` لمستحق واحد لا يعني مضاعفة عدد `PAYEE_RELATIONSHIP` أو بطاقاتها. مثال اصطناعي: `P-A` له `E-A` و`PAY-A` و`PAY-B`، فتعرض ثلاث بطاقات علاقات، بينما قد تظهر عدة صرفيات تحت `PAY-A` نفسها.
+- هذا تعديل لطريقة **قراءة وعرض** الموجود بعد D-044، وليس قرارًا بإضافة FK أو DDL.
+
+### D-043 — دليل شامل لجميع الموظفين ومستحقي الصرف
+
+- نتائج شاشة «الموظفون» تصل إلى `PERSON` الذين لهم `EMPLOYMENT_RELATIONSHIP` أو `PAYEE_RELATIONSHIP` داخل نطاق الجهة وصلاحيات المستخدم. **قد توجد `PAYEE_RELATIONSHIP` دون `EMPLOYMENT_RELATIONSHIP`**؛ وتظل علاقة الاستحقاق قائمة بذاتها مع مرجع الشخص، ولا تُجبر على `EmploymentId` غير موجود.
+- `PAYEE_RELATIONSHIP.RelationshipKind` يصف نوع العلاقة، وتُعرض علاقات العمل/الاستحقاق التي تنطبق على الشخص مع تواريخها ومرجعها؛ **لا يُستنتج من `PAYEE` أنه موظف، ولا تُنشأ له `GRADE_HISTORY` أو عضوية مجموعة موظفين أو `MONTHLY_MAIN_SALARY_SLOT` تلقائيًا**.
+- **D-044 حسم العرض:** نتيجة بحث واحدة لكل `PERSON.PersonId` متحقق منه، مع عرض قائمة `EMPLOYMENT_RELATIONSHIP` و`PAYEE_RELATIONSHIP` *منفصلة* داخل الملف، بالصفّات والفترات المختلفة؛ **لا يُنشأ سجل `PERSON` جديد لكل علاقة** ولا تُجمع الوقائع المالية بين علاقات صرف مختلفة دون سياق. شخصان لهما الاسم نفسه ومعرّفان داخليان مختلفان يظهران نتيجتين ولا يُدمجان تخمينًا. العرض الواحد إسقاط استعلام وليس قيد SQL جديدًا على العلاقات.
+- مثال اصطناعي: `P-A` مع `E-A` و`PAY-A` يمثل علاقة توظيف وصرف؛ `P-B` مع `PAY-B` فقط يمثل مستحق مكافأة دون علاقة عمل. يظهر الاثنان في بحث «الموظفون»، بينما درجة `P-B` وقسمه «لا ينطبق»، وليس `0` ولا «مفقود». لا تُستحدث له صرفية رئيسية.
+- هذا توصيف **للاستعلام والعرض فوق كيانات ERD-A الحالية**، وليس إضافة جدول أو قيد SQL.
+
+### D-039 — إسقاط ملف الموظف التاريخي دون اختراع جدول شامل
+
+- `PERSON` يحتفظ بهوية الشخص، و`EMPLOYMENT_RELATIONSHIP` يميز علاقات عمله، و`PAYEE_RELATIONSHIP` علاقات الصرف. شاشة قائمة الموظفين تفتح ملف شخص/علاقة محددة بدل افتراض أن كل مستفيد مكافأة موظف بدرجة وظيفية.
+- تبويب الترقيات والدرجات يستعين بـ`GRADE_HISTORY` وبالوقائع الإدارية المؤرخة، وتبويب المال يعرض الوقائع المالية من `APPROVED_FINANCIAL_FACT` والبنود من `FinancialComponent` والأثر التاريخي للقاعدة/القرار، لا أحدث قيمة لجميع السنوات.
+- **تاريخ الأقسام والتنقلات:** يجب توفير علاقة انتماء لقسم/جهة بفترتي السريان وسبب الحركة ومرجع سندها؛ المخطط الحالي يثبت تاريخ الدرجة وعلاقة الجهة لكنه لا يثبت بعد شكل كيان تفاصيل العمل في الأقسام. يُراجع `StatusHistory` و`WorkArrangement` والهيكل التنظيمي قبل اقتراح جدول جديد.
+- **الأحكام القضائية:** يجب حفظ مرجع الحكم وتاريخه وتاريخ السريان/الأثر، والقرار أو واقعة التطبيق المرتبطة به، والعلاقة بين كل حكم والبند المالي وفترة تعديله؛ لا يُفترض أن `AdministrativeDecision` وحده يمثل الحكم القضائي. لا تُستنتج مبالغ تنفيذ أو فروق تلقائيًا من وجود حكم.
+- `EmployeeProfileReadModel` المقترح في UML قراءة مركبة من المراجع التاريخية مع اختيار «كما في تاريخ»، **وليس جدول بيانات مكررًا أو ترخيصًا لإنشاء أعمدة أو كيانات في SQL**. تراعي القراءة الصلاحيات والهوية والأصل ووقت تسجيل المعرفة.
+
+### D-040 — مساران لتحرير السجل وقرارات متعددة المستهدفين
+
+- **نفس سجل `Personnel` مصدر الحقيقة**: تسجيل قرار من صفحة الموظف أو من شاشة قرارات جماعية لا يولّد نسختين مختلفتين من أصل القرار. يرجع الاستعلام الشخصي إلى القرار وتاريخ أثره والمستند، مع **عضوية المستهدفين المؤكدة وقت التسجيل** وليس نتيجة فلتر ديناميكية يمكن أن تتغير لاحقًا.
+- **قرار جماعي:** `AdministrativeDecision` الموجود كمفهوم لا يُفترض أنه يحمل قائمة موظفين أصلًا. العلاقة المرجعية «قرار ← علاقات عمل مستهدفة» مع إمكانية أثر مختلف لكل علاقة تحتاج مراجعة نموذج البيانات الحالي، وقواعد الصلاحية والتاريخ والتكرار قبل اقتراح جدول ربط فعلي؛ لا نضيفه ضمن ERD-A كأنه مثبت.
+- **حركة قسم/ترقية:** كل صف أثر يخص علاقة العمل والدرجة أو القسم المناسبين وتاريخ نفاذه وأصل الأمر ووقت التسجيل. التحرير لا يحذف الدرجة أو القسم التاريخي السابق. عند تأخر القرار أو رجعيته لا يُعاد كتابة مصادر Oracle أو أي مراجعة معتمدة.
+- **بحث الغياب وفق D-041/D-042:** المصدر المعتمد لوقائع الغياب هو **شؤون العاملين** فقط، وتصل **مكاتبات فردية وكشوف مجمعة** معًا. نحتاج علاقة منطقية بين **المستند الوارد مرة واحدة** و**وقائع منفصلة تخص موظفين/علاقات عمل وفترات وأنواعًا**؛ كشف واحد قد ينتج عدة وقائع مسندة لموظفين مختلفين مع مرجع المستند نفسه. الهوية غير المحسومة تبقى للمراجعة ولا تُربط تخمينًا. يحتفظ كل حدث بتاريخه وتاريخ وصول المستند وتصحيحه، ولا يفترض التنفيذ المالي. **لا نحتاج جدول حضور وانصراف يومي ولا سجل بصمة**، ولا يعني عدم وجود واقعة غياب إثبات حضور. الصيغة المادية للوثائق وطريقة إدخالها أو استيرادها وأسماء الجداول المقترحة غير محسومة؛ يُراجع نموذج المستندات الموجود قبل إنشاء أي جدول جديد، ولا يصح احتساب جزاء أو خصم تلقائيًا.
+- **الخصوصية والاختبارات:** عند استهداف مجموعة كبيرة تُعرض قائمة المطابقين والمستبعدين قبل الحفظ، وسبب عدم قبول كل مستهدف؛ لكل فرد نسخة/تاريخ/سند وأثر محفوظ، وتُفحص الصلاحية في الخادم. كل الإجراءات تصميم تسجيل وتوثيق لا تنفيذ مالي.
+
 ### قيود ERD-A التي تتطلب تصميمًا فيزيائيًا
 
 - فرادة `AccountingUnitRef × EmploymentId × SalaryEntitlementMonth` مرشح يطابق النطاق المعتاد؛ تعدد التعيين والنقل بين وحدتين سؤال مالك قبل تعميمه. لا تستبدله بفرادة عالمية للشخص من نفسك.
@@ -245,8 +276,11 @@ erDiagram
   AUDIT_CASE ||--o{ REVIEW_REVISION : reviewedVersions
   AUDIT_CASE ||--o{ FINDING : hasFindings
   FINDING ||--o{ FINDING_REVISION : historicalFinding
+  FINDING ||--o{ FINDING_RESOLUTION_DELEGATION : overlappingActiveDelegationsAllowed
+  FINDING_RESOLUTION_DELEGATION ||--o| FINDING_RESOLUTION_DELEGATION_REVOCATION : cancellationEvent
+  FINDING_RESOLUTION_DELEGATION |o--o{ RESOLUTION_DECISION : delegatedDecisionBasis
   FINDING_REVISION ||--o{ REVIEW_MESSAGE : addressedMessages
-  FINDING_REVISION ||--o{ RESOLUTION_DECISION : reasonedDecisions
+  FINDING_REVISION ||--o{ RESOLUTION_DECISION : recordedHumanConclusions
   RESOLUTION_DECISION ||--o{ REVIEW_ADJUSTMENT : optionalOverlays
   REVIEW_REVISION ||--o{ REVIEW_SOURCE_LINK : frozenSourceRefs
   SOURCE_SNAPSHOT ||--o{ REVIEW_SOURCE_LINK : usedSource
@@ -278,7 +312,8 @@ erDiagram
   FINDING {
     uuid FindingId PK
     uuid CaseId FK
-    string FindingVersion
+    string RaisedByReviewerRef
+    string FindingVersion "concurrency guard reference"
   }
   FINDING_REVISION {
     uuid FindingRevisionId PK
@@ -290,11 +325,39 @@ erDiagram
     string EntitlementPeriod "optional"
     decimal ProposedDifference "optional"
   }
+  FINDING_RESOLUTION_DELEGATION {
+    uuid ResolutionDelegationId PK
+    uuid FindingId FK
+    string OriginalFindingVersion
+    string AssignedByRef
+    string AssignedByRoleRef
+    string AuthorizationScopeKind
+    string AuthorizationScopeRef
+    string AuthorizationScopeVersion
+    string AssignedReviewerRef
+    string ReasonKind
+    datetime AssignedAt
+  }
+  FINDING_RESOLUTION_DELEGATION_REVOCATION {
+    uuid RevocationId PK
+    uuid ResolutionDelegationId FK
+    string RevokedByRef
+    string RevokedByRoleRef
+    string RevocationScopeRef
+    string RevocationScopeVersion
+    datetime RevokedAt
+    string Reason
+  }
   REVIEW_MESSAGE {
     uuid MessageId PK
     uuid FindingRevisionId FK
     string PartyKind
+    string MessageKind
+    string OriginChannel
+    string AuthenticatedAuthorRef "optional for external"
+    string ClaimedExternalSenderRef "optional for in-app"
     string RecordedByRef
+    string ExternalCorrespondenceRef "optional for in-app"
     datetime OccurredAt "optional if unknown"
     datetime RecordedAt
     string EvidenceRef "optional"
@@ -304,6 +367,10 @@ erDiagram
     uuid DecisionId PK
     uuid FindingRevisionId FK
     uuid SupportingMessageId FK "optional"
+    string BasisFindingVersion
+    string DecidedByReviewerRef
+    datetime DecidedAt
+    uuid ResolutionDelegationId FK "optional for assigned reviewer"
     string DecisionKind
     string Reason
     string AuthorityEvidenceRef
@@ -367,6 +434,9 @@ erDiagram
 
 ### معنى النطاق واللقطة
 
+- **D-030 — مصدر الرد:** `OriginChannel` يميز `IN_APP` (كتبه مستخدم المركزية بحسابه الموثق، بعد فحص سلطته) من `EXTERNAL_RECORDED` (وصل خارج التطبيق وسجله مستخدم الوحدة المخوّل). `RecordedByRef` هو حساب مَن أدخل السجل بالفعل، و`AuthenticatedAuthorRef` يشير إلى كاتب الرد الموثق داخل النظام فقط، بينما `ClaimedExternalSenderRef` و`ExternalCorrespondenceRef` يحفظان بيانات جهة الرد ومرجع مراسلته كما وردا دون ادعاء تحقق حساب مركزي. لا تستنتج قوة الإثبات من القناة وحدها.
+- **قيود منطقية مقترحة:** في رد المركزية الداخلي لا يُقبل سجل بلا مرجع مستخدم موثق وصلاحية بالنطاق. في تسجيل الرد الخارجي لا يحل المرسل المنسوب محل `RecordedByRef` ولا يتحول إلى `AuthenticatedAuthorRef`. تظل متطلبات المرفق والتوقيع واعتماد التسجيل والصلاحيات التفصيلية قرارات مفتوحة؛ هذه ليست قيود DB منفذة.
+- **D-031/D-032 — سلطة حسم الملاحظة والتكليف:** `FINDING.RaisedByReviewerRef` يبقى مرجع صاحب الملاحظة الأصلي. `RESOLUTION_DECISION.DecidedByReviewerRef` و`DecidedAt` يثبتان الشخص الذي حسمها وتوقيته: في المسار المعتاد يطابق الحاسم صاحبها؛ وعند غيابه أو نقله يجب أن يشير `ResolutionDelegationId` إلى تكليف صريح صالح يحدد `AssignedReviewerRef` و`AssignedByRef` و`ReasonKind` ومرجع الملاحظة الأصلي ونسختها. تُفحص هوية المسؤول المخوّل عند التكليف، وهوية البديل ونطاقه والإصدار عند الحسم. سجلات التكليف والقرارات تاريخية لا تستبدل بعضها، ولا تُنقل ملكية أصل الملاحظة إلى البديل. لا يلزم توقيع رئيس المراجعة **لحسم الملاحظة ذاته**؛ اعتماد `REVIEW_REVISION` وإثبات التسوية مستقلان. **D-033 حدد صفتَي المُصدر**: رئيس المراجعة أو رئيس الوحدة الحسابية، كلٌّ حسب اختصاصه. تحفظ `AssignedByRoleRef` الصفة التي مارس بها `AssignedByRef` سلطة التكليف، ويُحفظ `AuthorizationScopeRef` مرجع النطاق الذي أجاز التكليف وقت إصداره؛ يتحقق التطبيق من عضوية الملاحظة في هذا النطاق دون افتراض أن صلاحيات الوظيفتين متطابقة. **D-034 حسم حدود الإصدار:** `REVIEW_HEAD` يصدر التكليف فقط إن كانت الملاحظة داخل `PayrollGroup` تخضع لإشرافه في `PayrollCycle` المعنية، ويرفض التكليف خارج مجموعاته وللصرفيات المنفصلة التي لا تندرج في نطاق مجموعة مراجعة رئيسية؛ لا تُمنح سلطة على صرفية منفصلة بسبب عضوية مستفيدها في مجموعته. `ACCOUNTING_UNIT_HEAD` يصدر التكليف لملاحظات جميع مجموعات المراجعة والصرفيات التابعة للوحدة التي يرأسها، ويرفض ملاحظات أي وحدة أخرى. لتجنب اختيار صلاحية من لحظة غير صحيحة، تحفظ مسودة `FINDING_RESOLUTION_DELEGATION` نوع النطاق `AuthorizationScopeKind` ومرجعه `AuthorizationScopeRef` وإصداره `AuthorizationScopeVersion`، ويُحسم الربط المنطقي بمراجع `PayrollCycle` و`PayrollGroup` و`ReviewerAssignment` والكيان الفعلي للصرفية مع مراعاة سجل الإسناد الزمني. لا يغيّر هذا ملكية الملاحظة أو اعتماد `REVIEW_REVISION`. **D-035 حسم سلطة الإلغاء:** رئيس المراجعة يلغي أي تكليف داخل مجموعاته حتى لو أصدره رئيس الوحدة، ورئيس الوحدة يلغي أي تكليف داخل وحدته حتى لو أصدره رئيس المراجعة؛ لا يصح تجاوز هذه الحدود. `FINDING_RESOLUTION_DELEGATION_REVOCATION` سجل إلغاء مستقل يحفظ رابط التكليف، وهوية مُصدِر الإلغاء وصفته ونطاقه ووقت الإلغاء وسببه. حالة التكليف تُستنتج من وجود سجل الإلغاء الصالح لا من محو أو تحديث سجل التكليف التاريخي؛ يلزم ضمان عدم قبول حسم جديد بواسطة بديل بتكليف ألغي بالفعل، بما يشمل سباق طلبَي الحسم والإلغاء، دون إبطال `RESOLUTION_DECISION` صحيحة سابقة بأثر رجعي. **D-036/D-037 — التسجيل لا التحكيم:** يجوز تعدد التكليفات والآراء المختلفة للملاحظة/نسختها؛ لا قيد فريد على `FINDING_RESOLUTION_DELEGATION.FindingId` يمنعها. `REVIEW_MESSAGE.MessageKind` يميز رد المركزية عن رأي المراجع أو إفادة بالإجراء، ويحتفظ `RecordedByRef` وهوية قائله/كاتبه ووقت التسجيل ومرجع الدليل. `RESOLUTION_DECISION` يوثق خلاصة أو قرارًا بشريًا إذا ورد، مع حفظ الإصدارات السابقة؛ لا يرفض البرنامج تسجيل رأي مغاير لأن هناك رأيًا سابقًا. **التصرف الفعلي يُذكر فقط بقدر مصدره:** يظهر البلاغ أو كشف الصرف بوصفه `Reported`، وتُثبت التسوية أو الدفع فقط بدليل مستقل من طبقة `ExecutionEvidence/AllocationVerification` القائمة في ERD-D. لا يُنشأ محرك للتحكيم أو اختيار الرأي المفضل، ولا يُستنتج التنفيذ من اتفاق المراجعين. المتبقي من التزامن هو حماية سلامة التدوين من الكتابة فوق سجل آخر، لا فرض قرار نهائي آلي. لا DDL أو اختبار تشغيل حقيقي.
 - `ScopeKind` يحدد مستفيدًا في صرفية أو صرفية كاملة أو مجموعة مراجعة. يجب وجود المرجع الموافق فقط، وانتماء المصادر والمستفيد والمجموعة للدورة والوحدة المصرح بهما. الحالة الجماعية لا تمنح مراجع مجموعة إذن الاطلاع على الجميع.
 - `ReviewSourceLink` و`ReviewCalculationLink` و`ReviewFindingLink` تجمع النسخ التي يشملها اعتماد بعينه. تربط قرارات الحسم بنسخة الملاحظة الصحيحة؛ لا تستخدم أحدث رد بالوقت فقط.
 - `ReviewCoverageItem` تحفظ مكونات النطاق التي فحصت والمعتمدة وغير المعتمدة والمستثناة وأسبابها، بما فيها البنود والمقاطع الزمنية. `ApprovalCoverageMode` يميز `WHOLE_SCOPE` عن `EXPLICIT_SUBSET` المسموح بسياسة مخولة. تدخل التغطية وأسبابها في البصمة وتظهر في التصدير، ولا يعرض مجموع أجزاء مقبولة باعتباره صافيًا معتمدًا كاملًا.
@@ -458,6 +528,109 @@ erDiagram
 4. المقارنة على المستفيد والعملة والفترة والغرض والبند وسياسة الدليل. اختلاف البند يحتاج سند توافق للفترة والنوع، ولا يحله تطابق المبلغ أو باب الصرف.
 5. عكس تخصيص يربط بالأصل والسبب والجهة المخولة ويمنع عكس أكثر مما خصص. تبقى عمليات العكس تاريخية، ولا تحذف اعتمادًا أو دليلًا. المبالغ السالبة الأصلية لا تُحذف أو تُحوّل إلى موجبة أثناء القراءة.
 6. يجب أن تشير `AllocationVerification` إلى تخصيص صالح ودليل مناسب لنوع التنفيذ، مع نسخة سياسة وهوية المعتمد. القبول بتأكيد تسوية يتبع سياسة الجهة؛ لا يفرض دليل بنك واحدًا على كل نوع عمل دون قرار.
+
+## ERD-E — الشجرة الحكومية ودليل بنود المرتبات والربط (D-038)
+
+```mermaid
+erDiagram
+  GOVERNMENT_ACCOUNT_NODE o|--o{ GOVERNMENT_ACCOUNT_NODE : parentChild
+  GOVERNMENT_ACCOUNT_NODE ||--o{ FINANCIAL_COMPONENT_ACCOUNT_MAPPING : mappedAccount
+  FINANCIAL_COMPONENT ||--o{ FINANCIAL_COMPONENT_ACCOUNT_MAPPING : mappedComponent
+  GOVERNMENT_ACCOUNT_NODE {
+    string GovernmentAccountNodeId PK
+    string OfficialCode
+    string OfficialName
+    string ParentNodeId FK "optional"
+    date ValidFrom "optional"
+    date ValidTo "optional"
+  }
+  FINANCIAL_COMPONENT {
+    string FinancialComponentId PK
+    string ComponentCode
+    string ComponentName
+    string ComponentKind
+  }
+  FINANCIAL_COMPONENT_ACCOUNT_MAPPING {
+    string MappingId PK
+    string FinancialComponentId FK
+    string GovernmentAccountNodeId FK
+    date ValidFrom "optional"
+    date ValidTo "optional"
+    string EvidenceRef "optional"
+    string ApprovalStatus
+  }
+```
+
+هذا رسم منطقي **غير منفذ وغير معتمد كجدول جديد**. `FINANCIAL_COMPONENT` يعيد استعمال مفهوم `FinancialComponent` الموجود في المواصفات؛ `GOVERNMENT_ACCOUNT_NODE` و`FINANCIAL_COMPONENT_ACCOUNT_MAPPING` اقتراحان مبدئيان لحفظ تصنيف حكومي مستقل عن بنود المرتبات وروابطها. لا يقرر هذا الرسم عدد الروابط المسموح لكل بند أو نطاق استعمالها (جهة/فترة/نوع صرف) ولا تفاصيل مستويات دليل الحسابات الرسمي؛ تُثبت من مصدر محاسبي معتمد. `SourceLine` أو كود Oracle الخام يظل سجل مصدر مستقلًا، وقد يلزم جدول ربط له بالبند طبقًا لدليل البيانات القائم، **لا يُدمج آليًا مع عقدة الحساب**. مثال `PAY-ITEM-01` ⇄ `GOV-ACC-01` رموز تجريبية وليست أكوادًا حكومية حقيقية. عرض الرابط لا يعني صلاحية إنشاء أو تنفيذ قيد محاسبي.
+
+## ERD-F — قواعد مطابقة مسميات Oracle مع البند والصندوق (D-046)
+
+```mermaid
+erDiagram
+  SOURCE_FINANCIAL_OCCURRENCE ||--o{ COMPONENT_MAPPING_DECISION : resolvedAs
+  FINANCIAL_COMPONENT ||--o{ SOURCE_LABEL_MAPPING_RULE : mappedFromLabels
+  DEDUCTION_FUND o|--o{ SOURCE_LABEL_MAPPING_RULE : identifiedByAlias
+  SOURCE_LABEL_MAPPING_RULE o|--o{ COMPONENT_MAPPING_DECISION : usedWhenDeciding
+  DEDUCTION_FUND o|--o{ COMPONENT_MAPPING_DECISION : identifiedFund
+  FINANCIAL_COMPONENT o|--o{ COMPONENT_MAPPING_DECISION : identifiedComponent
+  FINANCIAL_COMPONENT ||--o{ FINANCIAL_COMPONENT_ACCOUNT_MAPPING : linkedToAccount
+  GOVERNMENT_ACCOUNT_NODE ||--o{ FINANCIAL_COMPONENT_ACCOUNT_MAPPING : targetAccount
+  SOURCE_FINANCIAL_OCCURRENCE {
+    string SourceLineId PK
+    string RawCode
+    string RawLabel
+    decimal ParsedAmount
+    string FinancialSide
+    string ReportPeriod
+  }
+  DEDUCTION_FUND {
+    string FundId PK
+    string CanonicalName
+    string OfficialFundRef "optional"
+  }
+  SOURCE_LABEL_MAPPING_RULE {
+    string RuleId PK
+    string SourceLabelPattern
+    string SourceCode "optional"
+    string FinancialSide
+    string FinancialComponentId FK
+    string FundId FK "optional"
+    date ValidFrom
+    date ValidTo "optional"
+    string ContextScope "optional"
+    int MappingVersion
+    string ApprovalStatus
+  }
+  COMPONENT_MAPPING_DECISION {
+    string MappingDecisionId PK
+    string SourceLineId FK
+    string ComponentRef FK "optional"
+    string FundRef FK "optional"
+    string UsedRuleRef FK "optional"
+    string DecisionStatus
+    string EvidenceRef
+  }
+  FINANCIAL_COMPONENT {
+    string FinancialComponentId PK
+    string ComponentName
+  }
+  FINANCIAL_COMPONENT_ACCOUNT_MAPPING {
+    string MappingId PK
+    string FinancialComponentId FK
+    string GovernmentAccountNodeId FK
+  }
+  GOVERNMENT_ACCOUNT_NODE {
+    string GovernmentAccountNodeId PK
+    string OfficialName
+    string OfficialCode
+  }
+```
+
+**رسم مفاهيمي إضافي، غير منفذ ولا ينسخ الجداول السابقة:** `SourceFinancialOccurrence` و`ComponentMappingDecision` الموجودان في ERD-B يعاد **إظهارهما في الرسم لغرض الربط** فقط؛ وكذلك `FinancialComponent` و`FinancialComponentAccountMapping` و`GovernmentAccountNode` من ERD-E. الحقول الإضافية `FundRef` و`UsedRuleRef` في `ComponentMappingDecision` **مقترحات تحتاج توحيدًا مع ملكية مجال التدقيق قبل SQL** وليست أعمدة موجودة. `DeductionFund` و`SourceLabelMappingRule` مفهومان جديدان مرشحان لحل هوية الصندوق ونسخ مرادفات Oracle، لا دليلًا على وجود كيانات تنفيذية.
+
+**الهوية والمحاسبة:** سطر المصدر له أصل ومبلغ واسم كما ورد بغض النظر عن الربط؛ قد يرتبط استقطاعان لصندوقين مختلفين بالبند الداخلي نفسه أو بحساب حكومي واحد بعد اعتماد الخرائط. **إجمالي الحساب لا يستبدل تجميع الصندوق؛** أي عرض يجب أن يدعم `FundId` و`SourceLineId` والشهر والمستفيد وعلاقة الصرف والنسخة. لا يجوز إعادة استخدام الكود أو النص كقيد فرادة للسطر، ولا اعتماد اسم جديد بأثر رجعي على Snapshot معتمدة دون قرار إعادة مراجعة.
+
+**حدود أساسية:** عند تشابه الاسم بين أكثر من صندوق أو غياب كود واضح، يخرج السطر `MappingAmbiguous` أو `Unmapped` بدل تخمين هوية صندوق؛ لا يضم للصندوق «أخرى» تلقائيًا. يجب ضبط قواعد عدم تضارب المرادفات حسب السياق والفترة ونوع الجانب، وعدم مضاعفة مبلغ سطر في الإجماليات عند وجود أكثر من ترشيح. **سطر واحد قد يمثل تجميعًا أصليًا**، ولا يجوز توزيعه على صناديق متعددة افتراضيًا؛ يستلزم ذلك أدلة توزيع ومراجعة مستقلة إذا كان المصدر لا يفصلها. يتضح نوع البند المالي والسياسة الخاصة بكل صندوق من مصادره المعتمدة، لا من مجرد اسم الشجرة.
 
 ## مرجع الحساب والتاريخ خارج الرسوم التفصيلية
 
