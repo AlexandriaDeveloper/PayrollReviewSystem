@@ -136,3 +136,4 @@
 
 ## دراسات التوافق التقني والبيئي
 - [دراسة توافق الوصول للبيانات من .NET 10 مع SQL Server 2014 (DB-COMPAT-001)](research/SQL2014-DATA-ACCESS-COMPATIBILITY-AR.md) — دراسة `RESEARCH_ONLY / NO_PROVIDER_SELECTED` وفق `Issue #50` و`AI-0019` وتصحيحات المراجعة `AI-0022` (`Phase B / TC01..TC11: NOT_RUN`).
+- [خطة تجهيز معمل VM مستقل لاختبار SQL Server 2014 (LAB-PLAN-001)](research/SQL2014-ISOLATED-LAB-PLAN-AR.md) — خطة توثيقية فقط (`PLAN_ONLY / LAB_NOT_CREATED`) وفق `Issue #54` و`AI-0030` لمعالجة `BLOCKED_ISOLATION` و`BLOCKED_TLS_BUILD` قبل بدء `Phase B`.
