@@ -1,6 +1,6 @@
 # الذاكرة المعمارية لمشروع مراجعة المرتبات (PROJECT-MEMORY-AR)
 
-> **الحالة:** مقترح تنفيذي قيد المراجعة في [Draft PR #49](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/pull/49) للهيكل التقني الأولي لمشروع **PayrollReviewSystem** بموجب المهمة التنفيذية المعتمدة **[Issue #48 — BOOT-001](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/48)** (ومرجع التكليف الأول المرتبط **[Issue #47](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/47)**) — لا يُعد معتمدًا نهائيًا إلا بعد مراجعة ChatGPT ودمج المالك (12 نوفمبر 2026).  
+> **الحالة:** تم اعتماد ودمج الهيكل التقني الأولي لمشروع **PayrollReviewSystem** عبر [PR #49](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/pull/49) على `main` (`656097a2e9fe35c14dceb98f7daeb819355c0097`) بموجب **[Issue #48 — BOOT-001](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/48)** (ومرجع **[Issue #47](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/47)**). وتجري حاليًا دراسة التوافق **[Issue #50 — DB-COMPAT-001](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/50)** للوصول إلى `SQL Server 2014 (12.x)` بحالة `RESEARCH_ONLY / NO_PROVIDER_SELECTED / NO_SQL_OR_MIGRATIONS` (12 نوفمبر 2026).  
 > **تنبيه الحوكمة:** هذا الملف هو المرجع الثابت لخريطة المشاريع والتبعيات وحالة قاعدة البيانات، **ويجب تحديثه في كل Pull Request لاحق يغير العلاقات أو يضيف مكونات برمجية**.
 
 ---
@@ -56,7 +56,7 @@
 | **الخادم (Backend)** | **.NET 10 LTS** | SDK `10.0.404` (`net10.0`) | إعداد `global.json` و `Directory.Build.props` بصرامة |
 | **الواجهة (Frontend)** | **Angular 22** | Angular `22.2.6`, TypeScript `6.0.2`, Node `24.15.0` | تطبيق خفيف معزول يدعم RTL واللغة العربية مع `strict` و `strictTemplates` |
 | **قاعدة البيانات (Database)** | **SQL Server 2014 (12.x)** | مستهدف في مراحل لاحقة | **قرار مالك صريح** في Issue #39 و #41 و #48 (#47)؛ لا تفترض SQL 2022 |
-| **الوصول للبيانات (ORM)** | **NOT_SELECTED / NOT_IMPLEMENTED** | غير محدد في `BOOT-001` | لا `EF Core` ولا `Dapper` حاليًا؛ توافق SQL 2014 يتطلب اختبارًا منفصلًا لاحقًا |
+| **الوصول للبيانات (ORM)** | **NOT_SELECTED / NOT_IMPLEMENTED** | غير محدد حتى اعتماد `ADR` | لا `EF Core` ولا `Dapper` ولا `SqlClient` في الإنتاج حاليًا؛ راجع دراسة التوافق الأولية [SQL2014-DATA-ACCESS-COMPATIBILITY-AR.md](research/SQL2014-DATA-ACCESS-COMPATIBILITY-AR.md) (`Issue #50` — `Phase B` بحالة `NOT_RUN`) |
 
 ---
 
