@@ -2,9 +2,9 @@
 
 ```text
 STATUS: OWNER_AUTHORIZED_PLAN_ONLY / LAB_NOT_CREATED / DB_NOT_MODIFIED / PHASE_B_NOT_RUN / NO_PROVIDER_SELECTED / NO_TABLES
-TASK: Issue #54 (LAB-PLAN-001) | RELATED: Issue #53 (DB-COMPAT-002), Issue #50 (DB-COMPAT-001), Issue #41 (AI-0028..AI-0035)
+TASK: Issue #54 (LAB-PLAN-001) | RELATED: Issue #56 (OWNER-PRIORITY-001), Issue #53 (DB-COMPAT-002), Issue #50 (DB-COMPAT-001), Issue #41 (AI-0028..AI-0038)
 MAIN HEAD VERIFIED: 6ad3419c62850fcc7442a61da14726ded6f07963
-EXECUTION SCOPE: وثيقة خطة وتصميم بيئة معملية فقط (محدّثة وفق مراجعة PR #55 / AI-0034) — ممنوع أي تثبيت أو تنزيل ISO أو إنشاء VM أو تعديل SQL Server أو إجراء اختبارات اتصال في هذه المرحلة
+EXECUTION SCOPE: وثيقة خطة وتصميم بيئة معملية فقط (محدّثة وفق مراجعة PR #55 / AI-0034 وAI-0037 وقرار الترتيب Issue #56) — ممنوع أي تثبيت أو تنزيل ISO أو إنشاء VM أو تعديل SQL Server أو إجراء اختبارات اتصال أو تتبع شبكي في هذه المرحلة
 ```
 
 > **تنبيه حوكمة إلزامي:** هذه الوثيقة **خطة تنفيذية توثيقية فقط** بموجب تكليف المالك في [Issue #54](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/54) ورسالة `AI-0030`. لا يترتب عليها أي تثبيت لبرامج الافتراضية أو أنظمة التشغيل أو `SQL Server`، ولا أي مساس بالمثيل المحلي المشترك `MSSQLSERVER` ذي الـ13 قاعدة، وتظل جميع اختبارات `Phase B (TC01..TC11)` بحالة **`NOT_RUN`**، ومزود البيانات بحالة **`NOT_SELECTED`**.
@@ -119,7 +119,8 @@ EXECUTION SCOPE: وثيقة خطة وتصميم بيئة معملية فقط (م
 - **إعداد شهادة الاختبار وسلسلة الثقة (`Trust Chain`):**
   - إنشاء شهادة خادم للـLab صادر عن `Internal Lab CA` مؤقتة (مُضمَّن فيها الاسم المرجعي/SAN الصحيح للـLab)، مع استيراد جذر `Lab CA` إلى مخزن الثقة في المضيف للمعمل **فقط** (أو التحقق الصريح عبر `ServerCertificate` في `Microsoft.Data.SqlClient`).
   - اختبار الاتصال في PoC بالوضع الآمن **`Encrypt=Mandatory`** (`true`) **دون** وضع `TrustServerCertificate=True` و**دون** `Encrypt=False` كحل التفافي.
-  - إذا تعذر تحقق `SP3` أو ثقة الشهادة، تُسجل الحالة **`BLOCKED_TLS`** ولا يُخفض مستوى التشفير.
+  - **إثبات إصدار البروتوكول مستقبلًا (`TLS 1.2` Proof):** ظهور `encrypt_option = TRUE` في `sys.dm_exec_connections` يثبت وجود تشفير للاتصال فقط، لكنه **لا يثبت وحده** أن الإصدار المتفاوض عليه هو `TLS 1.2`. عند تنفيذ `P2` أو `TC01` مستقبلًا بعد تفويض مستقل، يجب تقديم دليل مستقل لإصدار البروتوكول المتفاوض عليه (مثل سجل `Schannel` موثوق على الضيف/المضيف، أو `trace` تشخيصي لطبقة TLS، أو التقاط حزم شبكة المعمل المعزولة مع طمس البيانات الحساسة).
+  - إذا تعذر إثبات إصدار `TLS 1.2` بدليل مستقل فلا يُحتسب الاختبار `PASS` بل تُسجل الحالة **`BLOCKED_TLS_VERIFICATION`**؛ وإذا تعذر تحقق `SP3` أو ثقة الشهادة تُسجل الحالة **`BLOCKED_TLS`** ولا يُخفض مستوى التشفير مطلقًا.
 
 ---
 
@@ -129,7 +130,7 @@ EXECUTION SCOPE: وثيقة خطة وتصميم بيئة معملية فقط (م
 
 | المعرّف | الشرط المسبق (`Precondition`) | إجراء الاختبار المخطط (`TC` Verification) | معيار القبول (`PASS Criteria`) | نوع الدليل المحجوب البيانات | الحالة الآن |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **`TC01`** | اجتياز `P2` + إذن `P3` | فتح اتصال آمن (`Encrypt=Mandatory` وشهادة Lab CA موثوقة) وتنفيذ استعلام هوية الخادم: `SELECT 1 AS Ok, @@VERSION AS VersionText, SERVERPROPERTY('ProductVersion') AS ProductVersion, SERVERPROPERTY('ProductLevel') AS ProductLevel;` ثم استعلام مستقل لمستوى توافق القاعدة الاصطناعية من `sys.databases`: `SELECT name, compatibility_level FROM sys.databases WHERE name = N'PayrollReview_CompatLab_Synthetic';` | نجاح الاتصال بـ `TLS 1.2` وقراءة `ProductVersion` (`12.0.6xxx`) و`ProductLevel = N'SP3'` عبر `SERVERPROPERTY`، وقراءة `compatibility_level = 120` للقاعدة الاصطناعية من `sys.databases` دون `TrustServerCertificate=True` | سجل ناتج `ProductVersion` و`ProductLevel` و`compatibility_level` و`encrypt_option = TRUE` مع حجب اسم الجهاز والـIP | **`NOT_RUN`** |
+| **`TC01`** | اجتياز `P2` + إذن `P3` | فتح اتصال آمن (`Encrypt=Mandatory` وشهادة Lab CA موثوقة) وتنفيذ استعلام هوية الخادم: `SELECT 1 AS Ok, @@VERSION AS VersionText, SERVERPROPERTY('ProductVersion') AS ProductVersion, SERVERPROPERTY('ProductLevel') AS ProductLevel;` ثم استعلام مستقل لمستوى توافق القاعدة الاصطناعية من `sys.databases`: `SELECT name, compatibility_level FROM sys.databases WHERE name = N'PayrollReview_CompatLab_Synthetic';`، مع جمع دليل مستقل لإصدار TLS المتفاوض عليه (`Schannel` أو `trace` تشخيصي أو التقاط شبكة المعمل المعزولة مع طمس البيانات) | نجاح الاتصال بـ `TLS 1.2` مثبتًا بدليل بروتوكول مستقل (لا يكفي `encrypt_option = TRUE` وحده؛ وعند عدم إثبات الإصدار تُسجل **`BLOCKED_TLS_VERIFICATION`** لا `PASS`)، وقراءة `ProductVersion` (`12.0.6xxx`) و`ProductLevel = N'SP3'` عبر `SERVERPROPERTY`، وقراءة `compatibility_level = 120` للقاعدة الاصطناعية من `sys.databases` دون `TrustServerCertificate=True` | سجل ناتج `ProductVersion` و`ProductLevel` و`compatibility_level` و`encrypt_option = TRUE` + الدليل المستقل لإصدار `TLS 1.2` مع حجب اسم الجهاز والـIP وأي بيانات حساسة | **`NOT_RUN`** |
 | **`TC02`** | نجاح `TC01` | استعلام `SELECT/INSERT` اصطناعي عبر `SqlParameter` صريح + تمرير نص محاولة حقن (`' OR 1=1 --`) | معاملة النص كقيمة بيانات حرفية آمنة دون تنفيذ SQL محقون | نص الكود الاختباري المجهّز + تأكيد عدد الصفوف المتأثرة = 1 أو 0 | **`NOT_RUN`** |
 | **`TC03`** | نجاح `TC01` ووجود جدول اصطناعي | إدراج وقراءة `DECIMAL(18,2)` و`DECIMAL(18,4)` (موجب، سالب، صفر، و`NULL/DBNull`) | تطابق القيم تمامًا في `decimal` دون تحويل `double`، وتمييز `NULL` عن `0.00m` | مقارنة القيم المدخلة والمستخرجة بالنوع والدقة (`decimal`) | **`NOT_RUN`** |
 | **`TC04`** | نجاح `TC01` | إدراج واسترجاع نصوص عربية `NVARCHAR` (تشكيل، مسافات، أرقام عربية/هندية) | مطابقة ثنائية (`ordinal equality`) دون تحول إلى `????` | سجل مقارنة الطول والبايتات لنص اصطناعي غير حساس | **`NOT_RUN`** |
@@ -165,7 +166,7 @@ EXECUTION SCOPE: وثيقة خطة وتصميم بيئة معملية فقط (م
 | :--- | :--- | :--- | :--- |
 | **`P0`** | إذن المالك -> فحص من Gemini | فحص قراءة فقط لإمكانيات جهاز المالك وتوافر التراخيص ووسائط ISO | تعارض موارد المضيف أو انعدام تراخيص صالحة لـ `Guest OS` / `SQL 2014` |
 | **`P1`** | موافقة المالك المستقلة -> تجهيز الـVM | إنشاء `VM` معزولة، شبكة `Host-Only`، تثبيت `Guest OS` + `SQL 2014 SP3` + `Lab CA`، وأخذ **`Snapshot 0`** نظيف | أي استخدام أو مساس بـ`MSSQLSERVER` الحالي أو كسر عزل الشبكة |
-| **`P2`** | Gemini -> مراجعة ChatGPT | التحقق بقراءة فقط من `0` قواعد مستخدمين، رقم البناء `SP3`، وتفاوض `TLS 1.2` عبر TCP | فشل التشفير الآمن -> **`BLOCKED_TLS`**؛ أي تسرب شبكي -> **`BLOCKED_ISOLATION`** |
+| **`P2`** | Gemini -> مراجعة ChatGPT | التحقق بقراءة فقط من `0` قواعد مستخدمين، رقم البناء `SP3`، وتفاوض `TLS 1.2` عبر TCP بدليل بروتوكول مستقل (`Schannel` أو `trace` تشخيصي أو التقاط شبكة معملية مع طمس البيانات) | فشل التشفير الآمن -> **`BLOCKED_TLS`**؛ عدم ثبوت إصدار `TLS 1.2` بدليل مستقل -> **`BLOCKED_TLS_VERIFICATION`** (لا `PASS`)؛ أي تسرب شبكي -> **`BLOCKED_ISOLATION`** |
 | **`P3`** | موافقة المالك المستقلة -> إنشاء قاعدة الاختبار | إنشاء قاعدة واحدة فقط: `PayrollReview_CompatLab_Synthetic` ببيانات اصطناعية وحساب معمل مقيد | غياب الموافقة الصريحة على الكتابة (`BLOCKED_OWNER_PERMISSION`) |
 | **`P4`** | Gemini | تشغيل `PoC` خارج `src/**` لـ`TC01..TC11` وتوثيق الأدلة المحجوبة البيانات | استخدام أي بيانات حقيقية أو خفض إعدادات التشفير |
 | **`P5`** | مراجعة ChatGPT -> قرار المالك | رفع Draft PR توثيقي بنتائج `Phase B` الفعلية، ثم فتح `ADR` مستقل لاختيار المزود | **لا دمج لكود أو إضافة NuGet إنتاجية أو إنشاء Schema قبل اعتماد ADR مستقل وبوابات التصميم** |
@@ -177,7 +178,7 @@ EXECUTION SCOPE: وثيقة خطة وتصميم بيئة معملية فقط (م
 1. **نقاط الاستعادة (`VM Snapshots`):** أخذ لقطة نظيفة للـVM (`Snapshot-Clean-SP3-PreLabDB`) بعد `P2` وقبل `P3`، بحيث يمكن إعادة المعمل إلى حالة الصفر النظيفة فورًا بعد `P4` أو عند أي خلل.
 2. **محفزات التوقف الفوري (`Mandatory STOP`):**
    - الاشتباه في اتصال أو توجيه شبكي يصل لقاعدة بيانات الجامعة أو `MSSQLSERVER` ذي الـ13 قاعدة.
-   - عدم إمكانية تحقيق `TLS 1.2` + ثقة الشهادة عبر `SP3` (`BLOCKED_TLS`).
+   - عدم إمكانية تحقيق `TLS 1.2` + ثقة الشهادة عبر `SP3` (`BLOCKED_TLS`) أو تعذر إثبات إصدار `TLS 1.2` بدليل بروتوكول مستقل (`BLOCKED_TLS_VERIFICATION`).
    - محاولة استخدام بيانات حقيقية أو كلمات سر في أي ملف متتبع بـ Git.
    - غياب إذن المالك المستقل عند أي انتقال بين `P0..P5`.
 3. **ضوابط حماية الأسرار وطمس الأدلة:**
