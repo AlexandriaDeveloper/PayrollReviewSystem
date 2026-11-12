@@ -1,6 +1,6 @@
 # فهرس التوثيق العربي وحالة اعتماد المعلومات
 
-> **نقطة البدء الحالية:** [قاعدة العمل الموحدة](WORKING-BASELINE-AR.md)، [فهرس 43 مذكرة دراسة](research/README.md)، [مراجعة المستودع](reviews/2026-11-11-repository-review-ar.md)، و[حالة EGM المحدثة](egm/REVIEW-STATUS.md). اعتماد نقل المعرفة لا يفعّل قانونًا أو كودًا.
+> **نقطة البدء الحالية:** [قاعدة العمل الموحدة](WORKING-BASELINE-AR.md)، [فهرس 43 مذكرة دراسة](research/README.md)، [مراجعة المستودع](reviews/2026-11-11-repository-review-ar.md)، [حالة EGM المحدثة](egm/REVIEW-STATUS.md)، و[سجل تحكيم ملاحظات EGM (`EGM-ADJ-001`)](egm/EGM-ADJUDICATION-REGISTER-AR.md). اعتماد نقل المعرفة لا يفعّل قانونًا أو كودًا.
 
 **مرجع التوثيق بتاريخ 6 نوفمبر 2026.** المستودع يحتوي مخططات وقواعد ومواصفات ولا يعني وجود برنامج منفذ أو مخطط SQL معتمد. جميع ملفات Markdown مشروحة بالعربية؛ تُترك أسماء الكلاسات والمفاتيح والـAPI وأكواد الاختبارات بالإنجليزية لتظل متوافقة مع البرمجة.
 
@@ -98,7 +98,9 @@
 - [ERD الاستيراد والمجموعات](architecture/ERD-IMPORT-AND-AUDIT.md)، [UML الكلاسات](architecture/UML-CLASSES.md)، [UML سير العمل](architecture/UML-WORKFLOWS.md). الصرفيات المنفصلة ليست خاضعة لقيد `MainSalarySlot`.
 
 ## بوابة المراجعة المستقلة EGM / Goldfish
-اعتمد المالك مسار مراجعة معماري مستقل **قبل تنفيذ التغييرات الجوهرية**: ChatGPT يصمم، وGoldfish يراجع في سياق جديد، والمالك يحسم ويعتمد، وGemini ينفذ. **الحالة الآن: `NOT_RUN`؛ تم تجهيز الملفات ولم تُشغّل مراجعة Goldfish بعد.**
+اعتمد المالك مسار مراجعة معماري مستقل **قبل تنفيذ التغييرات الجوهرية**: ChatGPT يصمم، وGoldfish يراجع في سياق جديد، والمالك يحسم ويعتمد، وGemini ينفذ. **الحالة الآن للتقارير الستة الموجودة على القرص: `REPORTS_PRESENT_INDEPENDENCE_UNVERIFIED`** (توجد تقارير على القرص لكن استقلال تشغيلها غير متحقق بأدلة تشغيل مستقلة؛ بينما تبقى المراجعة الموثقة تاريخيًا في [Issue #27](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/27) ومراجعة `ADR-003/004` في [Issue #30](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/30) بحالة `NOT_RUN` حتى توفر دليل تشغيل مستقل).
+- [حالة تقارير EGM وقيود إثبات الاستقلال](egm/REVIEW-STATUS.md)
+- [سجل تحكيم ملاحظات EGM وتوحيد تتبعها (`EGM-ADJ-001`)](egm/EGM-ADJUDICATION-REGISTER-AR.md)
 - [فهرس الحزم الثلاث وحالتها](egm/README.md)
 - [بروتوكول التثبيت والتحقق من Fresh Context والتشغيل](egm/REVIEW-PROTOCOL.md)
 - [حزمة نطاق الموظفين والصرفيات الرئيسية والمنفصلة](egm/01-DOMAIN-AND-PAYROLL-DESIGN-DRAFT.md)
