@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 
@@ -7,7 +8,8 @@ namespace PayrollReviewSystem.UnitTests;
 
 /// <summary>
 /// اختبارات تشغيلية لنقاط فحص الصحة والمعلومات الفنية في API.
-/// تتأكد الاختبارات من استجابة الخادم بنجاح دون الحاجة لقاعدة بيانات أو أسرار أو اتصال خارجي.
+/// تتأكد الاختبارات من استجابة الخادم بنجاح دون الحاجة لقاعدة بيانات أو أسرار أو اتصال خارجي،
+/// وعدم كشف أسماء الأنواع الداخلية (CLR Types) علنًا.
 /// </summary>
 public class HealthEndpointTests : IClassFixture<WebApplicationFactory<Program>>
 {
@@ -44,6 +46,20 @@ public class HealthEndpointTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.Equal("PayrollReviewSystem", result.System);
         Assert.Equal("SQL Server 2014 (12.x)", result.TargetDatabase);
         Assert.Equal("NOT_DESIGNED / NO_TABLES", result.DatabaseStatus);
+    }
+
+    [Fact]
+    public async Task GetApiInfo_DoesNotExpose_InternalClrTypeNames()
+    {
+        var response = await _client.GetAsync("/api/info");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        using var jsonDoc = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        var root = jsonDoc.RootElement;
+
+        Assert.False(root.TryGetProperty("applicationType", out _));
+        Assert.False(root.TryGetProperty("infrastructureType", out _));
     }
 
     private sealed record HealthResponse(string Status, string Service, string Version, string Scaffold, DateTimeOffset Timestamp);

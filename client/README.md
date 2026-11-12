@@ -1,59 +1,52 @@
-# Client
+# الواجهة الأمامية لنظام مراجعة المرتبات (`client/`)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.7.
+> **النطاق والحالة:** جزء من الهيكل التقني الأولي (`BOOT-001`) قيد المراجعة في [Draft PR #49](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/pull/49) بموجب المهمة التنفيذية المعتمدة [Issue #48](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/48) (ومرجع التكليف الأول المرتبط [Issue #47](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/47)).
 
-## Development server
+تُمثل هذه الحزمة تطبيق الواجهة الأمامية (`Angular 22`) لنظام **PayrollReviewSystem**، وهي مُهيأة لدعم اللغة العربية والاتجاه من اليمين إلى اليسار (`dir="rtl"`, `lang="ar"`) مع تفعيل أنماط الفحص الصارم (`strict` و `strictTemplates`).
 
-To start a local development server, run:
+---
 
+## 1. المواصفات التقنية المعتمدة للواجهة
+
+| البند | القيمة المعتمدة |
+| :--- | :--- |
+| **إطار العمل** | `Angular 22.2.x` (`@angular/core`, `@angular/build`) |
+| **لغة البرمجة** | `TypeScript ~6.0.2` (`strict: true`, `strictTemplates: true`) |
+| **بيئة التشغيل** | `Node.js 24.15.x` |
+| **إطار الاختبارات** | `Vitest ^5.0.0` عبر `@angular/build:unit-test` |
+| **اللغة والاتجاه** | العربية (`lang="ar"`) والاتجاه من اليمين إلى اليسار (`dir="rtl"`) |
+
+---
+
+## 2. دليل التشغيل والبناء والاختبار (Runbook)
+
+تُنفذ جميع الأوامر التالية من داخل مجلد `client/` (أو باستخدام `--prefix client` من جذر المستودع):
+
+### تثبيت الاعتماديات النظيف:
 ```bash
-ng serve
+npm ci
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
+### تشغيل خادم التطوير المحلي:
 ```bash
-ng generate component component-name
+npm start
+```
+يعمل التطبيق محليًا على العنوان `http://localhost:4200/` مع إعادة التحميل التلقائي عند تعديل الملفات المصدرية.
+
+### بناء نسخة الإنتاج والتحقق من القوالب:
+```bash
+npm run build
+```
+تُحفظ مخرجات البناء في المجلد `dist/` (المُستبعد عبر `.gitignore`).
+
+### تشغيل اختبارات الوحدة التحققية (بما فيها فحص RTL واللغة العربية):
+```bash
+npm test -- --watch=false
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+---
 
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## 3. ضوابط ومحظورات المرحلة (`BOOT-001`)
+1. **خلو الواجهة من منطق الأعمال المالي:** لا تتضمن الواجهة في هذه المرحلة أي شاشات لحساب المرتبات أو الضرائب أو المعاشات أو استيراد ملفات Oracle/Excel.
+2. **حماية البيانات والخصوصية:** يُحظر إدراج أي بيانات موظفين حقيقية أو أرقام قومية أو مفاتيح سرية داخل ملفات الواجهة أو الاختبارات.
+3. **الاتجاه العربي الإلزامي:** تلتزم الواجهة بضبط `lang="ar"` و `dir="rtl"` في كل من `src/index.html` والمكون الجذري `src/app/app.ts` و `src/app/app.html`، ويتم التحقق من ذلك تلقائيًا في `src/app/app.spec.ts`.
