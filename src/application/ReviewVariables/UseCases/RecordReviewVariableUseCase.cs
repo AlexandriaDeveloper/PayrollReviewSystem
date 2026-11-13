@@ -113,6 +113,7 @@ public sealed class RecordReviewVariableUseCase
             ReviewVariableOperation.RecordReviewVariable,
             targetNaturalKey,
             scope,
+            actorContext.ActorId,
             command.IdempotencyKey.Trim());
 
         var normalizedReason = command.Reason.Trim();
