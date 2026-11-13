@@ -143,4 +143,44 @@
 - تعدد علاقات العمل أو النقل بين الوحدات (`BLK-02`, `BLK-04`, `BLK-12`, `MAJ-21`)، والمعالجة المحاسبية/الختامية عبر السنوات المالية.
 
 ### ملاحظات التنفيذ والإبلاغ
-- **SPEC-029-003 ([Issue #63](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/63)):** تحديث مواصفة [AUDIT-FINDING-RESPONSE-RESOLUTION-WORKFLOW-AR](../specs/AUDIT-FINDING-RESPONSE-RESOLUTION-WORKFLOW-AR.md) وسجل القرارات والذاكرة المعمارية بما يعكس `D-034` (`OD-04`: `AI-0075..AI-0083`) وتثبيت إتمام دمج `PR #62` — **توثيق فقط دون كود أو SQL أو DDL أو تعديل قواعد البيانات أو دمج ذاتي**.
+- **SPEC-029-003 ([Issue #63](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/63)):** تحديث مواصفة [AUDIT-FINDING-RESPONSE-RESOLUTION-WORKFLOW-AR](../specs/AUDIT-FINDING-RESPONSE-RESOLUTION-WORKFLOW-AR.md) وسجل القرارات والذاكرة المعمارية بما يعكس `D-034` (`OD-04`: `AI-0075..AI-0083`) وتثبيت إتمام دمج `PR #62` (دُمج عبر [PR #64](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/pull/64) عند `b415bb802645b80429c16bdeb35635ab4489bf77`).
+
+---
+
+## D-035 — نظام المراجعين المرن وإلغاء موافقة المراجع الأساسي وتسجيل العمليات باسم منفذها (`OD-05`: `AI-0091 → AI-0092 [SUPERSEDED] → AI-0093`)
+
+- **الحالة:** `OWNER_CONFIRMED` *(ضوابط العمل المعتمدة في `AI-0091` و`AI-0093`)* | `AI-0092` محفوظة تاريخيًا بحالة **`SUPERSEDED_BY_AI-0093`** *(في نقطة شرط موافقة المراجع الأساسي تحديدًا)* | مع عقود وحقول تدقيق مقترحة `PROPOSED` + عناصر مفتوحة `OWNER_DECISION_REQUIRED`
+- **المراجع المصدرية الدقيقة في [Issue #41](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/41):**
+  - [`AI-0091`](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/41#issuecomment-6858512530) ← [`AI-0092` (`SUPERSEDED_BY_AI-0093`)](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/41#issuecomment-6858606999) ← [`AI-0093` (الحاكم الأحدث)](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/41#issuecomment-6858668474)
+  - تكليف ChatGPT [`AI-0094`](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/41#issuecomment-6859040241) ومتابعة التسليم [`AI-0095`](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/41#issuecomment-6859888209) + [Issue #65 (`SPEC-029-004`)](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/65)
+- **المواصفة المحدثة:** [`docs/specs/AUDIT-FINDING-RESPONSE-RESOLUTION-WORKFLOW-AR.md`](../specs/AUDIT-FINDING-RESPONSE-RESOLUTION-WORKFLOW-AR.md) (`§1`, `§2.1`, `§2.2`, `§3.4`, `§4`, `§5.1`, `§6`, `§7`, `§8`)
+
+### التسلسل التاريخي والقواعد المؤكدة من المالك (`AI-0091 → AI-0092 [SUPERSEDED] → AI-0093`)
+1. **توجيه `AI-0091` (`OWNER_CONFIRMED` — [`6858512530`](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/41#issuecomment-6858512530)):** تخفيف أولوية إلزام سير عمل مفصّل لتوثيق ردود الاستحقاقات المركزية؛ يُكتفى بتقدير/رأي المراجع ومرونة إدخال المتغيرات بواسطته أو عبر مراجعين آخرين، **مع الإبقاء على قناتَي `D-030` (`CentralInternalReply` و`RecordedExternalReply`) كإمكانية متاحة عند ورود رد فعلي ودون محو تاريخها**.
+2. **قرار `AI-0092` (تاريخي — `SUPERSEDED_BY_AI-0093` في شرط موافقة المراجع الأساسي — [`6858606999`](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/41#issuecomment-6858606999)):** نصّ سابقًا على أن «المراجع الأساسي يراجع ويعتمد البيانات التي يدخلها المراجعون الآخرون قبل استخدامها نهائيًا». **أُلغي هذا القيد صراحةً بقرار المالك الأحدث `AI-0093` ولا يُفرض في التصميم أو الكود؛ ويُحتفظ بهذه الإشارة تاريخيًا دون محو صامت.**
+3. **تصحيح المالك الأحدث الحاكم `AI-0093` (`OWNER_CONFIRMED` — [`6858668474`](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/41#issuecomment-6858668474)):**
+   - **نص المالك:** *«لا أنا معترض على دي، أنا كل اللي عاوزه أي مراجع من حقه التعديل والتسوية بس تتسجل باسمه، أنا مش عاوز الشغل يوقف على مراجع واحد لو مش موجود»*.
+   - **حق أي مراجع مخوّل ومنع نقطة التعطل الوحيدة (`No Single Point of Failure`):** يحق لكل مراجع **مخوّل ضمن نطاق عمله** إدخال المتغيرات وتعديلها وتسجيل التسويات والتصحيحات التشغيلية المسموحة دون اشتراط موافقة مسبقة من «مراجع أساسي» ودون تعليق العمل عند غياب مراجع آخر؛ ولا يلغي لفظ «أي مراجع» ضوابط الوصول أو يفتح الصلاحيات لمستخدم غير مخوّل أو خارج النطاق.
+   - **المساءلة الفردية والتتبع غير المدمّر:** تُنسب كل عملية إلى **المراجع الذي نفّذها فعلًا** (`ActorId`/الاسم والتاريخ والوقت) مع الاحتفاظ بالقيمة القديمة والجديدة وسجل التعديلات وسبب الإجراء/مرجعه ومنع تكرار التسويات.
+   - **ثبات الضوابط المالية السابقة:** تسجيل المتغير أو التسوية التشغيلية لا يرفع `VerifiedPaidAmount` ولا يصفّر `OutstandingAmount` المالي دون سند دفع مستقل وفق `D-033`، ولا ينفذ آليًا في Oracle أو البنك؛ وتبقى حماية القيم السبع و`UNKNOWN ≠ 0`، ويبقى تفويض الاعتماد الفردي في `D-031` محصورًا في العمليات الأربع المحددة فقط دون توسيع غير مأذون.
+
+### ما يظل مقترحًا (`PROPOSED`) لا قرارًا نهائيًا للجداول أو الـAPI
+- الكيان/السجل التصوري `VariableChangeAuditEntry` والحقول (`PerformedByActorId`, `PerformedAt`, `OldValue`, `NewValue`, `ActionReason`) وعقدا `RecordOrUpdateReviewVariable` و`RecordOperationalSettlementAction` وأخطاء الحماية (`AttributionMismatchRejected`, `PermissionDenied`, `VersionConflict`, `IdempotencyConflict`) في `§2.1` و`§3.4` و`§5.1` و`§6`.
+
+### ما يظل مفتوحًا (`OWNER_DECISION_REQUIRED`)
+- مصفوفة الصلاحيات الدقيقة (`RBAC`) عند اختلاف الأدوار أو المجموعات، وأثر تعديل قيمة بعد اعتماد سابق (`re-approval`)، وحدود التزامن ونسخ البيانات.
+- مستندات الدفع المالي المستقلة المقبولة (`D-033`)، والقواعد القانونية/النظامية التي تستلزم سندًا مستقلًا.
+
+### ملاحظات التنفيذ والإبلاغ
+- **SPEC-029-004 ([Issue #65](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/65)):** تحديث مواصفة [AUDIT-FINDING-RESPONSE-RESOLUTION-WORKFLOW-AR](../specs/AUDIT-FINDING-RESPONSE-RESOLUTION-WORKFLOW-AR.md) وسجل القرارات والذاكرة المعمارية بما يعكس `D-035` (`AI-0091 → AI-0092 [SUPERSEDED_BY_AI-0093] → AI-0093`) وتثبيت إتمام دمج `PR #64` (`b415bb802645b80429c16bdeb35635ab4489bf77`) — **توثيق فقط دون كود أو SQL أو DDL أو تعديل قواعد البيانات أو دمج ذاتي**.
+
+---
+
+## ملحق هندسي توثيقي — ملكية تصميم القرارات وحصر المسائل المالية المفتوحة (ليس قرار مالك جديدًا)
+
+- **توجيه المالك الأحدث لتوزيع الأدوار:** يتولى **ChatGPT** تصميم القواعد والقرارات والمواصفات ومراجعتها، ويقتصر دور **Gemini** مستقبلًا على **كتابة الكود** انطلاقًا من مواصفة مُنجزة، بعد تفويض برمجي مستقل. أُثبت التوجيه في [رسالة إيقاف تكليف Gemini التوثيقي](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/41#issuecomment-6860077279)، وخريطة التصميم في [Blueprint v1 في Issue #65](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/65#issuecomment-6860157620) ثم §9 من [المواصفة](../specs/AUDIT-FINDING-RESPONSE-RESOLUTION-WORKFLOW-AR.md). هذا **توزيع مسؤولية العمل** لا ترخيص تلقائي لبدء `CODE-001` أو الدمج.
+- **حالة `SPEC-029-004`:** يوجد [Draft PR #66](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/pull/66) أنشأه Gemini قبل تحويل ملكية التوثيق؛ يستخدم ChatGPT **نفس PR** لاستكمال التصميم وتدقيقه، ولا ينشئ PR مكررًا ولا يعدل `main` قبل موافقة المالك على الدمج. لا يُنسب تصميم §9 إلى Gemini.
+- **ملاحظة نزاهة مراجع GitHub:** حصل **تكرار للمعرّف النصي `AI-0097`** في رسالتين مختلفتين: [رسالة ChatGPT لإيقاف مهام Gemini التوثيقية](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/41#issuecomment-6860077279) و[رسالة RESULT من Gemini عن Draft PR #66](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/41#issuecomment-6860099041). تعتمد الحوكمة **روابط التعليقات الأصلية لا النص `AI-0097` وحده** عند الإحالة، ويُتجنب تكرار الرقم في الرسائل التالية. لا يؤثر التكرار على قرار المالك `AI-0093`.
+- **سجل التنفيذ التالي `PROPOSED`:** شرائح `CODE-001` (مراجعة المتغيرات وسجل المنفذ/النسخ)، ثم `CODE-002` (الملاحظات والاعتماد المقيد)، ثم `CODE-003` (متابعة التسويات وظهور Oracle)، ثم `CODE-004` (API وواجهة Angular وتخزين لاحق). هذه **خطة هندسية وليست تنفيذًا أو تفويضًا بالكود**.
+- **القضايا التي تظل `OWNER_DECISION_REQUIRED` ولا تحسمها ChatGPT نيابة عن المالك:** مستند السداد المستقل وصاحب سلطة التحقق، النصوص القانونية وتواريخها وأوعية الضرائب/التأمينات والإجازات، تعدد علاقات العمل وصلاحيات مجموعات المراجعة، تفصيل اعتماد/إلغاء `SettlementOrder`، وأثر تعديل بيانات سبق اعتمادها والتعامل مع الظهور الزائد أو تصحيحات Oracle المتعارضة.
+- **قاعدة التقارير:** يُفصل دائمًا بين `OWNER_CONFIRMED` و`PROPOSED` و`OWNER_DECISION_REQUIRED` و`NOT_RUN`؛ اجتياز التوثيق لا يساوي اجتياز اختبارات النظام أو الاعتماد القانوني أو صلاحية تشغيل قاعدة البيانات. التقسيم `core/application/infrastructure/api/client` والتعليقات العربية وسجل الذاكرة واجبة في التنفيذ اللاحق.
