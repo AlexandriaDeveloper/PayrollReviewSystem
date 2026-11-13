@@ -168,3 +168,23 @@ npm start
 ### 8.4 حدود القرارات الباقية
 
 `OWNER_DECISION_REQUIRED`: أنواع إثبات السداد المالي المستقل والمخوّل بالتحقق، قواعد الضرائب/التأمينات/المعاشات والإجازات الموثقة زمنيًا، علاقات العمل المتعددة، تفويض اعتماد أو إلغاء `SettlementOrder`، أثر تعديل قيمة سبق اعتماد مراجعتها، والتصحيحات المتعارضة أو الزائدة في Oracle. **اختيار أسماء classes والمنافذ واختبارات التزامن من اختصاص التصميم الهندسي ChatGPT** ولا يحتاج إذنًا ماليًا بحد ذاته، أما تحويل قاعدة حسابية جديدة إلى `OWNER_CONFIRMED` فيتطلب قرار المالك أو سندًا رسميًا مناسبًا.
+
+---
+
+## 9. تحديث نقطة التوقف ونطاق المكونات الجديدة (13 نوفمبر 2026)
+
+**حالة GitHub المؤكدة في هذه الجلسة:**
+- دُمجت وثائق `SPEC-029-004` في [PR #66](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/pull/66) عند `837a822e4767c0c0f5d9fcf817e439d1b038c0d8`؛ الجملة التاريخية في §8 عن كون PR #66 Draft تخص وقت كتابتها فقط.
+- `CODE-001`: [Issue #67](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/67) مفتوحة، [PR #68](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/pull/68) ما زال Draft غير مدمج عند `8f989136b61490473264b6a84c65c5b74f501715`.
+- أنشئ فرع تطوير منفصل `feat/owner-autonomous-20261113` و[Draft PR #69](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/pull/69) المبني على تغييرات PR #68؛ آخر SHA مفحوص `60efc9a4087606183a7aacfd2a5886a21f79c22e`. إصلاح عزل `IdempotencyRecordKey` بحسب `TrustedActorId`، مع Regression لمراجعين مختلفين. [GitHub Actions run 43499684636](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/actions/runs/43499684636) **SUCCESS**: 20 architecture + 35 unit، .NET build بلا أخطاء/تحذيرات وAngular baseline ناجح. ذلك دليل على الاختبارات المكتوبة **وليس** اعتمادًا فنيًا كاملًا أو DB أو Merge.
+- PR #68 وPR #69 يتضمنان تغييرات متداخلة؛ **لا يُدمجان معًا من دون خطة توحيد**. `main` لم يتضمن CODE-001 عند آخر تحقق. لا قاعدة بيانات منفذة مثبتة.
+
+**توجيه المالك الجديد — [D-036](governance/DECISION-REGISTER.md):**
+- اشتقاق حقول المستفيد والقواعد اللازمة من التشريعات واللوائح بعد التحقق من نطاقها، بدل مطالبة المالك بقائمة يدوية.
+- اكتشاف البنود من PDFs وإضافتها آليًا إلى كتالوج `NeedsReview`، وليس إلى GFMIS الرسمي أو FinancialComponent معتمد بغير مراجعة.
+- الاستناد إلى شجرة GFMIS المنشورة (9 مقاطع)، مع الفصل عن `SourceAccountCode` و`FinancialComponent` وتاريخ الإصدار.
+- بناء `Dynamic Administrative Orders Engine` يعرّف المستخدم المخوّل أنواعه وحقوله وبنوده وقوالبه داخل النظام. التفاصيل التقنية `PROPOSED` ومصفوفات اعتماد/أثر كل أمر `OPEN`.
+
+**المرجع التصميمي:** [مواصفة الحقول، GFMIS، اكتشاف البنود ومحرك الأوامر الديناميكي](specs/OWNER-DYNAMIC-ORDERS-GFMIS-AND-PERSONNEL-AR.md). تمت معاينة بنية ثلاثة مصادر PDF خاصة (70 + 68 + 295 صفحات) **بدون نسخ بيانات الموظفين إلى GitHub**؛ لا استخراج شامل معتمد أو كتالوج بنود نهائي. تم العثور على مراجع منشورة للشجرة والمقطع الاقتصادي لكن ملف `5.xlsx` لم يُتحقق من محتواه بعد.
+
+**نقطة الاستئناف:** إغلاق مراجعة CODE-001 على مسار PR واحد دون دمج أو توسيع، ثم تحويل مواصفات `Personnel`, `FinancialComponent/ChartOfAccounts`, `SourceIntake`, `AdministrativeOrders` إلى وحدات تنفيذية لها Issues مستقلة بعد حسم بوابات السلطة والأدلة. لا تدّعِ اكتمال دراسة جميع القوانين أو نسخة إنتاجية نهائية.
