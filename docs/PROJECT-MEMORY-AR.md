@@ -149,6 +149,7 @@ npm start
 
 - **سجل القيمة:** `AuditCase → ReviewVariableRevision → SourceVersion`، وكل تغير `ReviewerActionLog(PerformedByActorId, PerformedAt, OldValue, NewValue, Reason)` بوصفه `PROPOSED`؛ لا محو تاريخ أو نسبة الإجراء لمراجع آخر.
 - **سجل الملاحظة:** `AuditCase → Finding → FindingRevision → ReviewDecision`، وقد تنشأ `FollowUp` للفرق الحقيقي وفق القرار، مع استمرار `PersistentFindingNotice` غير المغلقة.
+- **قنوات الرد التاريخية:** يحافظ التصميم على `CentralInternalReply` و`RecordedExternalReply` وفق `D-030`؛ تسجيل رد مركزي عند وروده متاح، لكنه ليس خطوة إلزامية لكل مراجعة بقرار `AI-0091`، ولا يُقبل الرد تلقائيًا كإثبات صحة الاستحقاق.
 - **سجل التسوية:** `OriginDisbursement → SettlementOrder A → OracleSourceVersion`؛ إذا كان A مغلقًا إداريًا ثم ألغى كشف رسمي مصحح 50 من 200: `A` يظل مغلقًا، `Finding F` جديدة، ثم `Order B=50` للشهر التالي، مرتبط بـ A وF والتصحيح. عدم الظهور أو الظهور الجزئي أثناء فتح الأمر لا ينشئ أمرًا ثانيًا.
 - **إثبات المال:** `SourceAmount / ExpectedAmount / ReviewedAmount / OfficialCorrectionAmount / ReportedDisbursementAmount / VerifiedPaidAmount / OutstandingAmount` **سبعة مفاهيم منفصلة**؛ الظهور في Oracle أو التسجيل الإداري أو رأي المراجع **ليس** إثبات `VerifiedPaidAmount`.
 - **القوانين:** `RuleSet → RuleEffect → EffectivePeriod → LegalReference` كتصور هندسي `PROPOSED`؛ لا حساب تلقائي لقوانين غير موثقة ولا تقريبات مفترضة.
