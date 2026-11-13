@@ -73,7 +73,7 @@ internal static class UseCaseSupport
             return true;
         }
 
-        if (!SourceReference.TryCreate(input.Kind, input.SourceVersionId, input.SourceCaptureRef, out sourceReference))
+        if (!SourceReference.TryCreate(input.DeclaredKind, input.SourceVersionId, input.SourceCaptureRef, out sourceReference))
         {
             error = new ApplicationError(
                 ApplicationErrorCode.InvalidVariableValue,
@@ -102,10 +102,10 @@ internal static class UseCaseSupport
         => source is null
             ? null
             : new SourceReferenceSnapshot(
-                source.Kind,
+                source.DeclaredKind,
                 source.SourceVersionId,
                 source.SourceCaptureRef,
-                source.IsOfficialOracle);
+                source.IsAuthenticityVerified);
 
     /// <summary>
     /// يبني إيصال المخرج القياسي بعد حفظ متغير المراجعة وسجل الفعل ذريًا.

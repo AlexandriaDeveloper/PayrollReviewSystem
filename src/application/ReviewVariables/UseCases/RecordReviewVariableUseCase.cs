@@ -104,8 +104,11 @@ public sealed class RecordReviewVariableUseCase
                 authDecision.DenialReason ?? "المراجع غير مخوّل لتسجيل متغير مراجعة في هذا النطاق.");
         }
 
-        // 4. فحص عدم التكرار (Idempotency) باستخدام المفتاح المركب وبصمة الحمولة المعيارية
-        var targetNaturalKey = $"{auditCaseId.Value}|{disbursementRef.Value}|{variableKey.Value}";
+        // 4. تجهيز المفتاح الطبيعي المركب بترميز مقاوم لتصادم الفواصل وبصمة الحمولة المعيارية
+        var targetNaturalKey = CanonicalPayloadHasher.EncodeCompositeTargetKey(
+            auditCaseId.Value,
+            disbursementRef.Value,
+            variableKey.Value);
         var idempotencyKey = new IdempotencyRecordKey(
             ReviewVariableOperation.RecordReviewVariable,
             targetNaturalKey,
@@ -122,27 +125,27 @@ public sealed class RecordReviewVariableUseCase
             normalizedReason,
             sourceReference);
 
-        var idempotencyCheck = await _idempotencyPort.CheckAsync(idempotencyKey, payloadHash, cancellationToken);
-        if (idempotencyCheck.Status == IdempotencyCheckStatus.MatchedReplay && idempotencyCheck.StoredReceipt is not null)
-        {
-            return ApplicationResult<ReviewVariableReceipt>.Replayed(idempotencyCheck.StoredReceipt);
-        }
-
-        if (idempotencyCheck.Status == IdempotencyCheckStatus.PayloadMismatchConflict)
-        {
-            return ApplicationResult<ReviewVariableReceipt>.Failure(
-                ApplicationErrorCode.IdempotencyConflict,
-                "تعارض عدم التكرار: نفس IdempotencyKey استُخدم مع حمولة أو قيمة أو سبب مختلف.");
-        }
-
         var correlationId = UseCaseSupport.ResolveCorrelationId(command.CorrelationId);
         var nowUtc = _clockPort.UtcNow.ToUniversalTime();
 
-        // 5. التنفيذ الذري: إنشاء المتغير + إلحاق سجل التدقيق + حفظ إيصال عدم التكرار
+        // 5. التنفيذ الذري: فحص عدم التكرار + إنشاء المتغير + إلحاق سجل التدقيق + حفظ إيصال عدم التكرار
         try
         {
             return await _atomicTransaction.ExecuteAtomicallyAsync(async ct =>
             {
+                var idempotencyCheck = await _idempotencyPort.CheckAsync(idempotencyKey, payloadHash, ct);
+                if (idempotencyCheck.Status == IdempotencyCheckStatus.MatchedReplay && idempotencyCheck.StoredReceipt is not null)
+                {
+                    return ApplicationResult<ReviewVariableReceipt>.Replayed(idempotencyCheck.StoredReceipt);
+                }
+
+                if (idempotencyCheck.Status == IdempotencyCheckStatus.PayloadMismatchConflict)
+                {
+                    return ApplicationResult<ReviewVariableReceipt>.Failure(
+                        ApplicationErrorCode.IdempotencyConflict,
+                        "تعارض عدم التكرار: نفس IdempotencyKey استُخدم مع حمولة أو قيمة أو سبب مختلف.");
+                }
+
                 var existing = await _variableRepository.GetByNaturalKeyAsync(
                     auditCaseId,
                     disbursementRef,
@@ -214,3 +217,4 @@ public sealed class RecordReviewVariableUseCase
         }
     }
 }
+

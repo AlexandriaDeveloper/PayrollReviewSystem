@@ -178,9 +178,10 @@ public sealed class ReviewVariable
     }
 
     /// <summary>
-    /// يعيد بناء الكيان من نسخ تاريخية محفوظة مسبقًا دون مشاركة مراجع الذاكرة مع المتصل (يفيد في عزل المستودع).
+    /// يعيد بناء الكيان من نسخ تاريخية محفوظة مسبقًا مع التحقق الصارم من جميع ثوابت التسلسل والهوية والقيمة (Q-04).
+    /// يمنع بناء كيان بتاريخ متناقض أو نسخ مفقودة أو غير متطابقة مع الحالة الحالية.
     /// </summary>
-    public static ReviewVariable Reconstitute(
+    public static DomainOutcome<ReviewVariable> Reconstitute(
         ReviewVariableId id,
         AuditCaseId auditCaseId,
         PayrollDisbursementRef disbursementRef,
@@ -191,8 +192,79 @@ public sealed class ReviewVariable
         int version,
         IEnumerable<ReviewVariableRevision> revisions)
     {
+        if (id.Value == Guid.Empty)
+        {
+            return DomainOutcome<ReviewVariable>.Failure(
+                DomainFailureCode.InvalidInput,
+                "تعذر إعادة بناء متغير المراجعة: المعرّف فارغ.");
+        }
+
+        if (version < 1)
+        {
+            return DomainOutcome<ReviewVariable>.Failure(
+                DomainFailureCode.InvalidInput,
+                "تعذر إعادة بناء متغير المراجعة: رقم النسخة يجب أن يكون 1 على الأقل.");
+        }
+
+        if (revisions is null)
+        {
+            return DomainOutcome<ReviewVariable>.Failure(
+                DomainFailureCode.InvalidInput,
+                "تعذر إعادة بناء متغير المراجعة: قائمة النسخ التاريخية مفقودة.");
+        }
+
         var revisionList = revisions.OrderBy(r => r.RevisionNumber).ToList();
-        return new ReviewVariable(
+        if (revisionList.Count != version)
+        {
+            return DomainOutcome<ReviewVariable>.Failure(
+                DomainFailureCode.InvalidInput,
+                $"تعذر إعادة بناء متغير المراجعة: عدد النسخ التاريخية ({revisionList.Count}) لا يطابق رقم النسخة ({version}).");
+        }
+
+        for (var i = 0; i < revisionList.Count; i++)
+        {
+            var rev = revisionList[i];
+            var expectedRevNumber = i + 1;
+
+            if (rev.VariableId != id)
+            {
+                return DomainOutcome<ReviewVariable>.Failure(
+                    DomainFailureCode.InvalidInput,
+                    "تعذر إعادة بناء متغير المراجعة: توجد نسخة تاريخية تابعة لمعرّف متغير مختلف.");
+            }
+
+            if (rev.RevisionNumber != expectedRevNumber)
+            {
+                return DomainOutcome<ReviewVariable>.Failure(
+                    DomainFailureCode.InvalidInput,
+                    $"تعذر إعادة بناء متغير المراجعة: تسلسل النسخ منقطع أو مكرر عند النسخة المتوقعة ({expectedRevNumber}).");
+            }
+
+            if (i == 0 && rev.PreviousValue is not null)
+            {
+                return DomainOutcome<ReviewVariable>.Failure(
+                    DomainFailureCode.InvalidInput,
+                    "تعذر إعادة بناء متغير المراجعة: النسخة الأولى لا يجوز أن تحمل قيمة سابقة.");
+            }
+
+            if (i > 0 && !Equals(rev.PreviousValue, revisionList[i - 1].NewValue))
+            {
+                return DomainOutcome<ReviewVariable>.Failure(
+                    DomainFailureCode.InvalidInput,
+                    $"تعذر إعادة بناء متغير المراجعة: القيمة السابقة للنسخة ({expectedRevNumber}) لا تطابق القيمة الجديدة للنسخة السابقة.");
+            }
+        }
+
+        var latestRevision = revisionList[^1];
+        if (!Equals(latestRevision.NewValue, currentValue) ||
+            !Equals(latestRevision.SourceReference, currentSourceReference))
+        {
+            return DomainOutcome<ReviewVariable>.Failure(
+                DomainFailureCode.InvalidInput,
+                "تعذر إعادة بناء متغير المراجعة: القيمة أو مرجع المصدر الحالي لا يطابق آخر نسخة تاريخية.");
+        }
+
+        return DomainOutcome<ReviewVariable>.Success(new ReviewVariable(
             id,
             auditCaseId,
             disbursementRef,
@@ -201,6 +273,7 @@ public sealed class ReviewVariable
             currentValue,
             currentSourceReference,
             version,
-            revisionList);
+            revisionList));
     }
 }
+

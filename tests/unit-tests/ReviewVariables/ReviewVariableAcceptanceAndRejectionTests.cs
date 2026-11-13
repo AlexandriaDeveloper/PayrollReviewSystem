@@ -188,7 +188,7 @@ public class ReviewVariableAcceptanceAndRejectionTests
         Assert.Null(unknownResult.Value.CurrentValue.Amount);
 
         // التحقق على مستوى كائن القيمة في النواة نفسه
-        Assert.True(ReviewVariableValue.TryCreateKnown(0m, out var knownZeroCore, out _));
+        var knownZeroCore = ReviewVariableValue.Known(0m);
         Assert.NotNull(knownZeroCore);
         Assert.NotEqual(knownZeroCore, ReviewVariableValue.Unknown);
         Assert.False(ReviewVariableValue.Unknown.TryGetKnownAmount(out _));
@@ -219,9 +219,9 @@ public class ReviewVariableAcceptanceAndRejectionTests
         Assert.True(result.IsSuccess);
         var source = result.Value!.SourceReference;
         Assert.NotNull(source);
-        Assert.Equal(alternativeKind, source.Kind);
-        Assert.NotEqual(SourceKind.OracleOfficial, source.Kind);
-        Assert.False(source.IsOfficialOracle);
+        Assert.Equal(alternativeKind, source.DeclaredKind);
+        Assert.NotEqual(SourceKind.OracleOfficial, source.DeclaredKind);
+        Assert.False(source.IsAuthenticityVerified);
     }
 
     [Fact]
@@ -564,7 +564,7 @@ public class ReviewVariableAcceptanceAndRejectionTests
 
     [Fact]
     [Trait("CaseId", "CODE001-NEG-09")]
-    public async Task CODE001_NEG_09_RejectsInvalidInputs_NegativeAmounts_AndNonDeterministicFloats_WithZeroPii()
+    public async Task CODE001_NEG_09_RejectsInvalidInputs_MalformedStrings_AndNonDeterministicFloats_WithZeroPii()
     {
         var harness = new InMemoryReviewVariableTestHarness();
         harness.ReviewerContext.Current = InMemoryReviewVariableTestHarness.BuildReviewerContext("REV-B");
@@ -593,17 +593,17 @@ public class ReviewVariableAcceptanceAndRejectionTests
             null,
             "IDEMP-NEG09-FLT"));
 
-        // 2. رفض المبلغ السالب
-        var negativeRejected = await recordUseCase.ExecuteAsync(new RecordReviewVariableCommand(
+        // 2. رفض نص عددي مشوّه أو غير قابل للتحويل الحتمي
+        var malformedRejected = await recordUseCase.ExecuteAsync(new RecordReviewVariableCommand(
             DemoAuditCaseId,
             DemoDisbursementId,
-            "VAR_NEG",
+            "VAR_NAN_STR",
             DemoUnitId,
             DemoGroupId,
-            ReviewVariableValueInput.Known(-50m),
-            "اختبار رفض قيمة سالبة",
+            ReviewVariableValueInput.FromExternalInput("NaN"),
+            "اختبار رفض نص غير رقمي",
             null,
-            "IDEMP-NEG09-MINUS"));
+            "IDEMP-NEG09-NAN"));
 
         // 3. رفض مدخل مفقود بدون استدعاء Unknown()
         var nullValueRejected = await recordUseCase.ExecuteAsync(new RecordReviewVariableCommand(
@@ -631,7 +631,7 @@ public class ReviewVariableAcceptanceAndRejectionTests
 
         Assert.Equal(ApplicationErrorCode.InvalidVariableValue, doubleRejected.Error!.Code);
         Assert.Equal(ApplicationErrorCode.InvalidVariableValue, floatRejected.Error!.Code);
-        Assert.Equal(ApplicationErrorCode.InvalidVariableValue, negativeRejected.Error!.Code);
+        Assert.Equal(ApplicationErrorCode.InvalidVariableValue, malformedRejected.Error!.Code);
         Assert.Equal(ApplicationErrorCode.InputMissing, nullValueRejected.Error!.Code);
         Assert.Equal(ApplicationErrorCode.InvalidVariableValue, emptyReasonRejected.Error!.Code);
 

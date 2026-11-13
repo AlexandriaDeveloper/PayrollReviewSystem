@@ -67,6 +67,24 @@ internal static class CanonicalPayloadHasher
             ? "KNOWN:" + value.Amount.Value.ToString("G29", CultureInfo.InvariantCulture)
             : "UNKNOWN";
 
+    /// <summary>
+    /// ترميز مفتاح طبيعي مركّب بصيغة مسبوقة بالطول لمنع تصادم الفواصل مثل '|'.
+    /// </summary>
+    public static string EncodeCompositeTargetKey(params string[] parts)
+    {
+        var builder = new System.Text.StringBuilder();
+        foreach (var part in parts)
+        {
+            var value = part ?? string.Empty;
+            builder.Append(value.Length);
+            builder.Append(':');
+            builder.Append(value);
+            builder.Append(';');
+        }
+
+        return builder.ToString();
+    }
+
     private static string SerializeSource(SourceReference? source)
     {
         if (source is null)
@@ -74,7 +92,7 @@ internal static class CanonicalPayloadHasher
             return "NO_SOURCE";
         }
 
-        return $"{(int)source.Kind}:{source.SourceVersionId}:{source.SourceCaptureRef ?? string.Empty}";
+        return $"{(int)source.DeclaredKind}:{source.SourceVersionId}:{source.SourceCaptureRef ?? string.Empty}";
     }
 
     private static string ComputeSha256Hex(IReadOnlyList<string> fields)
@@ -96,3 +114,4 @@ internal static class CanonicalPayloadHasher
         return Convert.ToHexString(hash);
     }
 }
+

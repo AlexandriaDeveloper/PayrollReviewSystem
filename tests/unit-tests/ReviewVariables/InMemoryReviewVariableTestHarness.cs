@@ -115,7 +115,8 @@ internal sealed class InMemoryReviewVariableTestHarness
         List<ReviewVariableRevision> Revisions)
     {
         public ReviewVariable ToIsolatedDomainCopy()
-            => ReviewVariable.Reconstitute(
+        {
+            var outcome = ReviewVariable.Reconstitute(
                 Id,
                 AuditCaseId,
                 DisbursementRef,
@@ -125,6 +126,14 @@ internal sealed class InMemoryReviewVariableTestHarness
                 CurrentSourceReference,
                 Version,
                 Revisions.ToList());
+
+            if (!outcome.IsSuccess || outcome.Value is null)
+            {
+                throw new InvalidOperationException(outcome.FailureMessage ?? "فشلت إعادة بناء كيان الاختبار من الحالة المخزنة.");
+            }
+
+            return outcome.Value;
+        }
 
         public static StoredVariableRecord FromDomain(ReviewVariable variable)
             => new(
@@ -196,7 +205,7 @@ internal sealed class InMemoryReviewVariableTestHarness
             return Task.CompletedTask;
         }
 
-        public Task<RepositorySaveStatus> SaveRevisionAsync(
+        public Task<RepositorySaveResult> SaveRevisionAsync(
             ReviewVariable variable,
             ReviewVariableRevision newRevision,
             int expectedVersion,
@@ -211,17 +220,17 @@ internal sealed class InMemoryReviewVariableTestHarness
             {
                 if (!harness._variables.TryGetValue(variable.Id, out var current))
                 {
-                    return Task.FromResult(RepositorySaveStatus.VersionConflict);
+                    return Task.FromResult(RepositorySaveResult.VersionConflict());
                 }
 
                 // التحقق الذري من تطابق النسخة المتوقعة ضد النسخة المخزنة فعليًا
                 if (current.Version != expectedVersion)
                 {
-                    return Task.FromResult(RepositorySaveStatus.VersionConflict);
+                    return Task.FromResult(RepositorySaveResult.VersionConflict(current.Version));
                 }
 
                 harness._variables[variable.Id] = StoredVariableRecord.FromDomain(variable);
-                return Task.FromResult(RepositorySaveStatus.Saved);
+                return Task.FromResult(RepositorySaveResult.Saved(variable.Version));
             }
         }
     }
@@ -354,3 +363,4 @@ internal sealed class InMemoryReviewVariableTestHarness
         }
     }
 }
+

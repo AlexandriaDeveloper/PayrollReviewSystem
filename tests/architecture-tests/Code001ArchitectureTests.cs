@@ -108,7 +108,8 @@ public class Code001ArchitectureTests
             "MandatoryPrimaryApproval",
             "ExecuteOracle",
             "BankTransfer",
-            "BankPayment"
+            "BankPayment",
+            "IsOfficialOracle"
         };
 
         foreach (var type in allTypes)
@@ -126,3 +127,4 @@ public class Code001ArchitectureTests
         }
     }
 }
+

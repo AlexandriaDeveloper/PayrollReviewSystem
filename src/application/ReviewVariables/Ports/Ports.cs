@@ -58,14 +58,15 @@ public interface IClockPort
 
 /// <summary>
 /// نتيجة محاولة حفظ نسخة جديدة من متغير المراجعة في المستودع.
+/// تعيد عند تعارض التزامن النسخة الفعلية في التخزين إن كانت متاحة بيقين، أو <c>null</c> إذا تعذر معرفتها (Q-06).
 /// </summary>
-public enum RepositorySaveStatus
+public sealed record RepositorySaveResult(bool IsSaved, int? ActualVersion = null)
 {
-    /// <summary>تم الحفظ بنجاح.</summary>
-    Saved = 1,
+    /// <summary>نتيجة نجاح الحفظ بالنسخة المعتمدة.</summary>
+    public static RepositorySaveResult Saved(int savedVersion) => new(true, savedVersion);
 
-    /// <summary>تعارض تزامن: تم تعديل النسخة في التخزين قبل إتمام الحفظ.</summary>
-    VersionConflict = 2
+    /// <summary>نتيجة تعارض تزامن مع النسخة الفعلية الحقيقية في التخزين أو <c>null</c> إذا كانت غير معلومة.</summary>
+    public static RepositorySaveResult VersionConflict(int? actualVersion = null) => new(false, actualVersion);
 }
 
 /// <summary>
@@ -86,8 +87,8 @@ public interface IReviewVariableRepository
     /// <summary>يحفظ متغير مراجعة جديدًا بالنسخة 1.</summary>
     Task SaveNewAsync(ReviewVariable variable, CancellationToken cancellationToken = default);
 
-    /// <summary>يحفظ تعديلًا جديدًا على المتغير مع التحقق من تطابق <paramref name="expectedVersion"/>.</summary>
-    Task<RepositorySaveStatus> SaveRevisionAsync(
+    /// <summary>يحفظ تعديلًا جديدًا على المتغير مع التحقق من تطابق <paramref name="expectedVersion"/> وإرجاع النسخة الفعلية عند التعارض.</summary>
+    Task<RepositorySaveResult> SaveRevisionAsync(
         ReviewVariable variable,
         ReviewVariableRevision newRevision,
         int expectedVersion,
@@ -167,3 +168,4 @@ public interface IReviewAtomicTransactionPort
         Func<CancellationToken, Task<TResult>> action,
         CancellationToken cancellationToken = default);
 }
+

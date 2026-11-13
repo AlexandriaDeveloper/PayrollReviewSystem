@@ -85,34 +85,6 @@ public sealed class ReviseReviewVariableUseCase
             return ApplicationResult<ReviewVariableReceipt>.Failure(sourceError!.Code, sourceError.Message);
         }
 
-        // 3. استرجاع متغير المراجعة لمعرفة نطاقه المالك وحالته الحالية
-        var variable = await _variableRepository.GetByIdAsync(variableId, cancellationToken);
-        if (variable is null)
-        {
-            return ApplicationResult<ReviewVariableReceipt>.Failure(
-                ApplicationErrorCode.NotFound,
-                "متغير المراجعة المطلوب غير موجود.");
-        }
-
-        // 4. فحص الصلاحية داخل النطاق قبل السماح بأي تعديل أو استرجاع إيصال عدم التكرار
-        var authDecision = _authorizationPolicy.Evaluate(
-            actorContext,
-            ReviewVariableOperation.ReviseReviewVariable,
-            variable.Scope);
-        if (!authDecision.IsAllowed)
-        {
-            return ApplicationResult<ReviewVariableReceipt>.Failure(
-                ApplicationErrorCode.PermissionDenied,
-                authDecision.DenialReason ?? "المراجع غير مخوّل لتعديل متغيرات المراجعة في هذا النطاق.");
-        }
-
-        // 5. فحص Idempotency قبل فحص Version حتى لا تُرفض إعادة المحاولة المتطابقة على أنها VersionConflict
-        var idempotencyKey = new IdempotencyRecordKey(
-            ReviewVariableOperation.ReviseReviewVariable,
-            variable.Id.ToString(),
-            variable.Scope,
-            command.IdempotencyKey.Trim());
-
         var normalizedReason = command.ChangeReason.Trim();
         var payloadHash = CanonicalPayloadHasher.HashReviseCommand(
             variableId,
@@ -121,76 +93,106 @@ public sealed class ReviseReviewVariableUseCase
             normalizedReason,
             sourceReference);
 
-        var idempotencyCheck = await _idempotencyPort.CheckAsync(idempotencyKey, payloadHash, cancellationToken);
-        if (idempotencyCheck.Status == IdempotencyCheckStatus.MatchedReplay && idempotencyCheck.StoredReceipt is not null)
-        {
-            return ApplicationResult<ReviewVariableReceipt>.Replayed(idempotencyCheck.StoredReceipt);
-        }
-
-        if (idempotencyCheck.Status == IdempotencyCheckStatus.PayloadMismatchConflict)
-        {
-            return ApplicationResult<ReviewVariableReceipt>.Failure(
-                ApplicationErrorCode.IdempotencyConflict,
-                "تعارض عدم التكرار: نفس IdempotencyKey استُخدم مع قيمة أو سبب أو نسخة مختلفة.");
-        }
-
         var correlationId = UseCaseSupport.ResolveCorrelationId(command.CorrelationId);
         var nowUtc = _clockPort.UtcNow.ToUniversalTime();
-        var previousValueSnapshot = variable.CurrentValue;
 
-        // 6. تطبيق القاعدة داخل الكيان والتحقق من النسخة المتوقعة
-        var revisionOutcome = variable.Revise(
-            command.ExpectedVersion,
-            valueValidation.Value,
-            actorContext.ActorId,
-            variable.Scope,
-            nowUtc,
-            normalizedReason,
-            sourceReference,
-            correlationId);
-
-        if (!revisionOutcome.IsSuccess || revisionOutcome.Value is null)
-        {
-            return UseCaseSupport.MapDomainFailure<ReviewVariableReceipt>(
-                revisionOutcome.FailureCode,
-                revisionOutcome.FailureMessage,
-                revisionOutcome.CurrentVersion,
-                command.ExpectedVersion);
-        }
-
-        var newRevision = revisionOutcome.Value;
-        var actionEntry = ReviewerActionLogEntry.Create(
-            variable.Id,
-            variable.Version,
-            ReviewVariableOperation.ReviseReviewVariable,
-            actorContext.ActorId,
-            variable.Scope,
-            nowUtc,
-            oldValue: previousValueSnapshot,
-            newValue: variable.CurrentValue,
-            normalizedReason,
-            sourceReference,
-            correlationId);
-
-        var receipt = UseCaseSupport.BuildReceipt(variable, newRevision, actionEntry);
-
-        // 7. الحفظ الذري في المستودع وسجل التدقيق وسجل عدم التكرار مع حماية التزامن في التخزين
+        // 3-7. قراءة المتغير وفحص الصلاحية وعدم التكرار وتطبيق التعديل والحفظ داخل معاملة ذرية واحدة لمنع سباق التزامن
         try
         {
             return await _atomicTransaction.ExecuteAtomicallyAsync(async ct =>
             {
-                var saveStatus = await _variableRepository.SaveRevisionAsync(
+                // 3. استرجاع متغير المراجعة لمعرفة نطاقه المالك وحالته الحالية
+                var variable = await _variableRepository.GetByIdAsync(variableId, ct);
+                if (variable is null)
+                {
+                    return ApplicationResult<ReviewVariableReceipt>.Failure(
+                        ApplicationErrorCode.NotFound,
+                        "متغير المراجعة المطلوب غير موجود.");
+                }
+
+                // 4. فحص الصلاحية داخل النطاق قبل السماح بأي تعديل أو استرجاع إيصال عدم التكرار
+                var authDecision = _authorizationPolicy.Evaluate(
+                    actorContext,
+                    ReviewVariableOperation.ReviseReviewVariable,
+                    variable.Scope);
+                if (!authDecision.IsAllowed)
+                {
+                    return ApplicationResult<ReviewVariableReceipt>.Failure(
+                        ApplicationErrorCode.PermissionDenied,
+                        authDecision.DenialReason ?? "المراجع غير مخوّل لتعديل متغيرات المراجعة في هذا النطاق.");
+                }
+
+                // 5. فحص Idempotency قبل فحص Version حتى لا تُرفض إعادة المحاولة المتطابقة على أنها VersionConflict
+                var idempotencyKey = new IdempotencyRecordKey(
+                    ReviewVariableOperation.ReviseReviewVariable,
+                    variable.Id.ToString(),
+                    variable.Scope,
+                    command.IdempotencyKey.Trim());
+
+                var idempotencyCheck = await _idempotencyPort.CheckAsync(idempotencyKey, payloadHash, ct);
+                if (idempotencyCheck.Status == IdempotencyCheckStatus.MatchedReplay && idempotencyCheck.StoredReceipt is not null)
+                {
+                    return ApplicationResult<ReviewVariableReceipt>.Replayed(idempotencyCheck.StoredReceipt);
+                }
+
+                if (idempotencyCheck.Status == IdempotencyCheckStatus.PayloadMismatchConflict)
+                {
+                    return ApplicationResult<ReviewVariableReceipt>.Failure(
+                        ApplicationErrorCode.IdempotencyConflict,
+                        "تعارض عدم التكرار: نفس IdempotencyKey استُخدم مع قيمة أو سبب أو نسخة مختلفة.");
+                }
+
+                var previousValueSnapshot = variable.CurrentValue;
+
+                // 6. تطبيق القاعدة داخل الكيان والتحقق من النسخة المتوقعة
+                var revisionOutcome = variable.Revise(
+                    command.ExpectedVersion,
+                    valueValidation.Value,
+                    actorContext.ActorId,
+                    variable.Scope,
+                    nowUtc,
+                    normalizedReason,
+                    sourceReference,
+                    correlationId);
+
+                if (!revisionOutcome.IsSuccess || revisionOutcome.Value is null)
+                {
+                    return UseCaseSupport.MapDomainFailure<ReviewVariableReceipt>(
+                        revisionOutcome.FailureCode,
+                        revisionOutcome.FailureMessage,
+                        revisionOutcome.CurrentVersion,
+                        command.ExpectedVersion);
+                }
+
+                var newRevision = revisionOutcome.Value;
+                var actionEntry = ReviewerActionLogEntry.Create(
+                    variable.Id,
+                    variable.Version,
+                    ReviewVariableOperation.ReviseReviewVariable,
+                    actorContext.ActorId,
+                    variable.Scope,
+                    nowUtc,
+                    oldValue: previousValueSnapshot,
+                    newValue: variable.CurrentValue,
+                    normalizedReason,
+                    sourceReference,
+                    correlationId);
+
+                var receipt = UseCaseSupport.BuildReceipt(variable, newRevision, actionEntry);
+
+                // 7. الحفظ الذري في المستودع وسجل التدقيق وسجل عدم التكرار مع حماية التزامن في التخزين
+                var saveResult = await _variableRepository.SaveRevisionAsync(
                     variable,
                     newRevision,
                     command.ExpectedVersion,
                     ct);
 
-                if (saveStatus == RepositorySaveStatus.VersionConflict)
+                if (!saveResult.IsSaved)
                 {
                     return ApplicationResult<ReviewVariableReceipt>.Failure(
                         ApplicationErrorCode.VersionConflict,
                         "تعارض تزامن أثناء الحفظ: سبق مراجع آخر إلى تحديث المتغير بنسخة أحدث.",
-                        new VersionConflictInfo(command.ExpectedVersion, variable.Version));
+                        new VersionConflictInfo(command.ExpectedVersion, saveResult.ActualVersion));
                 }
 
                 await _auditTrailPort.AppendAsync(actionEntry, ct);
@@ -211,3 +213,4 @@ public sealed class ReviseReviewVariableUseCase
         }
     }
 }
+

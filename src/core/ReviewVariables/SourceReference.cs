@@ -1,58 +1,60 @@
 namespace PayrollReviewSystem.Core.ReviewVariables;
 
 /// <summary>
-/// تصنيف قناة المصدر التي استُقي منها متغير المراجعة.
-/// هذا التصنيف وصفي (Metadata) فقط ولا يُنشئ إثبات دفع ماليًا تلقائيًا ولا يسمح لإدخال Excel أو الشاشة بانتحال صفة Oracle الرسمي.
+/// تصنيف قناة المصدر المُصرّح بها عند إدخال أو تعديل متغير المراجعة.
+/// هذا التصنيف بيانات وصفية مُصرّح بها فقط (<c>DeclaredMetadata</c>) ولا يثبت أصالة كشف أوراكل الرسمي أو التحقق البنكي.
 /// </summary>
 public enum SourceKind
 {
-    /// <summary>كشف أوراكل الرسمي (ORACLE_OFFICIAL).</summary>
+    /// <summary>ادعاء كشف أوراكل الرسمي (ORACLE_OFFICIAL) — يحتاج تحققًا مستقلًا خارج CODE-001 لإثبات الأصالة.</summary>
     OracleOfficial = 1,
 
-    /// <summary>استيراد من ملف إكسل (EXCEL_IMPORT) — لا يُعد كشف أوراكل رسميًا.</summary>
+    /// <summary>استيراد من ملف إكسل (EXCEL_IMPORT) — قناة بديلة لا تمنح صفة كشف أوراكل الرسمي.</summary>
     ExcelImport = 2,
 
-    /// <summary>إدخال مباشر من شاشة المراجعة (DIRECT_FORM) — لا يُعد كشف أوراكل رسميًا.</summary>
+    /// <summary>إدخال مباشر من شاشة المراجعة (DIRECT_FORM) — قناة بديلة لا تمنح صفة كشف أوراكل الرسمي.</summary>
     DirectForm = 3
 }
 
 /// <summary>
-/// مرجع المصدر المرتبط بنسخة متغير المراجعة (بيانات وصفية فقط لحفظ تتبع الأصل دون تعديل مستندات أو استنتاج سداد).
+/// مرجع المصدر المُصرّح به المرتبط بنسخة متغير المراجعة.
+/// تنبيه حوكمة (B-02): يحفظ هذا الكائن **البيان الوصفي المصرح به فقط** ولا يمتلك آلية تحقق من أصالة أوراكل؛
+/// لذلك تبقى <see cref="IsAuthenticityVerified"/> دائمًا <c>false</c> حتى عند ادعاء <see cref="SourceKind.OracleOfficial"/>.
 /// </summary>
 public sealed record SourceReference
 {
-    /// <summary>قناة المصدر الفعلية (<see cref="SourceKind"/>).</summary>
-    public SourceKind Kind { get; }
+    /// <summary>قناة المصدر المصرح بها من الإدخال فقط (غير متحقق من أصالتها آليًا في هذه الشريحة).</summary>
+    public SourceKind DeclaredKind { get; }
 
-    /// <summary>معرّف نسخة المصدر الذي أُخذ منه الإدخال أو التعديل.</summary>
+    /// <summary>معرّف نسخة المصدر المصرح به في الإدخال.</summary>
     public string SourceVersionId { get; }
 
     /// <summary>مرجع إضافي اختياري للمستند أو جلسة الالتقاط (دون بيانات موظفين حساسة).</summary>
     public string? SourceCaptureRef { get; }
 
     /// <summary>
-    /// يوضح صراحةً ما إذا كان المصدر كشف أوراكل رسميًا أم قناة بديلة؛
-    /// تظل قناتا ExcelImport وDirectForm دائمًا false هنا لمنع الخلط المالي.
+    /// يؤكد صراحةً أن أصالة المصدر **غير متحقق منها** في شريحة CODE-001؛
+    /// لا يُسمح لأي إدخال بترقية نفسه إلى «أوراكل رسمي متحقق» بمجرد اختيار <see cref="SourceKind.OracleOfficial"/>.
     /// </summary>
-    public bool IsOfficialOracle => Kind == SourceKind.OracleOfficial;
+    public bool IsAuthenticityVerified => false;
 
-    private SourceReference(SourceKind kind, string sourceVersionId, string? sourceCaptureRef)
+    private SourceReference(SourceKind declaredKind, string sourceVersionId, string? sourceCaptureRef)
     {
-        Kind = kind;
+        DeclaredKind = declaredKind;
         SourceVersionId = sourceVersionId;
         SourceCaptureRef = sourceCaptureRef;
     }
 
     /// <summary>
-    /// ينشئ مرجع مصدر بعد التحقق من تعريف نوع القناة وصلاحية معرّف نسخة المصدر.
+    /// ينشئ مرجع مصدر وصفيًا بعد التحقق من تعريف نوع القناة وصلاحية معرّف نسخة المصدر.
     /// </summary>
     public static bool TryCreate(
-        SourceKind kind,
+        SourceKind declaredKind,
         string? sourceVersionId,
         string? sourceCaptureRef,
         out SourceReference? reference)
     {
-        if (!Enum.IsDefined(kind) || string.IsNullOrWhiteSpace(sourceVersionId))
+        if (!Enum.IsDefined(declaredKind) || string.IsNullOrWhiteSpace(sourceVersionId))
         {
             reference = null;
             return false;
@@ -62,7 +64,7 @@ public sealed record SourceReference
             ? null
             : sourceCaptureRef.Trim();
 
-        reference = new SourceReference(kind, sourceVersionId.Trim(), normalizedCapture);
+        reference = new SourceReference(declaredKind, sourceVersionId.Trim(), normalizedCapture);
         return true;
     }
 }

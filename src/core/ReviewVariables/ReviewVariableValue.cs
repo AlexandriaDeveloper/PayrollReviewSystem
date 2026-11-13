@@ -1,9 +1,12 @@
 namespace PayrollReviewSystem.Core.ReviewVariables;
 
 /// <summary>
-/// كائن قيمة حتمي يمثل قيمة متغير المراجعة.
-/// القاعدة المحاسبية الثابتة: القيمة المجهولة (<see cref="Unknown"/> / INPUT_MISSING) لا تساوي أبدًا صفرًا معلومًا (<c>Known(0)</c>)،
-/// ويُستخدم النوع <see cref="decimal"/> حصرًا لتجنب أخطاء التقريب غير الحتمية في <c>float</c> و<c>double</c>.
+/// كائن قيمة حتمي يمثل قيمة متغير المراجعة العامة في النواة.
+/// القواعد الثابتة:
+/// 1. القيمة المجهولة (<see cref="Unknown"/> / INPUT_MISSING) لا تساوي أبدًا صفرًا معلومًا (<c>Known(0)</c>).
+/// 2. يُستخدم <see cref="decimal"/> حصرًا لتجنب أخطاء التقريب غير الحتمية في <c>float</c> و<c>double</c>.
+/// 3. يقبل النوع العام القيم العشرية الموقعة (موجبة أو صفرًا أو سالبة)، وتُعزل قيود الإشارة الخاصة بكل متغير مستقبلًا
+///    ضمن سياسة قواعد مؤرخة وسند قانوني معتمد (B-03).
 /// </summary>
 public sealed record ReviewVariableValue
 {
@@ -28,22 +31,10 @@ public sealed record ReviewVariableValue
     }
 
     /// <summary>
-    /// ينشئ قيمة معلومة حتمية من <see cref="decimal"/> فقط.
-    /// يرفض القيم السالبة لأن مقادير البنود في هذه النواة غير سالبة ما لم يُقر غير ذلك بسند مستقل.
+    /// ينشئ قيمة معلومة حتمية من <see cref="decimal"/> فقط (موجبة أو صفرًا أو سالبة).
     /// </summary>
-    public static bool TryCreateKnown(decimal amount, out ReviewVariableValue? value, out string? failureReason)
-    {
-        if (amount < 0m)
-        {
-            value = null;
-            failureReason = "قيمة متغير المراجعة المعلومة لا يجوز أن تكون سالبة.";
-            return false;
-        }
-
-        value = new ReviewVariableValue(isKnown: true, amount: amount);
-        failureReason = null;
-        return true;
-    }
+    public static ReviewVariableValue Known(decimal amount)
+        => new(isKnown: true, amount: amount);
 
     /// <summary>
     /// يقرأ المبلغ العشري بأمان فقط إذا كانت القيمة معلومة؛ ويرجع <c>false</c> عند <see cref="Unknown"/> دون إرجاع صفر.

@@ -3,10 +3,10 @@ using PayrollReviewSystem.Core.ReviewVariables;
 namespace PayrollReviewSystem.Application.ReviewVariables.Contracts;
 
 /// <summary>
-/// مدخل بيانات المصدر الوصفية المرفقة بأمر إنشاء أو تعديل متغير المراجعة (Metadata فقط).
+/// مدخل بيانات المصدر الوصفية المرفقة بأمر إنشاء أو تعديل متغير المراجعة (بيانات مصرح بها فقط ولا تثبت أصالة أوراكل).
 /// </summary>
 public sealed record SourceReferenceInput(
-    SourceKind Kind,
+    SourceKind DeclaredKind,
     string SourceVersionId,
     string? SourceCaptureRef = null);
 
@@ -55,13 +55,13 @@ public sealed record GetReviewVariableHistoryQuery(
 public sealed record ReviewVariableValueSnapshot(bool IsKnown, decimal? Amount);
 
 /// <summary>
-/// تمثيل قراءة غير قابل للتعديل لمرجع المصدر مع إظهار عدم رسمية Excel/DirectForm مقارنةً بـ Oracle.
+/// تمثيل قراءة غير قابل للتعديل لمرجع المصدر مع إظهار أن القناة مصرح بها فقط وأن الأصالة غير متحقق منها في CODE-001 (B-02).
 /// </summary>
 public sealed record SourceReferenceSnapshot(
-    SourceKind Kind,
+    SourceKind DeclaredKind,
     string SourceVersionId,
     string? SourceCaptureRef,
-    bool IsOfficialOracle);
+    bool IsAuthenticityVerified);
 
 /// <summary>
 /// إيصال مخرج موحد لعمليتَي التسجيل والتعديل يعكس الحالة الفعلية بعد الحفظ الذري ويُخزن لإعادات Idempotency.
@@ -128,3 +128,4 @@ public sealed record ReviewVariableHistoryDto(
     SourceReferenceSnapshot? CurrentSourceReference,
     IReadOnlyList<ReviewVariableRevisionDto> Revisions,
     IReadOnlyList<ReviewerActionLogDto> ActionLogs);
+

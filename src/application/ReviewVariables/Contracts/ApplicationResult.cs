@@ -17,7 +17,7 @@ public enum ApplicationErrorCode
     /// <summary>تعارض عدم التكرار: إعادة استخدام <c>IdempotencyKey</c> نفسه بحمولة طلب مختلفة.</summary>
     IdempotencyConflict = 4,
 
-    /// <summary>قيمة أو مدخل غير صالح (مثل مبلغ سالب أو رقم عائم غير حتمي أو سبب/مفتاح فارغ).</summary>
+    /// <summary>قيمة أو مدخل غير صالح (مثل رقم عائم غير حتمي أو سبب/مفتاح فارغ أو صيغة رقمية مشوهة).</summary>
     InvalidVariableValue = 5,
 
     /// <summary>مدخل أو مرجع مطلوب غير متوفر.</summary>
@@ -38,8 +38,9 @@ public enum ApplicationErrorCode
 
 /// <summary>
 /// تفاصيل تعارض النسخ عند رفض التعديل بسبب تحديث متزامن لمراجع آخر.
+/// قيمة <see cref="ActualVersion"/> تكون <c>null</c> إذا تعذر على طبقة التخزين تحديدها بيقين (Q-06).
 /// </summary>
-public sealed record VersionConflictInfo(int ExpectedVersion, int ActualVersion);
+public sealed record VersionConflictInfo(int ExpectedVersion, int? ActualVersion);
 
 /// <summary>
 /// كائن خطأ مصنف يحمل الرمز القياسي والرسالة التفسيرية باللغة العربية وتفاصيل التعارض إن وجدت.
@@ -90,3 +91,4 @@ public sealed class ApplicationResult<T>
         VersionConflictInfo? conflictInfo = null)
         => new(isSuccess: false, isReplayed: false, value: default, error: new ApplicationError(code, message, conflictInfo));
 }
+
