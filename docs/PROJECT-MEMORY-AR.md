@@ -124,3 +124,46 @@ npm test -- --watch=false
 # تشغيل خادم الواجهة محليًا
 npm start
 ```
+
+---
+
+## 8. خريطة التصميم الموحّد وتسليم الكود — ChatGPT Design Ownership
+
+**المرجعية المعتمدة:** [مواصفة دورة المراجعة §9](specs/AUDIT-FINDING-RESPONSE-RESOLUTION-WORKFLOW-AR.md) و[Blueprint v1 في Issue #65](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/65#issuecomment-6860157620). **ChatGPT مسؤول عن التصميم والقرارات والمواصفات** طبقًا لتوجيه المالك [هنا](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/41#issuecomment-6860077279)؛ **Gemini منفذ كود فقط** بعد تكليف صريح منفصل. يوجد [Draft PR #66](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/pull/66) لتحديث وثائق `SPEC-029-004`، **لم يُدمج** عند صياغة هذه الإضافة؛ لا تستنتج وجود التصميم في `main` قبل تحقق دمج GitHub فعلي.
+
+### 8.1 العلاقات التصورية بين نموذج الأعمال والكود
+
+| المسار/المفهوم المقترح | موضعه المستقبلي | علاقته بالكيانات الأخرى وحالة الاعتماد |
+| :--- | :--- | :--- |
+| `Payee / PayeeRelationship / PayrollCycle` | `src/core` | الهوية الوظيفية وفترات الاستحقاق، مع `MonthlyGroupMembership` للنطاق؛ المفاتيح النهائية وتعدد علاقات العمل `OPEN` |
+| `PayrollDisbursement / SourceVersion` | `src/core` + منافذ إدخال في `src/application` | صرفية `MAIN_SALARY / SEPARATE` ونسخة مصدر `Oracle / EXCEL_IMPORT / DIRECT_FORM`؛ مستند Oracle الرسمي لا يُستنتج من Excel/إدخال مباشر |
+| `AuditCase / ReviewVariableRevision / ReviewerActionLog` | `src/core`, `src/application` | تغير المتغير يولد نسخة وسجل عملية باسم منفذها؛ **لا بوابة مراجع أساسي** (`D-035`)، وسجل الفاعل والنسخ `PROPOSED` |
+| `Finding / FindingRevision / ReviewDecision` | `src/core` | ملاحظة وإصدار وقرار مع أدلته؛ بقاء تنبيه `Finding` مفتوحة عند اعتماد البنود السليمة `D-032` |
+| `FollowUp / SettlementOrder` | `src/core` | المتابعة وأوامر الشهر التالي منفصلة؛ التصحيح الرسمي بعد الإغلاق الإداري يربط `OldOrder → CorrectedOracle → Finding → NewOrder` دون مديونية ثانية |
+| `IAuthorizationPolicyPort / IIdempotencyPort / IRepository` | تعريف في `src/application` وتنفيذ لاحق في `src/infrastructure` | هوية فاعل الخادم، حدود الوصول، `ExpectedVersion` و`IdempotencyKey`، لا ORM ولا DB حاليًا |
+| `src/api` و`client` | API وAngular RTL | عرض الإجراءات المسموحة لا يغني عن تفويض الخادم؛ `ActorId` غير مستمد من حقل قابل للتلاعب في Angular |
+
+**مسار التبعيات:** `client → api → application → core`، وتنفيذ منافذ التطبيق في `infrastructure` اعتمادًا على `application/core`. ممنوع `core → infrastructure` أو منطق حساب مالي في Angular/Controller. جميع أسماء Domain هنا **مخطط مفاهيمي لا جداول SQL**.
+
+### 8.2 خريطة علاقة السجلات والأدلة والتصحيح
+
+- **سجل القيمة:** `AuditCase → ReviewVariableRevision → SourceVersion`، وكل تغير `ReviewerActionLog(PerformedByActorId, PerformedAt, OldValue, NewValue, Reason)` بوصفه `PROPOSED`؛ لا محو تاريخ أو نسبة الإجراء لمراجع آخر.
+- **سجل الملاحظة:** `AuditCase → Finding → FindingRevision → ReviewDecision`، وقد تنشأ `FollowUp` للفرق الحقيقي وفق القرار، مع استمرار `PersistentFindingNotice` غير المغلقة.
+- **سجل التسوية:** `OriginDisbursement → SettlementOrder A → OracleSourceVersion`؛ إذا كان A مغلقًا إداريًا ثم ألغى كشف رسمي مصحح 50 من 200: `A` يظل مغلقًا، `Finding F` جديدة، ثم `Order B=50` للشهر التالي، مرتبط بـ A وF والتصحيح. عدم الظهور أو الظهور الجزئي أثناء فتح الأمر لا ينشئ أمرًا ثانيًا.
+- **إثبات المال:** `SourceAmount / ExpectedAmount / ReviewedAmount / OfficialCorrectionAmount / ReportedDisbursementAmount / VerifiedPaidAmount / OutstandingAmount` **سبعة مفاهيم منفصلة**؛ الظهور في Oracle أو التسجيل الإداري أو رأي المراجع **ليس** إثبات `VerifiedPaidAmount`.
+- **القوانين:** `RuleSet → RuleEffect → EffectivePeriod → LegalReference` كتصور هندسي `PROPOSED`؛ لا حساب تلقائي لقوانين غير موثقة ولا تقريبات مفترضة.
+
+### 8.3 سجل اختبار وتسليم كل شريحة
+
+| الشريحة المستقبلية | الحد الأول | متطلبات قبول التصميم قبل البرمجة |
+| :--- | :--- | :--- |
+| `CODE-001` | `core/application` للمتغيرات وسجل المراجعين | غياب مراجع لا يوقف العمل، `PermissionDenied` خارج النطاق، تاريخ before/after، `VersionConflict`، `IdempotencyConflict`، `UNKNOWN != 0` |
+| `CODE-002` | `AuditCase/Finding/ReviewDecision` | `D-031` للعمليات الأربع فقط، مراجعة صرفية مستقلة، تنبيه مستمر، رد المركزية اختياري عند عدم وجود إلزام خاص |
+| `CODE-003` | `FollowUp/SettlementOrder` | صفر/جزئي/كامل Oracle، إغلاق إداري فقط، `A=200 → F → B=50`، عدم رفع `VerifiedPaidAmount` بلا سند |
+| `CODE-004` | `api/client/infrastructure` | API/RBAC من الخادم وRTL، ثم SQL Server 2014 اصطناعي بمزود بيانات يخضع لدراسة توافق مستقلة |
+
+**الاختبارات الحالية لهذه الخريطة:** `DESIGN_ONLY / NOT_RUN`، ولا يوجد دليل على تشغيل اختبار Core جديد أو SQL. لا توجد جداول أو مفاتيح خارجية معتمدة: `STATUS: NOT_DESIGNED / NO_TABLES`. يجب تحديث هذه الخريطة مع **كل PR كود مُدمج فعليًا** وربط أسماء الأصناف والأساليب والجداول ومفاتيحها بالـcommit والاختبارات؛ قبل وجودها لا تُخترع مسارات أو علاقات DB.
+
+### 8.4 حدود القرارات الباقية
+
+`OWNER_DECISION_REQUIRED`: أنواع إثبات السداد المالي المستقل والمخوّل بالتحقق، قواعد الضرائب/التأمينات/المعاشات والإجازات الموثقة زمنيًا، علاقات العمل المتعددة، تفويض اعتماد أو إلغاء `SettlementOrder`، أثر تعديل قيمة سبق اعتماد مراجعتها، والتصحيحات المتعارضة أو الزائدة في Oracle. **اختيار أسماء classes والمنافذ واختبارات التزامن من اختصاص التصميم الهندسي ChatGPT** ولا يحتاج إذنًا ماليًا بحد ذاته، أما تحويل قاعدة حسابية جديدة إلى `OWNER_CONFIRMED` فيتطلب قرار المالك أو سندًا رسميًا مناسبًا.
