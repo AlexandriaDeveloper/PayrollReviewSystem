@@ -109,4 +109,34 @@
      - **(أ) الإغلاق بتسوية مثبتة بمستند مستقل (`FinancialFollowUpClosedVerified` — اسم مقترح `PROPOSED`):** يشترط إثبات التسوية الفعلية بمستند مالي مستقل (`SettlementEvidenceRef`) وتحقق `OutstandingAmount = 0` وفق `AI-0061`.
      - **(ب) الإغلاق التشغيلي بإفادة شفهية موثقة (`ClosedByReviewerAttestation` — اسم مقترح `PROPOSED`):** يجوز تشغيليًا عند غياب مستند السداد بناءً على إفادة شفهية يقتنع بها المراجع (`AI-0065`)، مع توثيق نص الإفادة وسبب الاقتناع وهوية المراجع وتاريخ القرار والمبلغ المرتبط، و**حظر رفع `VerifiedPaidAmount`** أو تصفير الرصيد كسداد مثبت بمستند أو تعديل البيانات المالية تلقائيًا.
   3. إذا أُغلقت متابعة مالية تشغيليًا بناءً على إفادة شفهية ثم ظهر لاحقًا مستند ينفي السداد، **لا يُعاد فتح المتابعة القديمة**؛ بل تبقى المتابعة القديمة مغلقة بتاريخ إغلاقها الأصلي، وتُنشأ **ملاحظة رقابية جديدة (`Finding`)** بتاريخ اكتشاف الدليل الناقض مرتبطة بالمتابعة والملاحظة السابقتين (`OriginatingFollowUpId`, `RelatedPreviousFindingId` — أسماء حقول مقترحة `PROPOSED`)، ويستمر ظهور تنبيهها حتى الحل، مع **منع تكرار المبلغ أو إنشاء خصم مالي جديد تلقائيًا** وعدم اعتبار الإغلاق الشفهي السابق دليلًا على توريد مالي مثبت.
-- **SPEC-029-002 ([Issue #61](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/61)):** تحديث مواصفة [AUDIT-FINDING-RESPONSE-RESOLUTION-WORKFLOW-AR](../specs/AUDIT-FINDING-RESPONSE-RESOLUTION-WORKFLOW-AR.md) وسجل القرارات والذاكرة المعمارية بما يعكس `D-031..D-033` ويفصل بوضوح بين المؤكد (`OWNER_CONFIRMED`) والمقترح (`PROPOSED`) والمفتوح (`OWNER_DECISION_REQUIRED`) دون توسيع الصلاحيات خارج العمليات الأربع المعتمدة — **توثيق فقط دون كود أو SQL أو DDL أو دمج ذاتي**.
+- **SPEC-029-002 ([Issue #61](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/61)):** تحديث مواصفة [AUDIT-FINDING-RESPONSE-RESOLUTION-WORKFLOW-AR](../specs/AUDIT-FINDING-RESPONSE-RESOLUTION-WORKFLOW-AR.md) وسجل القرارات والذاكرة المعمارية بما يعكس `D-031..D-033` (دُمج عبر [PR #62](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/pull/62) عند `df57f10b2431b60d4c24f4975d8468c42440fbd5`).
+
+---
+
+## D-034 — قرارات المالك المؤكدة لـ `OD-04` (استقلال الصرفيات، `132 ع.ح` مع رعاية الطفل، وتتبع أوامر التسوية في Oracle)
+
+- **الحالة:** `OWNER_CONFIRMED` *(ضوابط العمل المعتمدة)* | مع مسميات وعقود مقترحة `PROPOSED` + عناصر مفتوحة `OWNER_DECISION_REQUIRED`
+- **المراجع:** [Issue #41](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/41) — رسائل المالك `AI-0075..AI-0083` ([`AI-0075`](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/41#issuecomment-6853993356) إلى [`AI-0083`](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/41#issuecomment-6854021455)) + تكليف ChatGPT [`AI-0084`](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/41#issuecomment-6854047321) + [Issue #63 (`SPEC-029-003`)](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/63)
+- **المواصفة المحدثة:** [`docs/specs/AUDIT-FINDING-RESPONSE-RESOLUTION-WORKFLOW-AR.md`](../specs/AUDIT-FINDING-RESPONSE-RESOLUTION-WORKFLOW-AR.md) (`§1`, `§2.1`, `§3.3`, `§4`, `§5.1`, `§6`, `§7`, `§8`)
+
+### ما تم تأكيده من المالك (`OWNER_CONFIRMED`)
+1. **استقلال اعتماد المرتب الرئيسي (`MAIN_SALARY`) عن الصرفيات المستقلة (`SEPARATE`) (`AI-0075`, `AI-0076`):** وجود مراجعة أو ملاحظة معلّقة على صرفية مستقلة لا يمنع أو يعلّق اعتماد `MAIN_SALARY` للموظف نفسه في الشهر ذاته، والعكس صحيح.
+2. **فصل مراجعة أيام العمل في `132 ع.ح` عن تسوية رعاية الطفل (`AI-0077`):** عند وجود أيام عمل قبل أو بعد إجازة رعاية الطفل في الشهر نفسه، تُراجع `132 ع.ح` منفصلةً كمستند وموضوع مراجعة مستقل عن تسوية رعاية الطفل دون دمج قسري أو تعطيل متبادل.
+3. **استمرار تنبيهات `MAIN_SALARY` في الشهر التالي (`AI-0078` + `OD-02`):** تنفيذ تسوية أو إجراء على صرفية مستقلة لا يُغلق تلقائيًا ملاحظة `MAIN_SALARY` المفتوحة؛ يستمر ظهور تنبيه الملاحظة في الشهر التالي حتى حلها فعليًا دون تكرار الفروق المالية.
+4. **إدارة أمر التسوية للشهر التالي وتتبع ظهوره في Oracle (`AI-0079..AI-0083`):**
+   - يُنشأ **أمر تسوية** مستقل يُسجّل كالتزام متابعة للشهر التالي دون تعديل تلقائي على `MAIN_SALARY` أو `VerifiedPaidAmount` (`AI-0079`).
+   - إذا صدر كشف Oracle للشهر التالي ولم يظهر المبلغ (`0`) يظل أمر التسوية **مفتوحًا** وتستمر متابعته دون إنشاء خصم مكرر (`AI-0080`).
+   - إذا ظهر جزء من المبلغ فقط في Oracle يظل أمر التسوية **مفتوحًا بالمبلغ المتبقي** حتى استيفاء الظهور التراكمي (`AI-0081`).
+   - عند ظهور كامل مبلغ التسوية في استحقاقات Oracle عبر الدورات **يُغلق أمر التسوية إداريًا** (`AdministrativeOrderClosed`)؛ **هذا الإغلاق يثبت الظهور في كشف استحقاقات Oracle فقط ولا يثبت وصول المبلغ إلى البنك ولا يرفع `VerifiedPaidAmount`** (`AI-0082`).
+   - إذا ظهر بعد الإغلاق الإداري دليل رسمي على إلغاء أو عكس التسوية في Oracle، **لا يُعاد فتح أمر التسوية المغلق** بل يُحتفظ به وبتاريخه وتُنشأ **ملاحظة رقابية جديدة (`Finding`)** مرتبطة به وتستمر تنبيهاتها حتى الحل دون تكرار المبلغ المالي تلقائيًا (`AI-0083`).
+
+### ما يظل مقترحًا (`PROPOSED`) لا قرارًا نهائيًا للجداول أو الـAPI
+- الكيان `SettlementOrder` ومسميات حالاته (`OrderRecordedOpen`, `OpenZeroObservedInCycle`, `PartiallyObservedInOracleOpen`, `AdministrativeOrderClosed`) وأسماء أوامره (`CreateNextMonthSettlementOrder`, `RecordSettlementOrderOracleObservation`, `RegisterPostAdminCloseOracleCorrection`) في `§3.3` و`§5.1`.
+
+### ما يظل مفتوحًا (`OWNER_DECISION_REQUIRED`)
+- صلاحيات إصدار وإلغاء واعتماد أوامر التسوية `SettlementOrder` (مع منع توسيع صلاحيات `D-031` الفردية تلقائيًا إليها).
+- أنواع مستندات التحويل البنكي/الخزانة المقبولة للتحقق الفعلي (`VerifiedPaidAmount`) بعد `AdministrativeOrderClosed`.
+- تعدد علاقات العمل أو النقل بين الوحدات (`BLK-02`, `BLK-04`, `BLK-12`, `MAJ-21`)، والمعالجة المحاسبية/الختامية عبر السنوات المالية.
+
+### ملاحظات التنفيذ والإبلاغ
+- **SPEC-029-003 ([Issue #63](https://github.com/AlexandriaDeveloper/PayrollReviewSystem/issues/63)):** تحديث مواصفة [AUDIT-FINDING-RESPONSE-RESOLUTION-WORKFLOW-AR](../specs/AUDIT-FINDING-RESPONSE-RESOLUTION-WORKFLOW-AR.md) وسجل القرارات والذاكرة المعمارية بما يعكس `D-034` (`OD-04`: `AI-0075..AI-0083`) وتثبيت إتمام دمج `PR #62` — **توثيق فقط دون كود أو SQL أو DDL أو تعديل قواعد البيانات أو دمج ذاتي**.
