@@ -127,6 +127,7 @@ public sealed class ReviseReviewVariableUseCase
                     ReviewVariableOperation.ReviseReviewVariable,
                     variable.Id.ToString(),
                     variable.Scope,
+                    actorContext.ActorId,
                     command.IdempotencyKey.Trim());
 
                 var idempotencyCheck = await _idempotencyPort.CheckAsync(idempotencyKey, payloadHash, ct);
