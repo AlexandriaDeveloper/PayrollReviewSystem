@@ -111,12 +111,13 @@ public interface IAuditTrailPort
 
 /// <summary>
 /// مفتاح تحديد نطاق عدم التكرار (Idempotency) طبقًا للمواصفة:
-/// نوع العملية + معرّف الهدف + نطاق العمل + مفتاح الطلب.
+/// نوع العملية + معرّف الهدف + نطاق العمل + هوية المراجع الموثوقة + مفتاح الطلب.
 /// </summary>
 public sealed record IdempotencyRecordKey(
     ReviewVariableOperation OperationType,
     string TargetAggregateId,
     ActorScope ActorScope,
+    ActorId TrustedActorId,
     string IdempotencyKey);
 
 /// <summary>حالة فحص مفتاح عدم التكرار مقابل البصمة المعيارية للطلب.</summary>
