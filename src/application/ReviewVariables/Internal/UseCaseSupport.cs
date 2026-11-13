@@ -17,7 +17,11 @@ internal static class UseCaseSupport
         string? claimedActorId)
     {
         var context = reviewerContextPort.GetCurrentReviewer();
-        if (context is null)
+        if (context is null
+            || context.ActorId is null
+            || string.IsNullOrWhiteSpace(context.ActorId.Value)
+            || string.IsNullOrWhiteSpace(context.RoleName)
+            || context.AuthorizedScopes is null)
         {
             return ApplicationResult<TrustedReviewerContext>.Failure(
                 ApplicationErrorCode.PermissionDenied,

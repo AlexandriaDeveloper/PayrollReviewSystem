@@ -63,9 +63,16 @@ internal static class CanonicalPayloadHasher
     }
 
     private static string SerializeValue(ReviewVariableValue value)
-        => value.IsKnown && value.Amount.HasValue
-            ? "KNOWN:" + value.Amount.Value.ToString("G29", CultureInfo.InvariantCulture)
-            : "UNKNOWN";
+    {
+        if (!value.IsKnown || !value.Amount.HasValue)
+        {
+            return "UNKNOWN";
+        }
+
+        // توحيد تمثيل الأصفار والأصفار العشرية الزائدة لضمان حتمية البصمة عند إعادة الإرسال
+        var normalized = value.Amount.Value == 0m ? 0m : value.Amount.Value;
+        return "KNOWN:" + normalized.ToString("0.############################", CultureInfo.InvariantCulture);
+    }
 
     /// <summary>
     /// ترميز مفتاح طبيعي مركّب بصيغة مسبوقة بالطول لمنع تصادم الفواصل مثل '|'.
@@ -92,7 +99,11 @@ internal static class CanonicalPayloadHasher
             return "NO_SOURCE";
         }
 
-        return $"{(int)source.DeclaredKind}:{source.SourceVersionId}:{source.SourceCaptureRef ?? string.Empty}";
+        // ترميز الحقول بالطول بدلاً من الفاصل الخام يمنع تصادم البصمات بين قيم مصدر تحتوي على نقطتين
+        return "SRC:" + EncodeCompositeTargetKey(
+            ((int)source.DeclaredKind).ToString(CultureInfo.InvariantCulture),
+            source.SourceVersionId,
+            source.SourceCaptureRef ?? string.Empty);
     }
 
     private static string ComputeSha256Hex(IReadOnlyList<string> fields)

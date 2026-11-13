@@ -88,10 +88,30 @@ public sealed record ReviewerActionLogEntry
         CorrelationId correlationId,
         ReviewerActionId? explicitActionId = null)
     {
+        if (targetVariableId.Value == Guid.Empty)
+        {
+            throw new ArgumentException("معرّف متغير المراجعة المستهدف في سجل التدقيق لا يجوز أن يكون فارغًا.", nameof(targetVariableId));
+        }
+
+        if (explicitActionId is { Value: var explicitGuid } && explicitGuid == Guid.Empty)
+        {
+            throw new ArgumentException("معرّف سجل التدقيق الممرّر صراحةً لا يجوز أن يكون فارغًا.", nameof(explicitActionId));
+        }
+
         if (targetVersion < 1)
         {
             throw new ArgumentOutOfRangeException(nameof(targetVersion), "رقم النسخة المستهدفة يجب أن يكون 1 على الأقل.");
         }
+
+        if (!Enum.IsDefined(operation))
+        {
+            throw new ArgumentOutOfRangeException(nameof(operation), "نوع العملية في سجل التدقيق غير معرّف.");
+        }
+
+        ArgumentNullException.ThrowIfNull(performedByActorId);
+        ArgumentNullException.ThrowIfNull(scope);
+        ArgumentNullException.ThrowIfNull(newValue);
+        ArgumentNullException.ThrowIfNull(correlationId);
 
         if (string.IsNullOrWhiteSpace(reason))
         {

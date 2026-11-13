@@ -78,6 +78,26 @@ public sealed class ReviewVariable
         CorrelationId correlationId,
         ReviewVariableId? explicitId = null)
     {
+        if (auditCaseId is null ||
+            disbursementRef is null ||
+            key is null ||
+            scope is null ||
+            initialValue is null ||
+            actorId is null ||
+            correlationId is null)
+        {
+            return DomainOutcome<ReviewVariable>.Failure(
+                DomainFailureCode.InvalidInput,
+                "تعذر إنشاء متغير المراجعة لوجود معرّف أو نطاق أو قيمة أو ارتباط مفقود.");
+        }
+
+        if (explicitId is { Value: var explicitGuid } && explicitGuid == Guid.Empty)
+        {
+            return DomainOutcome<ReviewVariable>.Failure(
+                DomainFailureCode.InvalidInput,
+                "معرّف متغير المراجعة الممرّر صراحةً لا يجوز أن يكون فارغًا.");
+        }
+
         if (string.IsNullOrWhiteSpace(reason))
         {
             return DomainOutcome<ReviewVariable>.Failure(
@@ -145,6 +165,13 @@ public sealed class ReviewVariable
                 currentVersion: Version);
         }
 
+        if (newValue is null || actorId is null || correlationId is null)
+        {
+            return DomainOutcome<ReviewVariableRevision>.Failure(
+                DomainFailureCode.InvalidInput,
+                "تعذر تعديل متغير المراجعة لوجود قيمة أو هوية فاعل أو معرّف ارتباط مفقود.");
+        }
+
         if (string.IsNullOrWhiteSpace(changeReason))
         {
             return DomainOutcome<ReviewVariableRevision>.Failure(
@@ -199,6 +226,13 @@ public sealed class ReviewVariable
                 "تعذر إعادة بناء متغير المراجعة: المعرّف فارغ.");
         }
 
+        if (auditCaseId is null || disbursementRef is null || key is null || scope is null || currentValue is null)
+        {
+            return DomainOutcome<ReviewVariable>.Failure(
+                DomainFailureCode.InvalidInput,
+                "تعذر إعادة بناء متغير المراجعة لوجود معرّف أو نطاق أو قيمة مفقودة.");
+        }
+
         if (version < 1)
         {
             return DomainOutcome<ReviewVariable>.Failure(
@@ -213,7 +247,15 @@ public sealed class ReviewVariable
                 "تعذر إعادة بناء متغير المراجعة: قائمة النسخ التاريخية مفقودة.");
         }
 
-        var revisionList = revisions.OrderBy(r => r.RevisionNumber).ToList();
+        var rawRevisions = revisions.ToList();
+        if (rawRevisions.Any(r => r is null))
+        {
+            return DomainOutcome<ReviewVariable>.Failure(
+                DomainFailureCode.InvalidInput,
+                "تعذر إعادة بناء متغير المراجعة لوجود نسخة تاريخية فارغة داخل القائمة.");
+        }
+
+        var revisionList = rawRevisions.OrderBy(r => r.RevisionNumber).ToList();
         if (revisionList.Count != version)
         {
             return DomainOutcome<ReviewVariable>.Failure(
@@ -225,6 +267,17 @@ public sealed class ReviewVariable
         {
             var rev = revisionList[i];
             var expectedRevNumber = i + 1;
+
+            if (rev.RevisionId.Value == Guid.Empty ||
+                rev.NewValue is null ||
+                rev.PerformedByActorId is null ||
+                string.IsNullOrWhiteSpace(rev.Reason) ||
+                rev.CorrelationId is null)
+            {
+                return DomainOutcome<ReviewVariable>.Failure(
+                    DomainFailureCode.InvalidInput,
+                    "تعذر إعادة بناء متغير المراجعة لاكتمال ناقص في حقول إحدى النسخ التاريخية.");
+            }
 
             if (rev.VariableId != id)
             {

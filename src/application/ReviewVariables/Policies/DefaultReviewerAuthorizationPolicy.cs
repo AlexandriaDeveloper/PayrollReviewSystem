@@ -19,6 +19,14 @@ public sealed class DefaultReviewerAuthorizationPolicy : IAuthorizationPolicyPor
         ReviewVariableOperation operation,
         ActorScope targetScope)
     {
+        if (context is null
+            || context.ActorId is null
+            || targetScope is null
+            || context.AuthorizedScopes is null)
+        {
+            return AuthorizationDecision.Deny("سياق التفويض أو النطاق المستهدف غير مكتمل.");
+        }
+
         if (!context.AuthorizedScopes.Contains(targetScope))
         {
             return AuthorizationDecision.Deny(

@@ -54,72 +54,85 @@ public sealed class GetReviewVariableHistoryUseCase
                 "معرّف متغير المراجعة غير صالح.");
         }
 
-        var variable = await _variableRepository.GetByIdAsync(variableId, cancellationToken);
-        if (variable is null)
+        try
+        {
+            var variable = await _variableRepository.GetByIdAsync(variableId, cancellationToken);
+            if (variable is null)
+            {
+                return ApplicationResult<ReviewVariableHistoryDto>.Failure(
+                    ApplicationErrorCode.NotFound,
+                    "متغير المراجعة المطلوب غير موجود.");
+            }
+
+            var authDecision = _authorizationPolicy.Evaluate(
+                actorCheck.Value,
+                ReviewVariableOperation.ViewReviewVariableHistory,
+                variable.Scope);
+            if (!authDecision.IsAllowed)
+            {
+                return ApplicationResult<ReviewVariableHistoryDto>.Failure(
+                    ApplicationErrorCode.PermissionDenied,
+                    authDecision.DenialReason ?? "المراجع غير مخوّل للاطلاع على سجل متغير المراجعة خارج نطاقه.");
+            }
+
+            var actionLogs = await _auditTrailPort.GetByVariableIdAsync(variable.Id, cancellationToken);
+
+            var revisionDtos = variable.Revisions
+                .OrderBy(r => r.RevisionNumber)
+                .Select(r => new ReviewVariableRevisionDto(
+                    r.RevisionId.Value,
+                    r.RevisionNumber,
+                    r.PreviousValue is null ? null : UseCaseSupport.ToSnapshot(r.PreviousValue),
+                    UseCaseSupport.ToSnapshot(r.NewValue),
+                    r.PerformedByActorId.Value,
+                    r.OccurredAtUtc,
+                    r.Reason,
+                    UseCaseSupport.ToSnapshot(r.SourceReference),
+                    r.CorrelationId.Value))
+                .ToList();
+
+            var actionDtos = actionLogs
+                .OrderBy(a => a.OccurredAtUtc)
+                .ThenBy(a => a.TargetVersion)
+                .Select(a => new ReviewerActionLogDto(
+                    a.ActionId.Value,
+                    a.TargetVersion,
+                    a.Operation,
+                    a.PerformedByActorId.Value,
+                    a.Scope.UnitId,
+                    a.Scope.ReviewGroupId,
+                    a.OccurredAtUtc,
+                    a.OldValue is null ? null : UseCaseSupport.ToSnapshot(a.OldValue),
+                    UseCaseSupport.ToSnapshot(a.NewValue),
+                    a.Reason,
+                    UseCaseSupport.ToSnapshot(a.SourceReference),
+                    a.CorrelationId.Value))
+                .ToList();
+
+            var history = new ReviewVariableHistoryDto(
+                variable.Id.Value,
+                variable.AuditCaseId.Value,
+                variable.DisbursementRef.Value,
+                variable.Key.Value,
+                variable.Scope.UnitId,
+                variable.Scope.ReviewGroupId,
+                variable.Version,
+                UseCaseSupport.ToSnapshot(variable.CurrentValue),
+                UseCaseSupport.ToSnapshot(variable.CurrentSourceReference),
+                revisionDtos,
+                actionDtos);
+
+            return ApplicationResult<ReviewVariableHistoryDto>.Success(history);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception)
         {
             return ApplicationResult<ReviewVariableHistoryDto>.Failure(
-                ApplicationErrorCode.NotFound,
-                "متغير المراجعة المطلوب غير موجود.");
+                ApplicationErrorCode.PersistenceFailure,
+                "تعذر استرجاع السجل التاريخي لمتغير المراجعة حاليًا؛ لم يتم كشف أي تفاصيل تقنية داخلية.");
         }
-
-        var authDecision = _authorizationPolicy.Evaluate(
-            actorCheck.Value,
-            ReviewVariableOperation.ViewReviewVariableHistory,
-            variable.Scope);
-        if (!authDecision.IsAllowed)
-        {
-            return ApplicationResult<ReviewVariableHistoryDto>.Failure(
-                ApplicationErrorCode.PermissionDenied,
-                authDecision.DenialReason ?? "المراجع غير مخوّل للاطلاع على سجل متغير المراجعة خارج نطاقه.");
-        }
-
-        var actionLogs = await _auditTrailPort.GetByVariableIdAsync(variable.Id, cancellationToken);
-
-        var revisionDtos = variable.Revisions
-            .OrderBy(r => r.RevisionNumber)
-            .Select(r => new ReviewVariableRevisionDto(
-                r.RevisionId.Value,
-                r.RevisionNumber,
-                r.PreviousValue is null ? null : UseCaseSupport.ToSnapshot(r.PreviousValue),
-                UseCaseSupport.ToSnapshot(r.NewValue),
-                r.PerformedByActorId.Value,
-                r.OccurredAtUtc,
-                r.Reason,
-                UseCaseSupport.ToSnapshot(r.SourceReference),
-                r.CorrelationId.Value))
-            .ToList();
-
-        var actionDtos = actionLogs
-            .OrderBy(a => a.OccurredAtUtc)
-            .ThenBy(a => a.TargetVersion)
-            .Select(a => new ReviewerActionLogDto(
-                a.ActionId.Value,
-                a.TargetVersion,
-                a.Operation,
-                a.PerformedByActorId.Value,
-                a.Scope.UnitId,
-                a.Scope.ReviewGroupId,
-                a.OccurredAtUtc,
-                a.OldValue is null ? null : UseCaseSupport.ToSnapshot(a.OldValue),
-                UseCaseSupport.ToSnapshot(a.NewValue),
-                a.Reason,
-                UseCaseSupport.ToSnapshot(a.SourceReference),
-                a.CorrelationId.Value))
-            .ToList();
-
-        var history = new ReviewVariableHistoryDto(
-            variable.Id.Value,
-            variable.AuditCaseId.Value,
-            variable.DisbursementRef.Value,
-            variable.Key.Value,
-            variable.Scope.UnitId,
-            variable.Scope.ReviewGroupId,
-            variable.Version,
-            UseCaseSupport.ToSnapshot(variable.CurrentValue),
-            UseCaseSupport.ToSnapshot(variable.CurrentSourceReference),
-            revisionDtos,
-            actionDtos);
-
-        return ApplicationResult<ReviewVariableHistoryDto>.Success(history);
     }
 }

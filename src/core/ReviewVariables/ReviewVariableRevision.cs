@@ -77,7 +77,32 @@ public sealed record ReviewVariableRevision
         string reason,
         SourceReference? sourceReference,
         CorrelationId correlationId)
-        => new(
+    {
+        if (revisionId.Value == Guid.Empty)
+        {
+            throw new ArgumentException("معرّف النسخة التاريخية لا يجوز أن يكون فارغًا.", nameof(revisionId));
+        }
+
+        if (variableId.Value == Guid.Empty)
+        {
+            throw new ArgumentException("معرّف متغير المراجعة للنسخة التاريخية لا يجوز أن يكون فارغًا.", nameof(variableId));
+        }
+
+        if (revisionNumber < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(revisionNumber), "رقم النسخة التاريخية يجب أن يكون 1 على الأقل.");
+        }
+
+        ArgumentNullException.ThrowIfNull(newValue);
+        ArgumentNullException.ThrowIfNull(performedByActorId);
+        ArgumentNullException.ThrowIfNull(correlationId);
+
+        if (string.IsNullOrWhiteSpace(reason))
+        {
+            throw new ArgumentException("سبب النسخة التاريخية لا يجوز أن يكون فارغًا.", nameof(reason));
+        }
+
+        return new(
             revisionId,
             variableId,
             revisionNumber,
@@ -85,7 +110,8 @@ public sealed record ReviewVariableRevision
             newValue,
             performedByActorId,
             occurredAtUtc,
-            reason,
+            reason.Trim(),
             sourceReference,
             correlationId);
+    }
 }
